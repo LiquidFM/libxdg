@@ -5,6 +5,7 @@
  * 
  * Copyright (C) 2003  Red Hat, Inc.
  * Copyright (C) 2003  Jonathan Blandford <jrb@alum.mit.edu>
+ * Copyright (C) 2011  Dmitriy Vilkov <dav.daemon@gmail.com>
  *
  * Licensed under the Academic Free License version 2.0
  * Or under the following terms:
