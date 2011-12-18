@@ -293,13 +293,11 @@ void _xdg_mime_app_list_free(XdgAppList *list)
 	free(list);
 }
 
-static XdgApp *_xdg_mime_app_list_new_item(XdgAppList *apps, const char *name, size_t len)
+static XdgApp *_xdg_mime_app_list_new_item(XdgAppList *apps, const char *name)
 {
 	XdgApp *app = _xdg_mime_app_list_add(apps);
 
-	app->name = malloc(len + 1);
-	memcpy(app->name, name, len);
-	app->name[len] = 0;
+	app->name = strdup(name);
 
 	return app;
 }
@@ -348,7 +346,7 @@ void _xdg_mime_app_read_from_directory(XdgAppList *list, const char *directory_n
 
 				if (file = fopen(file_name, "r"))
 				{
-					app = _xdg_mime_app_list_new_item(list, entry->d_name, strchr(entry->d_name, '.') - entry->d_name);
+					app = _xdg_mime_app_list_new_item(list, entry->d_name);
 
 					while (fgets(line, 1024, file) != NULL)
 						if (line[0] != '#' && line[0] != '\r' && line[0] != '\n')
