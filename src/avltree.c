@@ -67,7 +67,7 @@ static AvlNode *create_avl_node(const KEY_TYPE key, AvlNode *parent, DuplicateKe
 {
 	AvlNode *res = malloc(sizeof(AvlNode));
 
-	res->key = (*duplicateKey)(key);
+	res->key = duplicateKey(key);
 	res->value = 0;
 	res->balance = BALANCED;
 	res->links.left = 0;
@@ -79,7 +79,7 @@ static AvlNode *create_avl_node(const KEY_TYPE key, AvlNode *parent, DuplicateKe
 
 static void free_avl_node(AvlNode *node, DestroyKey destroyKey)
 {
-	(*destroyKey)(node->key);
+	destroyKey(node->key);
 	free(node);
 }
 
@@ -518,16 +518,16 @@ static void destroy_subtree(AvlTree *tree, AvlNode **subtree_root)
 	(*subtree_root) = 0;
 }
 
-static AvlNode **search_routine(const KEY_TYPE value_to_search, AvlNode **root, AvlNode **out_parent_node)
+static AvlNode **search_routine(const KEY_TYPE value_to_search, AvlNode **root, AvlNode **out_parent_node, CompareKeys compareKeys)
 {
 	AvlNode **this_node_pointer = root;
 	AvlNode *this_parent_node = 0;
 
-	while ((*this_node_pointer) && (*this_node_pointer)->key != value_to_search)
+	while ((*this_node_pointer) && compareKeys((*this_node_pointer)->key, value_to_search) != 0)
 	{
 		this_parent_node = (*this_node_pointer);
 
-		if (value_to_search < (*this_node_pointer)->key)
+		if (compareKeys(value_to_search, (*this_node_pointer)->key) < 0)
 			this_node_pointer = &(*this_node_pointer)->links.left;
 		else
 			this_node_pointer = &(*this_node_pointer)->links.right;
@@ -541,7 +541,7 @@ static void delete_routine(AvlTree *tree, const KEY_TYPE value_to_delete, AvlNod
 {
 	AvlNode *garbage = 0;
 	AvlNode *parent_node = 0;
-	AvlNode *this_node = *search_routine(value_to_delete, root, &parent_node);
+	AvlNode *this_node = *search_routine(value_to_delete, root, &parent_node, tree->compareKeys);
 
 	if (this_node)
 	{
@@ -625,7 +625,7 @@ static void delete_routine(AvlTree *tree, const KEY_TYPE value_to_delete, AvlNod
 static AvlNode *search_or_create(AvlTree *tree, const KEY_TYPE value_to_search, AvlNode **root)
 {
 	AvlNode *parent_node = 0;
-	AvlNode **this_node = search_routine(value_to_search, root, &parent_node);
+	AvlNode **this_node = search_routine(value_to_search, root, &parent_node, tree->compareKeys);
 
 	if ((*this_node))
 		return (*this_node);
@@ -638,10 +638,10 @@ static AvlNode *search_or_create(AvlTree *tree, const KEY_TYPE value_to_search, 
 	}
 }
 
-static AvlNode *search(const KEY_TYPE value_to_search, AvlNode **root)
+static AvlNode *search(const KEY_TYPE value_to_search, AvlNode **root, CompareKeys compareKeys)
 {
 	AvlNode *parent_node = 0;
-	return *search_routine(value_to_search, root, &parent_node);
+	return *search_routine(value_to_search, root, &parent_node, compareKeys);
 }
 
 AvlTree *create_avl_tree(DuplicateKey duplicateKey, DestroyKey destroyKey, CompareKeys compareKeys)
@@ -669,7 +669,7 @@ VALUE_TYPE *search_or_create_node(AvlTree *tree, const KEY_TYPE key)
 
 VALUE_TYPE *search_node(AvlTree *tree, const KEY_TYPE key)
 {
-	AvlNode *res = search(key, &tree->tree_root);
+	AvlNode *res = search(key, &tree->tree_root, tree->compareKeys);
 
 	if (res)
 		return &res->value;
