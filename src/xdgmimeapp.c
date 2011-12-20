@@ -25,6 +25,7 @@
  */
 
 #include "xdgmimeapp.h"
+#include "avltree.h"
 #include <dirent.h>
 #include <stdio.h>
 #include <string.h>
@@ -112,7 +113,7 @@ typedef struct XdgAppList XdgAppList;
 struct XdgApplications
 {
 	XdgAppList app_list;
-	XdgGroupList assoc_list;
+	AvlTree *assoc_map;
 };
 
 
@@ -389,7 +390,10 @@ static void _xdg_mime_applications_read_list_file(char *buffer, XdgApplications 
 				group = NULL;
 
 				if ((sep = strchr(buffer, ']')) != NULL)
-					group = _xdg_mime_group_list_new_item(&applications->assoc_list, buffer + 1, sep - buffer - 1);
+				{
+					*sep = 0;
+//					group = search_or_create_node(applications->assoc_map, buffer + 1);
+				}
 			}
 			else
 				if (group)
@@ -475,6 +479,7 @@ XdgApplications *_xdg_mime_applications_new(void)
 	XdgApplications *list;
 
 	list = calloc(1, sizeof(XdgApplications));
+	list->assoc_map = create_avl_tree(strdup, (DestroyKey)free, strcmp);
 
 	return list;
 }
@@ -482,6 +487,7 @@ XdgApplications *_xdg_mime_applications_new(void)
 void _xdg_mime_applications_free(XdgApplications *applications)
 {
 	_xdg_mime_app_list_free(&applications->app_list);
+	free_avl_tree(applications->assoc_map);
 }
 
 void _xdg_mime_applications_dump(XdgApplications *applications)

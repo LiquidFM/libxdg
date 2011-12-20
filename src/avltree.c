@@ -586,7 +586,7 @@ static void delete_routine(AvlTree *tree, const KEY_TYPE value_to_delete, AvlNod
 	{
 		AvlNode *node_to_balance = 0;
 		Links old_this_node_links = this_node->links;
-		const void *previous_node_value = 0;
+		KEY_TYPE previous_node_value = 0;
 
 		if (this_node->links.right && this_node->links.left == 0)
 		{
