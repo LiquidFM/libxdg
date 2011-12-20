@@ -101,6 +101,13 @@ struct XdgAppList
 	int count;
 	int capacity;
 };
+typedef struct XdgAppList XdgAppList;
+
+
+struct XdgApplications
+{
+	XdgAppList app_list;
+};
 
 
 static XdgAppGroupEntryValue *_xdg_mime_app_group_entry_value_list_add(XdgAppGroupEntryValueList *list)
@@ -275,7 +282,7 @@ static XdgApp *_xdg_mime_app_list_add(XdgAppList *list)
 	return res;
 }
 
-void _xdg_mime_app_list_free(XdgAppList *list)
+static void _xdg_mime_app_list_free(XdgAppList *list)
 {
 	if (list->list)
 	{
@@ -289,8 +296,6 @@ void _xdg_mime_app_list_free(XdgAppList *list)
 
 		free(list->list);
 	}
-
-	free(list);
 }
 
 static XdgApp *_xdg_mime_app_list_new_item(XdgAppList *apps, const char *name)
@@ -323,7 +328,7 @@ static void _xdg_mime_app_read_group_entry(XdgAppGroup *group, const char *line)
 	}
 }
 
-void _xdg_mime_app_read_from_directory(XdgAppList *list, const char *directory_name)
+void _xdg_mime_applications_read_from_directory(XdgApplications *applications, const char *directory_name)
 {
 	DIR *dir;
 
@@ -346,7 +351,7 @@ void _xdg_mime_app_read_from_directory(XdgAppList *list, const char *directory_n
 
 				if (file = fopen(file_name, "r"))
 				{
-					app = _xdg_mime_app_list_new_item(list, entry->d_name);
+					app = _xdg_mime_app_list_new_item(&applications->app_list, entry->d_name);
 
 					while (fgets(line, 1024, file) != NULL)
 						if (line[0] != '#' && line[0] != '\r' && line[0] != '\n')
@@ -373,22 +378,26 @@ void _xdg_mime_app_read_from_directory(XdgAppList *list, const char *directory_n
 	}
 }
 
-XdgAppList *_xdg_mime_app_list_new(void)
+const char *_xdg_mime_applications_lookup(XdgApplications *applications, const char *mime)
 {
-	XdgAppList *list;
 
-	list = malloc(sizeof(XdgAppList));
-	memset(list, 0, sizeof(XdgAppList));
+}
+
+XdgApplications *_xdg_mime_applications_new(void)
+{
+	XdgApplications *list;
+
+	list = calloc(1, sizeof(XdgApplications));
 
 	return list;
 }
 
-const char *_xdg_mime_app_list_lookup(XdgAppList *list, const char *mime)
+void _xdg_mime_applications_free(XdgApplications *applications)
 {
-
+	_xdg_mime_app_list_free(&applications->app_list);
 }
 
-void _xdg_mime_app_list_dump(XdgAppList *list)
+void _xdg_mime_applications_dump(XdgApplications *applications)
 {
 
 }

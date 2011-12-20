@@ -29,7 +29,7 @@
 
 #include "xdgmime.h"
 
-typedef struct XdgAppList XdgAppList;
+typedef struct XdgApplications XdgApplications;
 
 #ifdef XDG_PREFIX
 #define _xdg_mime_app_read_from_file        XDG_ENTRY(app_read_from_file)
@@ -39,12 +39,12 @@ typedef struct XdgAppList XdgAppList;
 #define _xdg_mime_app_list_dump             XDG_ENTRY(app_list_dump)
 #endif
 
-void          _xdg_mime_app_read_from_directory (XdgAppList *list,
-					    const char   *directory_name);
-XdgAppList  *_xdg_mime_app_list_new       (void);
-void          _xdg_mime_app_list_free      (XdgAppList *list);
-const char   *_xdg_mime_app_list_lookup    (XdgAppList *list,
-					     const char  *mime);
-void          _xdg_mime_app_list_dump      (XdgAppList *list);
+void _xdg_mime_applications_read_from_directory(XdgApplications *applications, const char *directory_name);
+const char *_xdg_mime_applications_lookup(XdgApplications *applications, const char *mime);
+
+XdgApplications *_xdg_mime_applications_new(void);
+void _xdg_mime_applications_free(XdgApplications *applications);
+
+void _xdg_mime_applications_dump(XdgApplications *applications);
 
 #endif /* __XDG_MIME_APP_H_ */

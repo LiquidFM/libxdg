@@ -61,7 +61,7 @@ static XdgDirTimeList *dir_time_list = NULL;
 static XdgCallbackList *callback_list = NULL;
 static XdgIconList *icon_list = NULL;
 static XdgIconList *generic_icon_list = NULL;
-static XdgAppList *application_list = NULL;
+static XdgApplications *application_list = NULL;
 
 XdgMimeCache **_caches = NULL;
 static int n_caches = 0;
@@ -148,7 +148,7 @@ xdg_mime_init_from_directory (const char *directory)
 
   file_name = malloc (strlen (directory) + strlen ("/applications") + 1);
   strcpy (file_name, directory); strcat (file_name, "/applications");
-  _xdg_mime_app_read_from_directory (application_list, file_name);
+  _xdg_mime_applications_read_from_directory (application_list, file_name);
   free (file_name);
 
   file_name = malloc (strlen (directory) + strlen ("/mime/mime.cache") + 1);
@@ -462,7 +462,7 @@ xdg_mime_init (void)
       parent_list = _xdg_mime_parent_list_new ();
       icon_list = _xdg_mime_icon_list_new ();
       generic_icon_list = _xdg_mime_icon_list_new ();
-      application_list = _xdg_mime_app_list_new ();
+      application_list = _xdg_mime_applications_new ();
 
       xdg_run_command_on_dirs ((XdgDirectoryFunc) xdg_mime_init_from_directory,
 			       NULL);
@@ -662,7 +662,7 @@ xdg_mime_shutdown (void)
   
   if (application_list)
     {
-      _xdg_mime_app_list_free (application_list);
+      _xdg_mime_applications_free (application_list);
       application_list = NULL;
     }
 
