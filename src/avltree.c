@@ -459,17 +459,17 @@ static void rebalance_grew(AvlNode *this_node, AvlNode **root)
 	}
 }
 
-static void rebalance_shrunk(AvlNode *this_node, const KEY_TYPE previous_node_value, AvlNode **root)
+static void rebalance_shrunk(AvlNode *this_node, const KEY_TYPE previous_node_value, AvlNode **root, CompareKeys compareKeys)
 {
 	while (this_node != 0)
 	{
-		if (previous_node_value < this_node->key)
+		if (compareKeys(previous_node_value, this_node->key) < 0)
 		{
 			if (rebalance_left_shrunk(&this_node, root))
 				return;
 		}
 		else
-			if (this_node->key < previous_node_value)
+			if (compareKeys(this_node->key, previous_node_value) < 0)
 				if (rebalance_right_shrunk(&this_node, root))
 					return;
 
@@ -576,7 +576,7 @@ static AvlNode **search_routine(const KEY_TYPE value_to_search, AvlNode **root, 
 	return this_node_pointer;
 }
 
-static void delete_routine(AvlTree *tree, const KEY_TYPE value_to_delete, AvlNode **root)
+static void delete_routine(AvlTree *tree, const KEY_TYPE value_to_delete, AvlNode **root, DestroyValue destroyValue)
 {
 	AvlNode *garbage = 0;
 	AvlNode *parent_node = 0;
@@ -655,8 +655,12 @@ static void delete_routine(AvlTree *tree, const KEY_TYPE value_to_delete, AvlNod
 
 		if (node_to_balance)
 		{
-			rebalance_shrunk(node_to_balance, previous_node_value, root);
-			free_avl_node(this_node, tree->destroyKey);
+			rebalance_shrunk(node_to_balance, previous_node_value, root, tree->compareKeys);
+
+			if (destroyValue)
+				free_avl_node_and_value(this_node, tree->destroyKey, destroyValue);
+			else
+				free_avl_node(this_node, tree->destroyKey);
 		}
 	}
 }
@@ -739,5 +743,10 @@ VALUE_TYPE *search_node(AvlTree *tree, const KEY_TYPE key)
 
 void delete_node(AvlTree *tree, const KEY_TYPE key)
 {
-	delete_routine(tree, key, &tree->tree_root);
+	delete_routine(tree, key, &tree->tree_root, 0);
+}
+
+void delete_node_and_value(AvlTree *tree, const KEY_TYPE key, DestroyValue destroyValue)
+{
+	delete_routine(tree, key, &tree->tree_root, destroyValue);
 }
