@@ -59,15 +59,15 @@ struct AvlNode
 {
 	Links links;
 	Balanced balance;
-	const void *key;
-	void *value;
+	KEY_TYPE key;
+	VALUE_TYPE value;
 };
 
-static AvlNode *create_avl_node(const void *key, AvlNode *parent)
+static AvlNode *create_avl_node(const KEY_TYPE key, AvlNode *parent, DuplicateKey duplicateKey)
 {
 	AvlNode *res = malloc(sizeof(AvlNode));
 
-	res->key = key;
+	res->key = (*duplicateKey)(key);
 	res->value = 0;
 	res->balance = BALANCED;
 	res->links.left = 0;
@@ -77,8 +77,9 @@ static AvlNode *create_avl_node(const void *key, AvlNode *parent)
 	return res;
 }
 
-static void free_avl_node(AvlNode *node)
+static void free_avl_node(AvlNode *node, DestroyKey destroyKey)
 {
+	(*destroyKey)(node->key);
 	free(node);
 }
 
@@ -451,7 +452,7 @@ static void rebalance_grew(AvlNode *this_node, AvlNode **root)
 	}
 }
 
-static void rebalance_shrunk(AvlNode *this_node, const void *previous_node_value, AvlNode **root)
+static void rebalance_shrunk(AvlNode *this_node, const KEY_TYPE previous_node_value, AvlNode **root)
 {
 	while (this_node != 0)
 	{
@@ -479,10 +480,13 @@ static void rebalance_shrunk(AvlNode *this_node, const void *previous_node_value
 struct AvlTree
 {
 	AvlNode *tree_root;
+	DuplicateKey duplicateKey;
+	DestroyKey destroyKey;
+	CompareKeys compareKeys;
 };
 
 
-static void destroy_subtree(AvlNode **subtree_root)
+static void destroy_subtree(AvlTree *tree, AvlNode **subtree_root)
 {
 	if ((*subtree_root) == 0)
 		return;
@@ -500,7 +504,7 @@ static void destroy_subtree(AvlNode **subtree_root)
 				AvlNode *node_to_delete = this_node;
 				this_node = this_node->links.parent;
 
-				free_avl_node(node_to_delete);
+				free_avl_node(node_to_delete, tree->destroyKey);
 
 				if (node_to_delete == (*subtree_root) || this_node == 0)
 					break;
@@ -514,7 +518,7 @@ static void destroy_subtree(AvlNode **subtree_root)
 	(*subtree_root) = 0;
 }
 
-static AvlNode **search_routine(const void *value_to_search, AvlNode **root, AvlNode **out_parent_node)
+static AvlNode **search_routine(const KEY_TYPE value_to_search, AvlNode **root, AvlNode **out_parent_node)
 {
 	AvlNode **this_node_pointer = root;
 	AvlNode *this_parent_node = 0;
@@ -533,7 +537,7 @@ static AvlNode **search_routine(const void *value_to_search, AvlNode **root, Avl
 	return this_node_pointer;
 }
 
-static void delete_routine(const void *value_to_delete, AvlNode **root)
+static void delete_routine(AvlTree *tree, const KEY_TYPE value_to_delete, AvlNode **root)
 {
 	AvlNode *garbage = 0;
 	AvlNode *parent_node = 0;
@@ -613,12 +617,12 @@ static void delete_routine(const void *value_to_delete, AvlNode **root)
 		if (node_to_balance)
 		{
 			rebalance_shrunk(node_to_balance, previous_node_value, root);
-			free_avl_node(this_node);
+			free_avl_node(this_node, tree->destroyKey);
 		}
 	}
 }
 
-static AvlNode *search_or_create(const void *value_to_search, AvlNode **root)
+static AvlNode *search_or_create(AvlTree *tree, const KEY_TYPE value_to_search, AvlNode **root)
 {
 	AvlNode *parent_node = 0;
 	AvlNode **this_node = search_routine(value_to_search, root, &parent_node);
@@ -627,37 +631,43 @@ static AvlNode *search_or_create(const void *value_to_search, AvlNode **root)
 		return (*this_node);
 	else
 	{
-		if ((*this_node) = create_avl_node(value_to_search, parent_node))
+		if (((*this_node) = create_avl_node(value_to_search, parent_node, tree->duplicateKey)))
 			rebalance_grew((*this_node), root);
 
 		return (*this_node);
 	}
 }
 
-static AvlNode *search(const void *value_to_search, AvlNode **root)
+static AvlNode *search(const KEY_TYPE value_to_search, AvlNode **root)
 {
 	AvlNode *parent_node = 0;
 	return *search_routine(value_to_search, root, &parent_node);
 }
 
-AvlTree *create_avl_tree(void)
+AvlTree *create_avl_tree(DuplicateKey duplicateKey, DestroyKey destroyKey, CompareKeys compareKeys)
 {
-	AvlTree *res = calloc(1, sizeof(AvlTree));
+	AvlTree *res = malloc(sizeof(AvlTree));
+
+	res->tree_root = NULL;
+	res->duplicateKey = duplicateKey;
+	res->destroyKey = destroyKey;
+	res->compareKeys = compareKeys;
+
 	return res;
 }
 
 void free_avl_tree(AvlTree *tree)
 {
-	destroy_subtree(&tree->tree_root);
+	destroy_subtree(tree, &tree->tree_root);
 	free(tree);
 }
 
-void **search_or_create_node(AvlTree *tree, const void *key)
+VALUE_TYPE *search_or_create_node(AvlTree *tree, const KEY_TYPE key)
 {
-	return &search_or_create(key, &tree->tree_root)->value;
+	return &search_or_create(tree, key, &tree->tree_root)->value;
 }
 
-void **search_node(AvlTree *tree, const void *key)
+VALUE_TYPE *search_node(AvlTree *tree, const KEY_TYPE key)
 {
 	AvlNode *res = search(key, &tree->tree_root);
 
@@ -667,7 +677,7 @@ void **search_node(AvlTree *tree, const void *key)
 		return 0;
 }
 
-void delete_node(AvlTree *tree, const void *key)
+void delete_node(AvlTree *tree, const KEY_TYPE key)
 {
-	delete_routine(key, &tree->tree_root);
+	delete_routine(tree, key, &tree->tree_root);
 }

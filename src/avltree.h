@@ -25,14 +25,39 @@
 #define AVLTREE_H_
 
 
+/**
+ * Main data types.
+ *
+ */
+#define KEY_TYPE   char *
+#define VALUE_TYPE void *
+
+
+/**
+ * Functions types for keys management.
+ *
+ */
+typedef KEY_TYPE (*DuplicateKey)(const KEY_TYPE key);
+typedef void (*DestroyKey)(KEY_TYPE key);
+typedef int (*CompareKeys)(const KEY_TYPE key1, const KEY_TYPE key2);
+
+
+/**
+ * Main data structure.
+ *
+ */
 typedef struct AvlTree AvlTree;
 
 
-AvlTree *create_avl_tree(void);
+/**
+ * Functions for tree management.
+ *
+ */
+AvlTree *create_avl_tree(DuplicateKey duplicateKey, DestroyKey destroyKey, CompareKeys compareKeys);
 void free_avl_tree(AvlTree *tree);
 
-void **search_or_create_node(AvlTree *tree, const void *key);
-void **search_node(AvlTree *tree, const void *key);
-void delete_node(AvlTree *tree, const void *key);
+VALUE_TYPE *search_or_create_node(AvlTree *tree, const KEY_TYPE key);
+VALUE_TYPE *search_node(AvlTree *tree, const KEY_TYPE key);
+void delete_node(AvlTree *tree, const KEY_TYPE key);
 
 #endif /* AVLTREE_H_ */
