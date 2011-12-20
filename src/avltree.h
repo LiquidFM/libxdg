@@ -34,12 +34,13 @@
 
 
 /**
- * Functions types for keys management.
+ * Functions types for keys and values management.
  *
  */
 typedef KEY_TYPE (*DuplicateKey)(const KEY_TYPE key);
 typedef void (*DestroyKey)(KEY_TYPE key);
 typedef int (*CompareKeys)(const KEY_TYPE key1, const KEY_TYPE key2);
+typedef void (*DestroyValue)(VALUE_TYPE value);
 
 
 /**
@@ -55,6 +56,11 @@ typedef struct AvlTree AvlTree;
  */
 AvlTree *create_avl_tree(DuplicateKey duplicateKey, DestroyKey destroyKey, CompareKeys compareKeys);
 void free_avl_tree(AvlTree *tree);
+void free_avl_tree_and_values(AvlTree *tree, DestroyValue destroyValue);
+
+void init_avl_tree(AvlTree *tree, DuplicateKey duplicateKey, DestroyKey destroyKey, CompareKeys compareKeys);
+void clear_avl_tree(AvlTree *tree);
+void clear_avl_tree_and_values(AvlTree *tree, DestroyValue destroyValue);
 
 VALUE_TYPE *search_or_create_node(AvlTree *tree, const KEY_TYPE key);
 VALUE_TYPE *search_node(AvlTree *tree, const KEY_TYPE key);

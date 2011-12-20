@@ -83,6 +83,13 @@ static void free_avl_node(AvlNode *node, DestroyKey destroyKey)
 	free(node);
 }
 
+static void free_avl_node_and_value(AvlNode *node, DestroyKey destroyKey, DestroyValue destroyValue)
+{
+	destroyKey(node->key);
+	destroyValue(node->value);
+	free(node);
+}
+
 static void destroy_parent_to_child_link(AvlNode *child)
 {
 	if (child)
@@ -518,6 +525,38 @@ static void destroy_subtree(AvlTree *tree, AvlNode **subtree_root)
 	(*subtree_root) = 0;
 }
 
+static void destroy_subtree_and_values(AvlTree *tree, AvlNode **subtree_root, DestroyValue destroyValue)
+{
+	if ((*subtree_root) == 0)
+		return;
+
+	AvlNode *this_node = (*subtree_root);
+
+	while (TRUE)
+		if (this_node->links.right)
+			this_node = this_node->links.right;
+		else
+			if (this_node->links.left)
+				this_node = this_node->links.left;
+			else
+			{
+				AvlNode *node_to_delete = this_node;
+				this_node = this_node->links.parent;
+
+				free_avl_node_and_value(node_to_delete, tree->destroyKey, destroyValue);
+
+				if (node_to_delete == (*subtree_root) || this_node == 0)
+					break;
+				else
+					if (node_to_delete == this_node->links.right)
+						this_node->links.right = 0;
+					else
+						this_node->links.left = 0;
+			}
+
+	(*subtree_root) = 0;
+}
+
 static AvlNode **search_routine(const KEY_TYPE value_to_search, AvlNode **root, AvlNode **out_parent_node, CompareKeys compareKeys)
 {
 	AvlNode **this_node_pointer = root;
@@ -648,10 +687,7 @@ AvlTree *create_avl_tree(DuplicateKey duplicateKey, DestroyKey destroyKey, Compa
 {
 	AvlTree *res = malloc(sizeof(AvlTree));
 
-	res->tree_root = NULL;
-	res->duplicateKey = duplicateKey;
-	res->destroyKey = destroyKey;
-	res->compareKeys = compareKeys;
+	init_avl_tree(res, duplicateKey, destroyKey, compareKeys);
 
 	return res;
 }
@@ -660,6 +696,30 @@ void free_avl_tree(AvlTree *tree)
 {
 	destroy_subtree(tree, &tree->tree_root);
 	free(tree);
+}
+
+void free_avl_tree_and_values(AvlTree *tree, DestroyValue destroyValue)
+{
+	destroy_subtree_and_values(tree, &tree->tree_root, destroyValue);
+	free(tree);
+}
+
+void init_avl_tree(AvlTree *tree, DuplicateKey duplicateKey, DestroyKey destroyKey, CompareKeys compareKeys)
+{
+	tree->tree_root = NULL;
+	tree->duplicateKey = duplicateKey;
+	tree->destroyKey = destroyKey;
+	tree->compareKeys = compareKeys;
+}
+
+void clear_avl_tree(AvlTree *tree)
+{
+	destroy_subtree(tree, &tree->tree_root);
+}
+
+void clear_avl_tree_and_values(AvlTree *tree, DestroyValue destroyValue)
+{
+	destroy_subtree_and_values(tree, &tree->tree_root, destroyValue);
 }
 
 VALUE_TYPE *search_or_create_node(AvlTree *tree, const KEY_TYPE key)
