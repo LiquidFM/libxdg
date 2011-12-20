@@ -37,60 +37,64 @@
 #define APP_LIST_ALLOC_GRANULARITY               8
 
 
-struct XdgAppGroupEntryValue
+/**
+ * Data structures
+ *
+ */
+struct XdgEntryValue
 {
 	char *value;
 };
-typedef struct XdgAppGroupEntryValue XdgAppGroupEntryValue;
+typedef struct XdgEntryValue XdgEntryValue;
 
 
-struct XdgAppGroupEntryValueList
+struct XdgEntryValueList
 {
-	XdgAppGroupEntryValue *list;
+	XdgEntryValue *list;
 	int count;
 	int capacity;
 };
-typedef struct XdgAppGroupEntryValueList XdgAppGroupEntryValueList;
+typedef struct XdgEntryValueList XdgEntryValueList;
 
 
-struct XdgAppGroupEntry
+struct XdgGroupEntry
 {
 	char *name;
-	XdgAppGroupEntryValueList values;
+	XdgEntryValueList values;
 };
-typedef struct XdgAppGroupEntry XdgAppGroupEntry;
+typedef struct XdgGroupEntry XdgGroupEntry;
 
 
-struct XdgAppGroupEntriesList
+struct XdgGroupEntryList
 {
-	XdgAppGroupEntry *list;
+	XdgGroupEntry *list;
 	int count;
 	int capacity;
 };
-typedef struct XdgAppGroupEntriesList XdgAppGroupEntriesList;
+typedef struct XdgGroupEntryList XdgGroupEntryList;
 
 
-struct XdgAppGroup
+struct XdgGroup
 {
 	char *name;
-	XdgAppGroupEntriesList entries;
+	XdgGroupEntryList entries;
 };
-typedef struct XdgAppGroup XdgAppGroup;
+typedef struct XdgGroup XdgGroup;
 
 
-struct XdgAppGroupList
+struct XdgGroupList
 {
-	XdgAppGroup *list;
+	XdgGroup *list;
 	int count;
 	int capacity;
 };
-typedef struct XdgAppGroupList XdgAppGroupList;
+typedef struct XdgGroupList XdgGroupList;
 
 
 struct XdgApp
 {
 	char *name;
-	XdgAppGroupList groups;
+	XdgGroupList groups;
 };
 typedef struct XdgApp XdgApp;
 
@@ -107,22 +111,37 @@ typedef struct XdgAppList XdgAppList;
 struct XdgApplications
 {
 	XdgAppList app_list;
+	char *associations;
 };
 
 
-static XdgAppGroupEntryValue *_xdg_mime_app_group_entry_value_list_add(XdgAppGroupEntryValueList *list)
+/**
+ * Comparison functions
+ *
+ */
+static int app_name_cmp(const void *v1, const void *v2)
 {
-	XdgAppGroupEntryValue *res;
+	return strcmp(((XdgApp *)v1)->name, ((XdgApp *)v2)->name);
+}
+
+
+/**
+ * Memory allocation functions
+ *
+ */
+static XdgEntryValue *_xdg_mime_entry_value_list_add(XdgEntryValueList *list)
+{
+	XdgEntryValue *res;
 
 	if (list->capacity == 0)
 		if (list->list == NULL)
 		{
-			list->list = malloc(GROUP_ENTRY_VALUE_LIST_ALLOC_GRANULARITY * sizeof(XdgAppGroupEntryValue));
+			list->list = malloc(GROUP_ENTRY_VALUE_LIST_ALLOC_GRANULARITY * sizeof(XdgEntryValue));
 			list->capacity = GROUP_ENTRY_VALUE_LIST_ALLOC_GRANULARITY;
 		}
 		else
 		{
-			list->list = realloc(list->list, list->count * 2 * sizeof(XdgAppGroupEntryValue));
+			list->list = realloc(list->list, list->count * 2 * sizeof(XdgEntryValue));
 			list->capacity = list->count;
 		}
 
@@ -130,20 +149,20 @@ static XdgAppGroupEntryValue *_xdg_mime_app_group_entry_value_list_add(XdgAppGro
 	++list->count;
 	--list->capacity;
 
-	memset(res, 0, sizeof(XdgAppGroupEntryValue));
+	memset(res, 0, sizeof(XdgEntryValue));
 	return res;
 }
 
-static void _xdg_mime_app_group_entry_value_list_new(XdgAppGroupEntryValueList *list, const char *name, size_t len)
+static void _xdg_mime_entry_value_list_new_item(XdgEntryValueList *list, const char *name, size_t len)
 {
-	XdgAppGroupEntryValue *value = _xdg_mime_app_group_entry_value_list_add(list);
+	XdgEntryValue *value = _xdg_mime_entry_value_list_add(list);
 
 	value->value = malloc(len + 1);
 	memcpy(value->value, name, len);
 	value->value[len] = 0;
 }
 
-static void _xdg_mime_app_group_entry_value_list_free(XdgAppGroupEntryValueList *list)
+static void _xdg_mime_entry_value_list_free(XdgEntryValueList *list)
 {
 	if (list->list)
 	{
@@ -156,19 +175,19 @@ static void _xdg_mime_app_group_entry_value_list_free(XdgAppGroupEntryValueList 
 	}
 }
 
-static XdgAppGroupEntry *_xdg_mime_app_group_entries_list_add(XdgAppGroupEntriesList *list)
+static XdgGroupEntry *_xdg_mime_group_entry_list_add(XdgGroupEntryList *list)
 {
-	XdgAppGroupEntry *res;
+	XdgGroupEntry *res;
 
 	if (list->capacity == 0)
 		if (list->list == NULL)
 		{
-			list->list = malloc(GROUP_ENTRIES_LIST_ALLOC_GRANULARITY * sizeof(XdgAppGroupEntry));
+			list->list = malloc(GROUP_ENTRIES_LIST_ALLOC_GRANULARITY * sizeof(XdgGroupEntry));
 			list->capacity = GROUP_ENTRIES_LIST_ALLOC_GRANULARITY;
 		}
 		else
 		{
-			list->list = realloc(list->list, list->count * 2 * sizeof(XdgAppGroupEntry));
+			list->list = realloc(list->list, list->count * 2 * sizeof(XdgGroupEntry));
 			list->capacity = list->count;
 		}
 
@@ -176,11 +195,11 @@ static XdgAppGroupEntry *_xdg_mime_app_group_entries_list_add(XdgAppGroupEntries
 	++list->count;
 	--list->capacity;
 
-	memset(res, 0, sizeof(XdgAppGroupEntry));
+	memset(res, 0, sizeof(XdgGroupEntry));
 	return res;
 }
 
-static void _xdg_mime_app_group_entries_list_free(XdgAppGroupEntriesList *list)
+static void _xdg_mime_group_entry_list_free(XdgGroupEntryList *list)
 {
 	if (list->list)
 	{
@@ -189,16 +208,16 @@ static void _xdg_mime_app_group_entries_list_free(XdgAppGroupEntriesList *list)
 		for (; i < size; ++i)
 		{
 			free(list->list[i].name);
-			_xdg_mime_app_group_entry_value_list_free(&list->list[i].values);
+			_xdg_mime_entry_value_list_free(&list->list[i].values);
 		}
 
 		free(list->list);
 	}
 }
 
-static XdgAppGroupEntry *_xdg_mime_app_group_entry_new(XdgAppGroupEntriesList *entries, const char *name, size_t len)
+static XdgGroupEntry *_xdg_mime_group_entry_list_new_item(XdgGroupEntryList *entries, const char *name, size_t len)
 {
-	XdgAppGroupEntry *entry = _xdg_mime_app_group_entries_list_add(entries);
+	XdgGroupEntry *entry = _xdg_mime_group_entry_list_add(entries);
 
 	entry->name = malloc(len + 1);
 	memcpy(entry->name, name, len);
@@ -207,19 +226,19 @@ static XdgAppGroupEntry *_xdg_mime_app_group_entry_new(XdgAppGroupEntriesList *e
 	return entry;
 }
 
-static XdgAppGroup *_xdg_mime_app_group_list_add(XdgAppGroupList *list)
+static XdgGroup *_xdg_mime_group_list_add(XdgGroupList *list)
 {
-	XdgAppGroup *res;
+	XdgGroup *res;
 
 	if (list->capacity == 0)
 		if (list->list == NULL)
 		{
-			list->list = malloc(GROUP_LIST_ALLOC_GRANULARITY * sizeof(XdgAppGroup));
+			list->list = malloc(GROUP_LIST_ALLOC_GRANULARITY * sizeof(XdgGroup));
 			list->capacity = GROUP_LIST_ALLOC_GRANULARITY;
 		}
 		else
 		{
-			list->list = realloc(list->list, list->count * 2 * sizeof(XdgAppGroup));
+			list->list = realloc(list->list, list->count * 2 * sizeof(XdgGroup));
 			list->capacity = list->count;
 		}
 
@@ -227,11 +246,11 @@ static XdgAppGroup *_xdg_mime_app_group_list_add(XdgAppGroupList *list)
 	++list->count;
 	--list->capacity;
 
-	memset(res, 0, sizeof(XdgAppGroup));
+	memset(res, 0, sizeof(XdgGroup));
 	return res;
 }
 
-static void _xdg_mime_app_group_list_free(XdgAppGroupList *list)
+static void _xdg_mime_group_list_free(XdgGroupList *list)
 {
 	if (list->list)
 	{
@@ -240,16 +259,16 @@ static void _xdg_mime_app_group_list_free(XdgAppGroupList *list)
 		for (; i < size; ++i)
 		{
 			free(list->list[i].name);
-			_xdg_mime_app_group_entries_list_free(&list->list[i].entries);
+			_xdg_mime_group_entry_list_free(&list->list[i].entries);
 		}
 
 		free(list->list);
 	}
 }
 
-static XdgAppGroup *_xdg_mime_app_group_new(XdgAppGroupList *groups, const char *name, size_t len)
+static XdgGroup *_xdg_mime_group_list_new_item(XdgGroupList *groups, const char *name, size_t len)
 {
-	XdgAppGroup *group = _xdg_mime_app_group_list_add(groups);
+	XdgGroup *group = _xdg_mime_group_list_add(groups);
 
 	group->name = malloc(len + 1);
 	memcpy(group->name, name, len);
@@ -291,7 +310,7 @@ static void _xdg_mime_app_list_free(XdgAppList *list)
 		for (; i < size; ++i)
 		{
 			free(list->list[i].name);
-			_xdg_mime_app_group_list_free(&list->list[i].groups);
+			_xdg_mime_group_list_free(&list->list[i].groups);
 		}
 
 		free(list->list);
@@ -307,24 +326,29 @@ static XdgApp *_xdg_mime_app_list_new_item(XdgAppList *apps, const char *name)
 	return app;
 }
 
-static void _xdg_mime_app_read_group_entry(XdgAppGroup *group, const char *line)
+
+/**
+ * Main algorithms
+ *
+ */
+static void _xdg_mime_app_read_group_entry(XdgGroup *group, const char *line)
 {
 	char *sep;
 
 	if ((sep = strchr(line, '=')) != NULL)
 	{
-		XdgAppGroupEntry *entry = _xdg_mime_app_group_entry_new(&group->entries, line, sep - line);
+		XdgGroupEntry *entry = _xdg_mime_group_entry_list_new_item(&group->entries, line, sep - line);
 		char *start = (++sep);
 
 		for (; *sep && *sep != '\n'; ++sep)
 			if (*sep == ';')
 			{
-				_xdg_mime_app_group_entry_value_list_new(&entry->values, start, sep - start);
+				_xdg_mime_entry_value_list_new_item(&entry->values, start, sep - start);
 				start = sep + 1;
 			}
 
 		if (*start != 0 && *start != '\n')
-			_xdg_mime_app_group_entry_value_list_new(&entry->values, start, sep - start);
+			_xdg_mime_entry_value_list_new_item(&entry->values, start, sep - start);
 	}
 }
 
@@ -340,7 +364,7 @@ void _xdg_mime_applications_read_from_directory(XdgApplications *applications, c
 		char *file_name;
 		struct dirent *entry;
 		XdgApp *app;
-		XdgAppGroup *group;
+		XdgGroup *group;
 
 		while ((entry = readdir(dir)) != NULL)
 			if (entry->d_type == DT_REG &&
@@ -360,7 +384,7 @@ void _xdg_mime_applications_read_from_directory(XdgApplications *applications, c
 								group = NULL;
 
 								if ((sep = strchr(line, ']')) != NULL)
-									group = _xdg_mime_app_group_new(&app->groups, line + 1, sep - line - 1);
+									group = _xdg_mime_group_list_new_item(&app->groups, line + 1, sep - line - 1);
 							}
 							else
 								if (group)
@@ -376,6 +400,12 @@ void _xdg_mime_applications_read_from_directory(XdgApplications *applications, c
 
 		closedir(dir);
 	}
+}
+
+void _xdg_mime_applications_build_cache(XdgApplications *applications)
+{
+	  if (applications->app_list.count > 1)
+		  qsort(&applications->app_list, applications->app_list.count, sizeof(XdgApp), app_name_cmp);
 }
 
 const char *_xdg_mime_applications_lookup(XdgApplications *applications, const char *mime)
