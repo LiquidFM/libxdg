@@ -31,10 +31,11 @@
 #include <fnmatch.h>
 
 
-#define GROUP_LIST_ALLOC_GRANULARITY             4
+#define GROUP_LIST_ALLOC_GRANULARITY             2
 #define GROUP_ENTRIES_LIST_ALLOC_GRANULARITY     4
 #define GROUP_ENTRY_VALUE_LIST_ALLOC_GRANULARITY 2
 #define APP_LIST_ALLOC_GRANULARITY               8
+#define READ_FROM_FILE_BUFFER_SIZE               1024
 
 
 /**
@@ -111,7 +112,7 @@ typedef struct XdgAppList XdgAppList;
 struct XdgApplications
 {
 	XdgAppList app_list;
-	char *associations;
+	XdgGroupList assoc_list;
 };
 
 
@@ -352,54 +353,110 @@ static void _xdg_mime_app_read_group_entry(XdgGroup *group, const char *line)
 	}
 }
 
-void _xdg_mime_applications_read_from_directory(XdgApplications *applications, const char *directory_name)
+static void _xdg_mime_applications_read_desktop_file(char *buffer, XdgApplications *applications, FILE *file, const char *file_name)
+{
+	char *sep;
+	XdgApp *app;
+	XdgGroup *group = NULL;
+
+	app = _xdg_mime_app_list_new_item(&applications->app_list, file_name);
+
+	while (fgets(buffer, READ_FROM_FILE_BUFFER_SIZE, file) != NULL)
+		if (buffer[0] != '#' && buffer[0] != '\r' && buffer[0] != '\n')
+			if (buffer[0] == '[')
+			{
+				group = NULL;
+
+				if ((sep = strchr(buffer, ']')) != NULL)
+					group = _xdg_mime_group_list_new_item(&app->groups, buffer + 1, sep - buffer - 1);
+			}
+			else
+				if (group)
+					_xdg_mime_app_read_group_entry(group, buffer);
+				else
+					break;
+}
+
+static void _xdg_mime_applications_read_list_file(char *buffer, XdgApplications *applications, FILE *file)
+{
+	char *sep;
+	XdgGroup *group = NULL;
+
+	while (fgets(buffer, READ_FROM_FILE_BUFFER_SIZE, file) != NULL)
+		if (buffer[0] != '#' && buffer[0] != '\r' && buffer[0] != '\n')
+			if (buffer[0] == '[')
+			{
+				group = NULL;
+
+				if ((sep = strchr(buffer, ']')) != NULL)
+					group = _xdg_mime_group_list_new_item(&applications->assoc_list, buffer + 1, sep - buffer - 1);
+			}
+			else
+				if (group)
+					_xdg_mime_app_read_group_entry(group, buffer);
+				else
+					break;
+}
+
+static void __xdg_mime_applications_read_from_directory(char *buffer, XdgApplications *applications, const char *directory_name)
 {
 	DIR *dir;
 
 	if (dir = opendir(directory_name))
 	{
-		char *sep;
 		FILE *file;
-		char line[1024];
 		char *file_name;
 		struct dirent *entry;
-		XdgApp *app;
-		XdgGroup *group;
 
 		while ((entry = readdir(dir)) != NULL)
-			if (entry->d_type == DT_REG &&
-				fnmatch("*.desktop", entry->d_name, FNM_NOESCAPE) != FNM_NOMATCH)
+			if (entry->d_type == DT_DIR)
 			{
 				file_name = malloc(strlen(directory_name) + strlen(entry->d_name) + 2);
 				strcpy(file_name, directory_name); strcat(file_name, "/"); strcat(file_name, entry->d_name);
 
-				if (file = fopen(file_name, "r"))
-				{
-					app = _xdg_mime_app_list_new_item(&applications->app_list, entry->d_name);
-
-					while (fgets(line, 1024, file) != NULL)
-						if (line[0] != '#' && line[0] != '\r' && line[0] != '\n')
-							if (line[0] == '[')
-							{
-								group = NULL;
-
-								if ((sep = strchr(line, ']')) != NULL)
-									group = _xdg_mime_group_list_new_item(&app->groups, line + 1, sep - line - 1);
-							}
-							else
-								if (group)
-									_xdg_mime_app_read_group_entry(group, line);
-								else
-									break;
-
-					fclose(file);
-				}
+				__xdg_mime_applications_read_from_directory(buffer, applications, file_name);
 
 				free(file_name);
 			}
+			else
+				if (entry->d_type == DT_REG)
+					if (fnmatch("*.desktop", entry->d_name, FNM_NOESCAPE) != FNM_NOMATCH)
+					{
+						file_name = malloc(strlen(directory_name) + strlen(entry->d_name) + 2);
+						strcpy(file_name, directory_name); strcat(file_name, "/"); strcat(file_name, entry->d_name);
+
+						if (file = fopen(file_name, "r"))
+						{
+							_xdg_mime_applications_read_desktop_file(buffer, applications, file, entry->d_name);
+							fclose(file);
+						}
+
+						free(file_name);
+					}
+					else
+						if (fnmatch("*.list", entry->d_name, FNM_NOESCAPE) != FNM_NOMATCH)
+						{
+							file_name = malloc(strlen(directory_name) + strlen(entry->d_name) + 2);
+							strcpy(file_name, directory_name); strcat(file_name, "/"); strcat(file_name, entry->d_name);
+
+							if (file = fopen(file_name, "r"))
+							{
+								_xdg_mime_applications_read_list_file(buffer, applications, file);
+								fclose(file);
+							}
+
+							free(file_name);
+						}
 
 		closedir(dir);
 	}
+}
+
+void _xdg_mime_applications_read_from_directory(XdgApplications *applications, const char *directory_name)
+{
+	char buffer[READ_FROM_FILE_BUFFER_SIZE];
+
+	__xdg_mime_applications_read_from_directory(buffer, applications, directory_name);
 }
 
 void _xdg_mime_applications_build_cache(XdgApplications *applications)
