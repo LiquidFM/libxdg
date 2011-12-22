@@ -35,7 +35,6 @@
 #define GROUP_LIST_ALLOC_GRANULARITY             2
 #define GROUP_ENTRIES_LIST_ALLOC_GRANULARITY     4
 #define GROUP_ENTRY_VALUE_LIST_ALLOC_GRANULARITY 2
-#define APP_LIST_ALLOC_GRANULARITY               8
 #define READ_FROM_FILE_BUFFER_SIZE               1024
 
 
@@ -95,8 +94,8 @@ typedef struct XdgGroupList XdgGroupList;
 
 struct XdgApp
 {
-	char *name;
 	XdgGroupList groups;
+	char name[1];
 };
 typedef struct XdgApp XdgApp;
 
@@ -112,7 +111,7 @@ typedef struct XdgAppList XdgAppList;
 
 struct XdgApplications
 {
-	XdgAppList app_list;
+	AvlTree *app_map;
 	AvlTree *assoc_map;
 };
 
@@ -279,53 +278,43 @@ static XdgGroup *_xdg_mime_group_list_new_item(XdgGroupList *groups, const char 
 	return group;
 }
 
-static XdgApp *_xdg_mime_app_list_add(XdgAppList *list)
+static XdgApp *_xdg_mime_app_map_item_new(AvlTree *apps, const char *name)
 {
-	XdgApp *res;
+	void **test = search_or_create_node(apps, "1");
+	test = search_or_create_node(apps, "2");
+	test = search_or_create_node(apps, "3");
+	test = search_or_create_node(apps, "4");
+	test = search_or_create_node(apps, "5");
+	test = search_or_create_node(apps, "6");
+	test = search_or_create_node(apps, "7");
+	test = search_or_create_node(apps, "8");
+	test = search_or_create_node(apps, "9");
+	test = search_or_create_node(apps, "10");
 
-	if (list->capacity == 0)
-		if (list->list == NULL)
-		{
-			list->list = malloc(APP_LIST_ALLOC_GRANULARITY * sizeof(XdgApp));
-			list->capacity = APP_LIST_ALLOC_GRANULARITY;
-		}
-		else
-		{
-			list->list = realloc(list->list, list->count * 2 * sizeof(XdgApp));
-			list->capacity = list->count;
-		}
 
-	res = &list->list[list->count];
-	++list->count;
-	--list->capacity;
 
-	memset(res, 0, sizeof(XdgApp));
-	return res;
-}
 
-static void _xdg_mime_app_list_free(XdgAppList *list)
-{
-	if (list->list)
+	XdgApp **app = (XdgApp **)search_or_create_node(apps, name);
+
+	if ((*app) == NULL)
 	{
-		int i = 0, size = list->count;
+		size_t len = strlen(name);
 
-		for (; i < size; ++i)
-		{
-			free(list->list[i].name);
-			_xdg_mime_group_list_free(&list->list[i].groups);
-		}
-
-		free(list->list);
+		(*app) = malloc(sizeof(XdgApp) + len);
+		memset(&(*app)->groups, 0, sizeof(XdgGroupList));
+		memcpy((*app)->name, name, len);
+		(*app)->name[len] = 0;
 	}
+
+	return *app;
 }
 
-static XdgApp *_xdg_mime_app_list_new_item(XdgAppList *apps, const char *name)
+static void _xdg_mime_app_map_item_free(XdgApp *app)
 {
-	XdgApp *app = _xdg_mime_app_list_add(apps);
+	if (app->groups.list)
+		_xdg_mime_group_list_free(&app->groups);
 
-	app->name = strdup(name);
-
-	return app;
+	free(app);
 }
 
 
@@ -360,7 +349,7 @@ static void _xdg_mime_applications_read_desktop_file(char *buffer, XdgApplicatio
 	XdgApp *app;
 	XdgGroup *group = NULL;
 
-	app = _xdg_mime_app_list_new_item(&applications->app_list, file_name);
+	app = _xdg_mime_app_map_item_new(applications->app_map, file_name);
 
 	while (fgets(buffer, READ_FROM_FILE_BUFFER_SIZE, file) != NULL)
 		if (buffer[0] != '#' && buffer[0] != '\r' && buffer[0] != '\n')
@@ -415,12 +404,15 @@ static void __xdg_mime_applications_read_from_directory(char *buffer, XdgApplica
 		while ((entry = readdir(dir)) != NULL)
 			if (entry->d_type == DT_DIR)
 			{
-				file_name = malloc(strlen(directory_name) + strlen(entry->d_name) + 2);
-				strcpy(file_name, directory_name); strcat(file_name, "/"); strcat(file_name, entry->d_name);
+				if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0)
+				{
+					file_name = malloc(strlen(directory_name) + strlen(entry->d_name) + 2);
+					strcpy(file_name, directory_name); strcat(file_name, "/"); strcat(file_name, entry->d_name);
 
-				__xdg_mime_applications_read_from_directory(buffer, applications, file_name);
+					__xdg_mime_applications_read_from_directory(buffer, applications, file_name);
 
-				free(file_name);
+					free(file_name);
+				}
 			}
 			else
 				if (entry->d_type == DT_REG)
@@ -463,15 +455,9 @@ void _xdg_mime_applications_read_from_directory(XdgApplications *applications, c
 	__xdg_mime_applications_read_from_directory(buffer, applications, directory_name);
 }
 
-void _xdg_mime_applications_build_cache(XdgApplications *applications)
-{
-	  if (applications->app_list.count > 1)
-		  qsort(&applications->app_list, applications->app_list.count, sizeof(XdgApp), app_name_cmp);
-}
-
 const char *_xdg_mime_applications_lookup(XdgApplications *applications, const char *mime)
 {
-
+	return 0;
 }
 
 XdgApplications *_xdg_mime_applications_new(void)
@@ -479,6 +465,7 @@ XdgApplications *_xdg_mime_applications_new(void)
 	XdgApplications *list;
 
 	list = calloc(1, sizeof(XdgApplications));
+	list->app_map = create_avl_tree(strdup, (DestroyKey)free, strcmp);
 	list->assoc_map = create_avl_tree(strdup, (DestroyKey)free, strcmp);
 
 	return list;
@@ -486,7 +473,7 @@ XdgApplications *_xdg_mime_applications_new(void)
 
 void _xdg_mime_applications_free(XdgApplications *applications)
 {
-	_xdg_mime_app_list_free(&applications->app_list);
+	free_avl_tree_and_values(applications->app_map, (DestroyValue)_xdg_mime_app_map_item_free);
 	free_avl_tree(applications->assoc_map);
 }
 

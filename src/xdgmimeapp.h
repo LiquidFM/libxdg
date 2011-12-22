@@ -40,7 +40,6 @@ typedef struct XdgApplications XdgApplications;
 #endif
 
 void _xdg_mime_applications_read_from_directory(XdgApplications *applications, const char *directory_name);
-void _xdg_mime_applications_build_cache(XdgApplications *applications);
 const char *_xdg_mime_applications_lookup(XdgApplications *applications, const char *mime);
 
 XdgApplications *_xdg_mime_applications_new(void);

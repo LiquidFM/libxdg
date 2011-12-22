@@ -283,16 +283,6 @@ static void rebalance_grew_routine(Balanced grew, AvlNode *node_to_balance, AvlN
 	node_to_balance->balance = BALANCED;
 }
 
-static void rebalance_left_grew(AvlNode *node_to_balance, AvlNode **root)
-{
-	rebalance_grew_routine(LEFT_IS_HEAVY, node_to_balance, root);
-}
-
-static void rebalance_right_grew(AvlNode *node_to_balance, AvlNode **root)
-{
-	rebalance_grew_routine(RIGHT_IS_HEAVY, node_to_balance, root);
-}
-
 static BOOL rebalance_shrunk_routine(Balanced shrunk, AvlNode **node_to_balance, AvlNode **root)
 {
 	BOOL need_to_stop_balance = FALSE;
@@ -435,24 +425,23 @@ static void rebalance_grew(AvlNode *this_node, AvlNode **root)
 					this_node->balance = LEFT_IS_HEAVY;
 				else
 				{
-					rebalance_left_grew(this_node, root);
+					rebalance_grew_routine(LEFT_IS_HEAVY, this_node, root);
 					return;
 				}
 		else
-			if (this_node->links.right == previous_node)
-				if (this_node->balance == LEFT_IS_HEAVY)
+			if (this_node->balance == LEFT_IS_HEAVY)
+			{
+				this_node->balance = BALANCED;
+				return;
+			}
+			else
+				if (this_node->balance == BALANCED)
+					this_node->balance = RIGHT_IS_HEAVY;
+				else
 				{
-					this_node->balance = BALANCED;
+					rebalance_grew_routine(RIGHT_IS_HEAVY, this_node, root);
 					return;
 				}
-				else
-					if (this_node->balance == BALANCED)
-						this_node->balance = RIGHT_IS_HEAVY;
-					else
-					{
-						rebalance_right_grew(this_node, root);
-						return;
-					}
 
 		previous_node = this_node;
 		this_node = this_node->links.parent;
@@ -559,17 +548,18 @@ static void destroy_subtree_and_values(AvlTree *tree, AvlNode **subtree_root, De
 
 static AvlNode **search_routine(const KEY_TYPE value_to_search, AvlNode **root, AvlNode **out_parent_node, CompareKeys compareKeys)
 {
+	int res;
 	AvlNode **this_node_pointer = root;
 	AvlNode *this_parent_node = 0;
 
-	while ((*this_node_pointer) && compareKeys((*this_node_pointer)->key, value_to_search) != 0)
+	while ((*this_node_pointer) && (res = compareKeys((*this_node_pointer)->key, value_to_search)) != 0)
 	{
 		this_parent_node = (*this_node_pointer);
 
-		if (compareKeys(value_to_search, (*this_node_pointer)->key) < 0)
-			this_node_pointer = &(*this_node_pointer)->links.left;
-		else
+		if (res < 0)
 			this_node_pointer = &(*this_node_pointer)->links.right;
+		else
+			this_node_pointer = &(*this_node_pointer)->links.left;
 	}
 
 	(*out_parent_node) = this_parent_node;
