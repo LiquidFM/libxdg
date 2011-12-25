@@ -190,99 +190,6 @@ static void replace_node(AvlNode *node_to_replace, AvlNode *new_node, AvlNode **
 	}
 }
 
-static void rebalance_grew_routine(Balanced grew, AvlNode *node_to_balance, AvlNode **root)
-{
-	AvlNode *garbage = 0;
-	AvlNode *child = 0;
-
-	if (grew == LEFT_IS_HEAVY)
-		child = node_to_balance->links.left;
-	else
-		if (grew == RIGHT_IS_HEAVY)
-			child = node_to_balance->links.right;
-		else
-			return;
-
-	if (child)
-		if (child->balance == grew)
-		{
-			Links old_child_links;
-			Links old_node_to_balance_links = node_to_balance->links;
-
-			replace_node(node_to_balance, child, root, &old_child_links);
-
-			if (grew == LEFT_IS_HEAVY)
-			{
-				change_left(node_to_balance, old_child_links.right, &garbage, &garbage);
-				change_right(node_to_balance, old_node_to_balance_links.right, &garbage, &garbage);
-
-				change_right(child, node_to_balance, &garbage, &garbage);
-				change_left(child, old_child_links.left, &garbage, &garbage);
-			}
-			else
-			{
-				change_right(node_to_balance, old_child_links.left, &garbage, &garbage);
-				change_left(node_to_balance, old_node_to_balance_links.left, &garbage, &garbage);
-
-				change_left(child, node_to_balance, &garbage, &garbage);
-				change_right(child, old_child_links.right, &garbage, &garbage);
-			}
-
-			node_to_balance->balance = BALANCED;
-			node_to_balance = child;
-		}
-		else
-		{
-			AvlNode *grandchild = 0;
-
-			if (grew == LEFT_IS_HEAVY)
-				grandchild = child->links.right;
-			else
-				grandchild = child->links.left;
-
-			if (grandchild)
-			{
-				Links old_grandchild_links;
-				Links old_node_to_balance_links = node_to_balance->links;
-
-				replace_node(node_to_balance, grandchild, root, &old_grandchild_links);
-
-				if (grew == LEFT_IS_HEAVY)
-				{
-					change_right(child, old_grandchild_links.left, &garbage, &garbage);
-
-					change_left(node_to_balance, old_grandchild_links.right, &garbage, &garbage);
-					change_right(node_to_balance, old_node_to_balance_links.right, &garbage, &garbage);
-
-					change_right(grandchild, node_to_balance, &garbage, &garbage);
-				}
-				else
-				{
-					change_left(child, old_grandchild_links.right, &garbage, &garbage);
-
-					change_right(node_to_balance, old_grandchild_links.left, &garbage, &garbage);
-					change_left(node_to_balance, old_node_to_balance_links.left, &garbage, &garbage);
-
-					change_left(grandchild, node_to_balance, &garbage, &garbage);
-				}
-
-				if (grandchild->balance == grew)
-					node_to_balance->balance = (Balanced)((int)grew * (-1));
-				else
-					node_to_balance->balance = BALANCED;
-
-				if (grandchild->balance == (Balanced)((int)grew * (-1)))
-					child->balance = grew;
-				else
-					child->balance = BALANCED;
-
-				node_to_balance = grandchild;
-			}
-		}
-
-	node_to_balance->balance = BALANCED;
-}
-
 static BOOL rebalance_shrunk_routine(Balanced shrunk, AvlNode **node_to_balance, AvlNode **root)
 {
 	BOOL need_to_stop_balance = FALSE;
@@ -407,12 +314,86 @@ static BOOL rebalance_right_shrunk(AvlNode **node_to_balance, AvlNode **root)
 	return rebalance_shrunk_routine(RIGHT_IS_HEAVY, node_to_balance, root);
 }
 
+static void left_left_rotation(AvlNode *parent, AvlNode *child, AvlNode **root)
+{
+	parent->balance = BALANCED;
+	child->balance = BALANCED;
+
+	if (child->links.parent = parent->links.parent)
+		child->links.parent->links.right = child;
+	else
+		(*root) = child;
+
+	parent->links.right = child->links.left;
+	child->links.left = parent;
+
+	parent->links.parent = child;
+}
+
+static void right_left_rotation(AvlNode *parent, AvlNode *child, AvlNode *grandchild, AvlNode **root)
+{
+	parent->balance = BALANCED;
+	child->balance = BALANCED;
+	grandchild->balance = BALANCED;
+
+	if (grandchild->links.parent = parent->links.parent)
+		grandchild->links.parent->links.right = grandchild;
+	else
+		(*root) = grandchild;
+
+	parent->links.right = grandchild->links.left;
+	child->links.left = grandchild->links.right;
+
+	grandchild->links.left = parent;
+	grandchild->links.right = child;
+
+	parent->links.parent = grandchild;
+	child->links.parent = grandchild;
+}
+
+static void right_right_rotation(AvlNode *parent, AvlNode *child, AvlNode **root)
+{
+	parent->balance = BALANCED;
+	child->balance = BALANCED;
+
+	if (child->links.parent = parent->links.parent)
+		child->links.parent->links.left = child;
+	else
+		(*root) = child;
+
+	parent->links.left = child->links.right;
+	child->links.right = parent;
+
+	parent->links.parent = child;
+}
+
+static void left_right_rotation(AvlNode *parent, AvlNode *child, AvlNode *grandchild, AvlNode **root)
+{
+	parent->balance = BALANCED;
+	child->balance = BALANCED;
+	grandchild->balance = BALANCED;
+
+	if (grandchild->links.parent = parent->links.parent)
+		grandchild->links.parent->links.left = grandchild;
+	else
+		(*root) = grandchild;
+
+	parent->links.left = grandchild->links.right;
+	child->links.right = grandchild->links.left;
+
+	grandchild->links.right = parent;
+	grandchild->links.left = child;
+
+	parent->links.parent = grandchild;
+	child->links.parent = grandchild;
+}
+
 static void rebalance_grew(AvlNode *this_node, AvlNode **root)
 {
 	AvlNode *previous_node = this_node;
 	this_node = this_node->links.parent;
 
-	while (this_node != 0)
+	while (this_node)
 	{
 		if (this_node->links.left == previous_node)
 			if (this_node->balance == RIGHT_IS_HEAVY)
@@ -425,7 +406,11 @@ static void rebalance_grew(AvlNode *this_node, AvlNode **root)
 					this_node->balance = LEFT_IS_HEAVY;
 				else
 				{
-					rebalance_grew_routine(LEFT_IS_HEAVY, this_node, root);
+					if (previous_node->balance == LEFT_IS_HEAVY)
+						right_right_rotation(this_node, previous_node, root);
+					else
+						left_right_rotation(this_node, previous_node, previous_node->links.right, root);
+
 					return;
 				}
 		else
@@ -439,7 +424,11 @@ static void rebalance_grew(AvlNode *this_node, AvlNode **root)
 					this_node->balance = RIGHT_IS_HEAVY;
 				else
 				{
-					rebalance_grew_routine(RIGHT_IS_HEAVY, this_node, root);
+					if (previous_node->balance == RIGHT_IS_HEAVY)
+						left_left_rotation(this_node, previous_node, root);
+					else
+						right_left_rotation(this_node, previous_node, previous_node->links.left, root);
+
 					return;
 				}
 
@@ -448,24 +437,164 @@ static void rebalance_grew(AvlNode *this_node, AvlNode **root)
 	}
 }
 
-static void rebalance_shrunk(AvlNode *this_node, const KEY_TYPE previous_node_value, AvlNode **root, CompareKeys compareKeys)
+static void rebalance_shrunk(AvlNode *this_node, AvlNode **root)
 {
-	while (this_node != 0)
+	AvlNode *previous_node = 0;
+	AvlNode *node_to_remove = this_node;
+	this_node = this_node->links.left;
+
+	while (this_node)
 	{
-		if (compareKeys(previous_node_value, this_node->key) < 0)
+		previous_node = this_node;
+		this_node = this_node->links.right;
+	}
+
+	if (previous_node == 0)
+		previous_node = node_to_remove->links.right;
+
+	if (previous_node)
+	{
+		if (previous_node->links.parent == node_to_remove)
+			this_node = previous_node;
+		else
+			this_node = previous_node->links.parent;
+
+		previous_node->balance = node_to_remove->balance;
+		previous_node->links = node_to_remove->links;
+
+		if (previous_node->links.parent == 0)
+			(*root) = previous_node;
+		else
+			if (previous_node->links.parent->links.left == node_to_remove)
+				previous_node->links.parent->links.left = previous_node;
+			else
+				previous_node->links.parent->links.right = previous_node;
+	}
+	else
+	{
+		this_node = node_to_remove->links.parent;
+		previous_node = node_to_remove;
+	}
+
+	if (this_node)
+	{
+		if (this_node->links.left == previous_node)
 		{
-			if (rebalance_left_shrunk(&this_node, root))
-				return;
+			this_node->links.left = 0;
+
+			if (this_node->balance == LEFT_IS_HEAVY)
+				this_node->balance = BALANCED;
+			else
+				if (this_node->balance == BALANCED)
+					this_node->balance = RIGHT_IS_HEAVY;
+				else
+					if (this_node->links.right->balance == RIGHT_IS_HEAVY)
+					{
+						node_to_remove = this_node->links.right;
+						left_left_rotation(this_node, this_node->links.right, root);
+						this_node = node_to_remove;
+					}
+					else
+					{
+						node_to_remove = this_node->links.right->links.left;
+						right_left_rotation(this_node, this_node->links.right, this_node->links.right->links.left, root);
+						this_node = node_to_remove;
+					}
 		}
 		else
-			if (compareKeys(this_node->key, previous_node_value) < 0)
-				if (rebalance_right_shrunk(&this_node, root))
-					return;
+		{
+			this_node->links.right = 0;
 
-		previous_node_value = this_node->key;
+			if (this_node->balance == RIGHT_IS_HEAVY)
+				this_node->balance = BALANCED;
+			else
+				if (this_node->balance == BALANCED)
+					this_node->balance = LEFT_IS_HEAVY;
+				else
+					if (this_node->links.left->balance == LEFT_IS_HEAVY)
+					{
+						node_to_remove = this_node->links.left;
+						right_right_rotation(this_node, this_node->links.left, root);
+						this_node = node_to_remove;
+					}
+					else
+					{
+						node_to_remove = this_node->links.left->links.right;
+						left_right_rotation(this_node, this_node->links.left, this_node->links.left->links.right, root);
+						this_node = node_to_remove;
+					}
+		}
+
+		previous_node = this_node;
 		this_node = this_node->links.parent;
+
+		while (this_node)
+		{
+			if (this_node->links.left == previous_node)
+				if (this_node->balance == LEFT_IS_HEAVY)
+					this_node->balance = BALANCED;
+				else
+					if (this_node->balance == BALANCED)
+						this_node->balance = RIGHT_IS_HEAVY;
+					else
+						if (this_node->links.right->balance == RIGHT_IS_HEAVY)
+						{
+							node_to_remove = this_node->links.right;
+							left_left_rotation(this_node, this_node->links.right, root);
+							this_node = node_to_remove;
+						}
+						else
+						{
+							node_to_remove = this_node->links.right->links.left;
+							right_left_rotation(this_node, this_node->links.right, this_node->links.right->links.left, root);
+							this_node = node_to_remove;
+						}
+			else
+				if (this_node->balance == RIGHT_IS_HEAVY)
+					this_node->balance = BALANCED;
+				else
+					if (this_node->balance == BALANCED)
+						this_node->balance = LEFT_IS_HEAVY;
+					else
+						if (this_node->links.left->balance == LEFT_IS_HEAVY)
+						{
+							node_to_remove = this_node->links.left;
+							right_right_rotation(this_node, this_node->links.left, root);
+							this_node = node_to_remove;
+						}
+						else
+						{
+							node_to_remove = this_node->links.left->links.right;
+							left_right_rotation(this_node, this_node->links.left, this_node->links.left->links.right, root);
+							this_node = node_to_remove;
+						}
+
+			previous_node = this_node;
+			this_node = this_node->links.parent;
+		}
 	}
+	else
+		(*root) = 0;
 }
+
+//static void rebalance_shrunk(AvlNode *this_node, const KEY_TYPE previous_node_value, AvlNode **root, CompareKeys compareKeys)
+//{
+//	while (this_node != 0)
+//	{
+//		if (compareKeys(previous_node_value, this_node->key) < 0)
+//		{
+//			if (rebalance_left_shrunk(&this_node, root))
+//				return;
+//		}
+//		else
+//			if (compareKeys(this_node->key, previous_node_value) < 0)
+//				if (rebalance_right_shrunk(&this_node, root))
+//					return;
+//
+//		previous_node_value = this_node->key;
+//		this_node = this_node->links.parent;
+//	}
+//}
 
 
 /**
@@ -549,8 +678,8 @@ static void destroy_subtree_and_values(AvlTree *tree, AvlNode **subtree_root, De
 static AvlNode **search_routine(const KEY_TYPE value_to_search, AvlNode **root, AvlNode **out_parent_node, CompareKeys compareKeys)
 {
 	int res;
-	AvlNode **this_node_pointer = root;
 	AvlNode *this_parent_node = 0;
+	AvlNode **this_node_pointer = root;
 
 	while ((*this_node_pointer) && (res = compareKeys((*this_node_pointer)->key, value_to_search)) != 0)
 	{
@@ -564,95 +693,6 @@ static AvlNode **search_routine(const KEY_TYPE value_to_search, AvlNode **root, 
 
 	(*out_parent_node) = this_parent_node;
 	return this_node_pointer;
-}
-
-static void delete_routine(AvlTree *tree, const KEY_TYPE value_to_delete, AvlNode **root, DestroyValue destroyValue)
-{
-	AvlNode *garbage = 0;
-	AvlNode *parent_node = 0;
-	AvlNode *this_node = *search_routine(value_to_delete, root, &parent_node, tree->compareKeys);
-
-	if (this_node)
-	{
-		AvlNode *node_to_balance = 0;
-		Links old_this_node_links = this_node->links;
-		KEY_TYPE previous_node_value = 0;
-
-		if (this_node->links.right && this_node->links.left == 0)
-		{
-			Links old_links;
-			replace_node(this_node, this_node->links.right, root, &old_links);
-
-			change_right(old_this_node_links.right, old_links.right, &garbage, &garbage);
-			change_left(old_this_node_links.right, old_links.left, &garbage, &garbage);
-
-			node_to_balance = old_this_node_links.right;
-			previous_node_value = old_this_node_links.right->key;
-		}
-		else
-			if (this_node->links.left && this_node->links.right == 0)
-			{
-				Links old_links;
-				replace_node(this_node, this_node->links.left, root, &old_links);
-
-				change_right(old_this_node_links.left, old_links.right, &garbage, &garbage);
-				change_left(old_this_node_links.left, old_links.left, &garbage, &garbage);
-
-				node_to_balance = old_this_node_links.left;
-				previous_node_value = old_this_node_links.left->key;
-			}
-			else
-				if (this_node->links.left && this_node->links.right)
-				{
-					AvlNode *this_replace_node = this_node->links.left;
-
-					if (this_node->links.left->links.right == 0)
-					{
-						node_to_balance = this_replace_node;
-						previous_node_value = (void *)(((long)this_replace_node->key) - 1);
-					}
-					else
-						node_to_balance = 0;
-
-					while (this_replace_node->links.right != 0)
-						this_replace_node = this_replace_node->links.right;
-
-					this_replace_node->balance = this_node->balance;
-					AvlNode *deep_right_parent = this_replace_node->links.parent;
-
-					Links old_replace_node_links;
-					replace_node(this_node, this_replace_node, root, &old_replace_node_links);
-
-					if (node_to_balance == 0)
-						change_right(deep_right_parent, old_replace_node_links.left, &garbage, &garbage);
-					else
-						change_left(this_replace_node, old_replace_node_links.left, &garbage, &garbage);
-
-					if (node_to_balance == 0)
-					{
-						node_to_balance = deep_right_parent;
-						previous_node_value = (void *)(((long)deep_right_parent->key) + 1);
-					}
-				}
-				else
-				{
-					Links old_replace_node_links;
-					replace_node(this_node, 0, root, &old_replace_node_links);
-
-					node_to_balance = old_this_node_links.parent;
-					previous_node_value = this_node->key;
-				}
-
-		if (node_to_balance)
-		{
-			rebalance_shrunk(node_to_balance, previous_node_value, root, tree->compareKeys);
-
-			if (destroyValue)
-				free_avl_node_and_value(this_node, tree->destroyKey, destroyValue);
-			else
-				free_avl_node(this_node, tree->destroyKey);
-		}
-	}
 }
 
 static AvlNode *search_or_create(AvlTree *tree, const KEY_TYPE value_to_search, AvlNode **root)
@@ -681,7 +721,10 @@ AvlTree *create_avl_tree(DuplicateKey duplicateKey, DestroyKey destroyKey, Compa
 {
 	AvlTree *res = malloc(sizeof(AvlTree));
 
-	init_avl_tree(res, duplicateKey, destroyKey, compareKeys);
+	res->tree_root = NULL;
+	res->duplicateKey = duplicateKey;
+	res->destroyKey = destroyKey;
+	res->compareKeys = compareKeys;
 
 	return res;
 }
@@ -696,14 +739,6 @@ void free_avl_tree_and_values(AvlTree *tree, DestroyValue destroyValue)
 {
 	destroy_subtree_and_values(tree, &tree->tree_root, destroyValue);
 	free(tree);
-}
-
-void init_avl_tree(AvlTree *tree, DuplicateKey duplicateKey, DestroyKey destroyKey, CompareKeys compareKeys)
-{
-	tree->tree_root = NULL;
-	tree->duplicateKey = duplicateKey;
-	tree->destroyKey = destroyKey;
-	tree->compareKeys = compareKeys;
 }
 
 void clear_avl_tree(AvlTree *tree)
@@ -731,12 +766,20 @@ VALUE_TYPE *search_node(AvlTree *tree, const KEY_TYPE key)
 		return 0;
 }
 
-void delete_node(AvlTree *tree, const KEY_TYPE key)
+VALUE_TYPE delete_node(AvlTree *tree, const KEY_TYPE key)
 {
-	delete_routine(tree, key, &tree->tree_root, 0);
-}
+	AvlNode *parent_node = 0;
+	AvlNode *this_node = *search_routine(key, &tree->tree_root, &parent_node, tree->compareKeys);
 
-void delete_node_and_value(AvlTree *tree, const KEY_TYPE key, DestroyValue destroyValue)
-{
-	delete_routine(tree, key, &tree->tree_root, destroyValue);
+	if (this_node)
+	{
+		VALUE_TYPE res = this_node->value;
+
+		rebalance_shrunk(this_node, &tree->tree_root);
+		free_avl_node(this_node, tree->destroyKey);
+
+		return res;
+	}
+	else
+		return 0;
 }

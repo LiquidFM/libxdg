@@ -58,13 +58,11 @@ AvlTree *create_avl_tree(DuplicateKey duplicateKey, DestroyKey destroyKey, Compa
 void free_avl_tree(AvlTree *tree);
 void free_avl_tree_and_values(AvlTree *tree, DestroyValue destroyValue);
 
-void init_avl_tree(AvlTree *tree, DuplicateKey duplicateKey, DestroyKey destroyKey, CompareKeys compareKeys);
 void clear_avl_tree(AvlTree *tree);
 void clear_avl_tree_and_values(AvlTree *tree, DestroyValue destroyValue);
 
 VALUE_TYPE *search_or_create_node(AvlTree *tree, const KEY_TYPE key);
 VALUE_TYPE *search_node(AvlTree *tree, const KEY_TYPE key);
-void delete_node(AvlTree *tree, const KEY_TYPE key);
-void delete_node_and_value(AvlTree *tree, const KEY_TYPE key, DestroyValue destroyValue);
+VALUE_TYPE delete_node(AvlTree *tree, const KEY_TYPE key);
 
 #endif /* AVLTREE_H_ */
