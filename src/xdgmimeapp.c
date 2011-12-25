@@ -280,18 +280,17 @@ static XdgGroup *_xdg_mime_group_list_new_item(XdgGroupList *groups, const char 
 
 static XdgApp *_xdg_mime_app_map_item_new(AvlTree *apps, const char *name)
 {
-	void **test = search_or_create_node(apps, "1");
-	test = search_or_create_node(apps, "2");
+	void **test = search_or_create_node(apps, "4");
 	test = search_or_create_node(apps, "3");
-	test = search_or_create_node(apps, "4");
-	test = search_or_create_node(apps, "5");
-	test = search_or_create_node(apps, "6");
 	test = search_or_create_node(apps, "7");
-	test = search_or_create_node(apps, "8");
+	test = search_or_create_node(apps, "1");
+	test = search_or_create_node(apps, "5");
 	test = search_or_create_node(apps, "9");
-	test = search_or_create_node(apps, "10");
+	test = search_or_create_node(apps, "8");
 
-
+	delete_node(apps, "5");
+	delete_node(apps, "3");
+	test = search_or_create_node(apps, "test");
 
 
 	XdgApp **app = (XdgApp **)search_or_create_node(apps, name);
