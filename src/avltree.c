@@ -224,6 +224,7 @@ static void rebalance_grew(AvlNode *this_node, AvlNode **root)
 
 static void rebalance_shrunk(AvlNode *this_node, AvlNode **root)
 {
+	Links previous_node_links = {};
 	AvlNode *previous_node = 0;
 	AvlNode *node_to_remove = this_node;
 	this_node = this_node->links.left;
@@ -244,6 +245,7 @@ static void rebalance_shrunk(AvlNode *this_node, AvlNode **root)
 		else
 			this_node = previous_node->links.parent;
 
+		previous_node_links = previous_node->links;
 		previous_node->balance = node_to_remove->balance;
 		previous_node->links = node_to_remove->links;
 
@@ -265,7 +267,7 @@ static void rebalance_shrunk(AvlNode *this_node, AvlNode **root)
 	{
 		if (this_node->links.left == previous_node)
 		{
-			this_node->links.left = 0;
+			this_node->links.left = previous_node_links.left;
 
 			if (this_node->balance == LEFT_IS_HEAVY)
 				this_node->balance = BALANCED;
@@ -288,7 +290,7 @@ static void rebalance_shrunk(AvlNode *this_node, AvlNode **root)
 		}
 		else
 		{
-			this_node->links.right = 0;
+			this_node->links.right = previous_node_links.right;
 
 			if (this_node->balance == RIGHT_IS_HEAVY)
 				this_node->balance = BALANCED;

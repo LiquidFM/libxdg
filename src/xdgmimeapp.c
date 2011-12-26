@@ -288,8 +288,7 @@ static XdgApp *_xdg_mime_app_map_item_new(AvlTree *apps, const char *name)
 	test = search_or_create_node(apps, "9");
 	test = search_or_create_node(apps, "8");
 
-	delete_node(apps, "5");
-	delete_node(apps, "3");
+	delete_node(apps, "9");
 	test = search_or_create_node(apps, "test");
 
 
