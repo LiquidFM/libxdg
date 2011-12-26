@@ -506,10 +506,10 @@ VALUE_TYPE *search_or_create_node(AvlTree *tree, const KEY_TYPE key)
 		return &(*this_node)->value;
 	else
 	{
-		if (((*this_node) = create_avl_node(key, parent_node, tree->duplicateKey)))
-			rebalance_grew((*this_node), &tree->tree_root);
+		if (((*this_node) = parent_node = create_avl_node(key, parent_node, tree->duplicateKey)))
+			rebalance_grew(parent_node, &tree->tree_root);
 
-		return &(*this_node)->value;
+		return &parent_node->value;
 	}
 }
 
