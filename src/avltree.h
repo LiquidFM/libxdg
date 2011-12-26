@@ -44,9 +44,18 @@ typedef void (*DestroyValue)(VALUE_TYPE value);
 
 
 /**
- * Main data structure.
+ * Main data structures.
  *
  */
+typedef struct AvlNode AvlNode;
+
+struct AvlTree
+{
+	AvlNode *tree_root;
+	DuplicateKey duplicateKey;
+	DestroyKey destroyKey;
+	CompareKeys compareKeys;
+};
 typedef struct AvlTree AvlTree;
 
 
@@ -55,6 +64,7 @@ typedef struct AvlTree AvlTree;
  *
  */
 AvlTree *create_avl_tree(DuplicateKey duplicateKey, DestroyKey destroyKey, CompareKeys compareKeys);
+void init_avl_tree(AvlTree *tree, DuplicateKey duplicateKey, DestroyKey destroyKey, CompareKeys compareKeys);
 void free_avl_tree(AvlTree *tree);
 void free_avl_tree_and_values(AvlTree *tree, DestroyValue destroyValue);
 

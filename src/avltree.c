@@ -46,8 +46,6 @@
  *
  */
 
-typedef struct AvlNode AvlNode;
-
 enum Balanced
 {
 	BALANCED = 0,
@@ -370,15 +368,6 @@ static void rebalance_shrunk(AvlNode *this_node, AvlNode **root)
  *
  */
 
-struct AvlTree
-{
-	AvlNode *tree_root;
-	DuplicateKey duplicateKey;
-	DestroyKey destroyKey;
-	CompareKeys compareKeys;
-};
-
-
 static void destroy_subtree(AvlTree *tree, AvlNode **subtree_root)
 {
 	if ((*subtree_root) == 0)
@@ -467,12 +456,17 @@ AvlTree *create_avl_tree(DuplicateKey duplicateKey, DestroyKey destroyKey, Compa
 {
 	AvlTree *res = malloc(sizeof(AvlTree));
 
-	res->tree_root = NULL;
-	res->duplicateKey = duplicateKey;
-	res->destroyKey = destroyKey;
-	res->compareKeys = compareKeys;
+	init_avl_tree(res, duplicateKey, destroyKey, compareKeys);
 
 	return res;
+}
+
+void init_avl_tree(AvlTree *tree, DuplicateKey duplicateKey, DestroyKey destroyKey, CompareKeys compareKeys)
+{
+	tree->tree_root = NULL;
+	tree->duplicateKey = duplicateKey;
+	tree->destroyKey = destroyKey;
+	tree->compareKeys = compareKeys;
 }
 
 void free_avl_tree(AvlTree *tree)
