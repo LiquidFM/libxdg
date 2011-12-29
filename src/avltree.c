@@ -103,7 +103,10 @@ static void left_left_rotation(AvlNode *parent, AvlNode *child, AvlNode **root)
 	child->balance = BALANCED;
 
 	if (child->links.parent = parent->links.parent)
-		child->links.parent->links.right = child;
+		if (child->links.parent->links.left == parent)
+			child->links.parent->links.left = child;
+		else
+			child->links.parent->links.right = child;
 	else
 		(*root) = child;
 
@@ -121,7 +124,10 @@ static void right_left_rotation(AvlNode *parent, AvlNode *child, AvlNode *grandc
 	grandchild->balance = BALANCED;
 
 	if (grandchild->links.parent = parent->links.parent)
-		grandchild->links.parent->links.right = grandchild;
+		if (grandchild->links.parent->links.left == parent)
+			grandchild->links.parent->links.left = grandchild;
+		else
+			grandchild->links.parent->links.right = grandchild;
 	else
 		(*root) = grandchild;
 
@@ -144,7 +150,10 @@ static void right_right_rotation(AvlNode *parent, AvlNode *child, AvlNode **root
 	child->balance = BALANCED;
 
 	if (child->links.parent = parent->links.parent)
-		child->links.parent->links.left = child;
+		if (child->links.parent->links.left == parent)
+			child->links.parent->links.left = child;
+		else
+			child->links.parent->links.right = child;
 	else
 		(*root) = child;
 
@@ -162,7 +171,10 @@ static void left_right_rotation(AvlNode *parent, AvlNode *child, AvlNode *grandc
 	grandchild->balance = BALANCED;
 
 	if (grandchild->links.parent = parent->links.parent)
-		grandchild->links.parent->links.left = grandchild;
+		if (grandchild->links.parent->links.left == parent)
+			grandchild->links.parent->links.left = grandchild;
+		else
+			grandchild->links.parent->links.right = grandchild;
 	else
 		(*root) = grandchild;
 
