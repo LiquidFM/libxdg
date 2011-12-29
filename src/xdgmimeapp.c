@@ -43,16 +43,9 @@
  * Data structures
  *
  */
-struct XdgEntryValue
-{
-	char *value;
-};
-typedef struct XdgEntryValue XdgEntryValue;
-
-
 struct XdgEntryValueList
 {
-	XdgEntryValue *list;
+	char **list;
 	int count;
 	int capacity;
 };
@@ -82,7 +75,7 @@ typedef struct XdgApp XdgApp;
 
 struct XdgAppArray
 {
-	char **list;
+	XdgApp **list;
 	int count;
 	int capacity;
 };
@@ -122,19 +115,19 @@ struct XdgApplications
  * Memory allocation functions
  *
  */
-static XdgEntryValue *_xdg_mime_entry_value_list_add(XdgEntryValueList *list)
+static char **_xdg_entry_value_list_new(XdgEntryValueList *list)
 {
-	XdgEntryValue *res;
+	char **res;
 
 	if (list->capacity == 0)
 		if (list->list == NULL)
 		{
-			list->list = malloc(GROUP_ENTRY_VALUE_LIST_ALLOC_GRANULARITY * sizeof(XdgEntryValue));
+			list->list = malloc(GROUP_ENTRY_VALUE_LIST_ALLOC_GRANULARITY * sizeof(char *));
 			list->capacity = GROUP_ENTRY_VALUE_LIST_ALLOC_GRANULARITY;
 		}
 		else
 		{
-			list->list = realloc(list->list, list->count * 2 * sizeof(XdgEntryValue));
+			list->list = realloc(list->list, list->count * 2 * sizeof(char *));
 			list->capacity = list->count;
 		}
 
@@ -142,33 +135,47 @@ static XdgEntryValue *_xdg_mime_entry_value_list_add(XdgEntryValueList *list)
 	++list->count;
 	--list->capacity;
 
-	memset(res, 0, sizeof(XdgEntryValue));
 	return res;
 }
 
-static void _xdg_mime_entry_value_list_new_item(XdgEntryValueList *list, const char *name, size_t len)
+static void _xdg_entry_value_list_add(XdgEntryValueList *list, const char *name)
 {
-	XdgEntryValue *value = _xdg_mime_entry_value_list_add(list);
-
-	value->value = malloc(len + 1);
-	memcpy(value->value, name, len);
-	value->value[len] = 0;
+	(*_xdg_entry_value_list_new(list)) = strdup(name);
 }
 
-static void _xdg_mime_entry_value_list_free(XdgEntryValueList *list)
+static void _xdg_entry_value_list_free(XdgEntryValueList *list)
 {
 	if (list->list)
 	{
 		int i = 0, size = list->count;
 
 		for (; i < size; ++i)
-			free(list->list[i].value);
+			free(list->list[i]);
 
 		free(list->list);
 	}
 }
 
-static XdgGroup *_xdg_mime_group_map_item_add(AvlTree *map, const char *name)
+static XdgGroupEntry *_xdg_group_entry_map_item_add(AvlTree *map, const char *name)
+{
+	XdgGroupEntry **res = (XdgGroupEntry **)search_or_create_node(map, name);
+
+	if ((*res) == NULL)
+	{
+		(*res) = malloc(sizeof(XdgGroupEntry));
+		memset(&(*res)->values, 0, sizeof(XdgEntryValueList));
+	}
+
+	return (*res);
+}
+
+static void _xdg_group_entry_map_item_free(XdgGroupEntry *item)
+{
+	_xdg_entry_value_list_free(&item->values);
+	free(item);
+}
+
+static XdgGroup *_xdg_group_map_item_add(AvlTree *map, const char *name)
 {
 	XdgGroup **res = (XdgGroup **)search_or_create_node(map, name);
 
@@ -181,13 +188,13 @@ static XdgGroup *_xdg_mime_group_map_item_add(AvlTree *map, const char *name)
 	return (*res);
 }
 
-static void _xdg_mime_group_map_item_free(XdgGroup *item)
+static void _xdg_group_map_item_free(XdgGroup *item)
 {
-	clear_avl_tree_and_values(&item->entries, (DestroyValue)free);
+	clear_avl_tree_and_values(&item->entries, (DestroyValue)_xdg_group_entry_map_item_free);
 	free(item);
 }
 
-static XdgApp *_xdg_mime_app_map_item_new(AvlTree *map, const char *name)
+static XdgApp *_xdg_app_map_item_add(AvlTree *map, const char *name)
 {
 	XdgApp **res = (XdgApp **)search_or_create_node(map, name);
 
@@ -200,45 +207,37 @@ static XdgApp *_xdg_mime_app_map_item_new(AvlTree *map, const char *name)
 	return (*res);
 }
 
-static void _xdg_mime_app_map_item_free(XdgApp *item)
+static void _xdg_app_map_item_free(XdgApp *item)
 {
-	clear_avl_tree_and_values(&item->groups, (DestroyValue)_xdg_mime_group_map_item_free);
+	clear_avl_tree_and_values(&item->groups, (DestroyValue)_xdg_group_map_item_free);
 	free(item);
 }
 
-static void _xdg_mime_app_array_add(XdgAppArray *array, const char *name)
+static void _xdg_app_array_add(XdgAppArray *array, XdgApp *app)
 {
 	if (array->capacity == 0)
 		if (array->list == NULL)
 		{
-			array->list = malloc(APP_ARRAY_ALLOC_GRANULARITY * sizeof(const char *));
+			array->list = malloc(APP_ARRAY_ALLOC_GRANULARITY * sizeof(XdgApp *));
 			array->capacity = APP_ARRAY_ALLOC_GRANULARITY;
 		}
 		else
 		{
-			array->list = realloc(array->list, array->count * 2 * sizeof(const char *));
+			array->list = realloc(array->list, array->count * 2 * sizeof(XdgApp *));
 			array->capacity = array->count;
 		}
 
-	array->list[array->count] = strdup(name);
+	array->list[array->count] = app;
 	++array->count;
 	--array->capacity;
 }
 
-static void _xdg_mime_app_array_free(XdgAppArray *array)
+static void _xdg_app_array_free(XdgAppArray *array)
 {
-	if (array->list)
-	{
-		int i = 0, size = array->count;
-
-		for (; i < size; ++i)
-			free(array->list[i]);
-
-		free(array->list);
-	}
+	free(array->list);
 }
 
-static XdgMimeSubType *_xdg_mime_sub_type_map_item_new(AvlTree *map, const char *name)
+static XdgMimeSubType *_xdg_mime_sub_type_map_item_add(AvlTree *map, const char *name)
 {
 	XdgMimeSubType **res = (XdgMimeSubType **)search_or_create_node(map, name);
 
@@ -250,11 +249,11 @@ static XdgMimeSubType *_xdg_mime_sub_type_map_item_new(AvlTree *map, const char 
 
 static void _xdg_mime_sub_type_map_item_free(XdgMimeSubType *sub_type)
 {
-	_xdg_mime_app_array_free(&sub_type->apps);
+	_xdg_app_array_free(&sub_type->apps);
 	free(sub_type);
 }
 
-static XdgMimeType *_xdg_mime_type_map_item_new(AvlTree *map, const char *name)
+static XdgMimeType *_xdg_mime_type_map_item_add(AvlTree *map, const char *name)
 {
 	XdgMimeType **res = (XdgMimeType **)search_or_create_node(map, name);
 
@@ -273,7 +272,7 @@ static void _xdg_mime_type_map_item_free(XdgMimeType *type)
 	free(type);
 }
 
-static XdgMimeGroup *_xdg_mime_group_map_item_new(AvlTree *map, const char *name)
+static XdgMimeGroup *_xdg_mime_group_map_item_add(AvlTree *map, const char *name)
 {
 	XdgMimeGroup **res = (XdgMimeGroup **)search_or_create_node(map, name);
 
@@ -297,71 +296,116 @@ static void _xdg_mime_group_map_item_free(XdgMimeGroup *group)
  * Main algorithms
  *
  */
-static void _xdg_mime_app_read_group_entry(XdgGroup *group, const char *line)
+static XdgMimeSubType *_xdg_mime_sub_type_item_read(AvlTree *map, const char *name)
 {
 	char *sep;
+
+	if ((sep = strchr(name, '/')) != NULL)
+	{
+		*sep = 0;
+		XdgMimeType *type = _xdg_mime_type_map_item_add(map, name);
+		char *start = (++sep);
+
+		if (*start && *start != '\n')
+			return _xdg_mime_sub_type_map_item_add(&type->sub_types, start);
+	}
+
+	return 0;
+}
+
+static void _xdg_app_group_read_entry(XdgGroup *group, XdgApp *app, AvlTree *asoc_map, const char *line)
+{
+	char *sep;
+	XdgMimeSubType *sub_type;
 
 	if ((sep = strchr(line, '=')) != NULL)
 	{
 		*sep = 0;
-		XdgGroupEntry *entry = _xdg_mime_group_entry_list_new_item(&group->entries, line);
+		XdgGroupEntry *entry = _xdg_group_entry_map_item_add(&group->entries, line);
 		char *start = (++sep);
 
-		for (; *sep && *sep != '\n'; ++sep)
-			if (*sep == ';')
-			{
-				_xdg_mime_entry_value_list_new_item(&entry->values, start, sep - start);
-				start = sep + 1;
-			}
-
-		if (*start != 0 && *start != '\n')
-			_xdg_mime_entry_value_list_new_item(&entry->values, start, sep - start);
-	}
-}
-
-static void _xdg_mime_group_read_entry(XdgMimeGroup *group, const char *line)
-{
-	char *sep;
-
-	if ((sep = strchr(line, '/')) != NULL)
-	{
-		*sep = 0;
-		XdgMimeType *type = _xdg_mime_type_map_item_new(&group->types, line);
-		char *start = (++sep);
-
-		if ((sep = strchr(sep, '=')) != NULL)
+		if (strcmp(line, "MimeType") == 0)
 		{
-			*sep = 0;
-			XdgMimeSubType *sub_type = _xdg_mime_sub_type_map_item_new(&type->sub_types, start);
-			start = (++sep);
-
 			for (; *sep && *sep != '\n'; ++sep)
 				if (*sep == ';')
 				{
 					*sep = 0;
-					_xdg_mime_app_array_add(&sub_type->apps, start);
+					_xdg_entry_value_list_add(&entry->values, start);
+
+					if (sub_type = _xdg_mime_sub_type_item_read(asoc_map, start))
+						_xdg_app_array_add(&sub_type->apps, app);
+
 					start = sep + 1;
 				}
 
 			if (*start != 0 && *start != '\n')
 			{
 				*sep = 0;
-				_xdg_mime_app_array_add(&sub_type->apps, start);
+				_xdg_entry_value_list_add(&entry->values, start);
+
+				if (sub_type = _xdg_mime_sub_type_item_read(asoc_map, start))
+					_xdg_app_array_add(&sub_type->apps, app);
+			}
+		}
+		else
+		{
+			for (; *sep && *sep != '\n'; ++sep)
+				if (*sep == ';')
+				{
+					*sep = 0;
+					_xdg_entry_value_list_add(&entry->values, start);
+					start = sep + 1;
+				}
+
+			if (*start != 0 && *start != '\n')
+			{
+				*sep = 0;
+				_xdg_entry_value_list_add(&entry->values, start);
 			}
 		}
 	}
 }
 
-static void _xdg_mime_applications_read_desktop_file(char *buffer, XdgApplications *applications, FILE *file, const char *file_name)
+static void _xdg_mime_group_read_entry(AvlTree *app_files_map, XdgMimeGroup *group, const char *line)
+{
+	char *sep;
+
+	if ((sep = strchr(line, '=')) != NULL)
+	{
+		*sep = 0;
+		XdgMimeSubType *sub_type = _xdg_mime_sub_type_item_read(&group->types, line);
+
+		if (sub_type)
+		{
+			char *start = (++sep);
+
+			for (; *sep && *sep != '\n'; ++sep)
+				if (*sep == ';')
+				{
+					*sep = 0;
+					_xdg_app_array_add(&sub_type->apps, _xdg_app_map_item_add(app_files_map, start));
+					start = sep + 1;
+				}
+
+			if (*start != 0 && *start != '\n')
+			{
+				*sep = 0;
+				_xdg_app_array_add(&sub_type->apps, _xdg_app_map_item_add(app_files_map, start));
+			}
+		}
+	}
+}
+
+static void _xdg_applications_read_desktop_file(char *buffer, XdgApplications *applications, FILE *file, const char *file_name)
 {
 	char *sep;
 	XdgApp *app;
 	XdgGroup *group = NULL;
 
-	app = _xdg_mime_app_map_item_new(&applications->app_files_map, file_name);
+	app = _xdg_app_map_item_add(&applications->app_files_map, file_name);
 
 	while (fgets(buffer, READ_FROM_FILE_BUFFER_SIZE, file) != NULL)
-		if (buffer[0] != '#' && buffer[0] != '\r' && buffer[0] != '\n')
+		if (buffer[0] != '#' && buffer[0] != '\r' && buffer[0] != '\n') //GenericName[zh_CN]
 			if (buffer[0] == '[')
 			{
 				group = NULL;
@@ -369,17 +413,17 @@ static void _xdg_mime_applications_read_desktop_file(char *buffer, XdgApplicatio
 				if ((sep = strchr(buffer, ']')) != NULL)
 				{
 					*sep = 0;
-					group = _xdg_mime_group_map_item_add(&app->groups, buffer + 1);
+					group = _xdg_group_map_item_add(&app->groups, buffer + 1);
 				}
 			}
 			else
 				if (group)
-					_xdg_mime_app_read_group_entry(group, buffer);
+					_xdg_app_group_read_entry(group, app, &applications->asoc_map, buffer);
 				else
 					break;
 }
 
-static void _xdg_mime_applications_read_list_file(char *buffer, XdgApplications *applications, FILE *file)
+static void _xdg_applications_read_list_file(char *buffer, XdgApplications *applications, FILE *file)
 {
 	char *sep;
 	XdgMimeGroup *group = NULL;
@@ -393,17 +437,17 @@ static void _xdg_mime_applications_read_list_file(char *buffer, XdgApplications 
 				if ((sep = strchr(buffer, ']')) != NULL)
 				{
 					*sep = 0;
-					group = _xdg_mime_group_map_item_new(&applications->lst_files_map, buffer + 1);
+					group = _xdg_mime_group_map_item_add(&applications->lst_files_map, buffer + 1);
 				}
 			}
 			else
 				if (group)
-					_xdg_mime_group_read_entry(group, buffer);
+					_xdg_mime_group_read_entry(&applications->app_files_map, group, buffer);
 				else
 					break;
 }
 
-static void __xdg_mime_applications_read_from_directory(char *buffer, XdgApplications *applications, const char *directory_name)
+static void __xdg_applications_read_from_directory(char *buffer, XdgApplications *applications, const char *directory_name)
 {
 	DIR *dir;
 
@@ -421,7 +465,7 @@ static void __xdg_mime_applications_read_from_directory(char *buffer, XdgApplica
 					file_name = malloc(strlen(directory_name) + strlen(entry->d_name) + 2);
 					strcpy(file_name, directory_name); strcat(file_name, "/"); strcat(file_name, entry->d_name);
 
-					__xdg_mime_applications_read_from_directory(buffer, applications, file_name);
+					__xdg_applications_read_from_directory(buffer, applications, file_name);
 
 					free(file_name);
 				}
@@ -435,7 +479,7 @@ static void __xdg_mime_applications_read_from_directory(char *buffer, XdgApplica
 
 						if (file = fopen(file_name, "r"))
 						{
-							_xdg_mime_applications_read_desktop_file(buffer, applications, file, entry->d_name);
+							_xdg_applications_read_desktop_file(buffer, applications, file, entry->d_name);
 							fclose(file);
 						}
 
@@ -449,7 +493,7 @@ static void __xdg_mime_applications_read_from_directory(char *buffer, XdgApplica
 
 							if (file = fopen(file_name, "r"))
 							{
-								_xdg_mime_applications_read_list_file(buffer, applications, file);
+								_xdg_applications_read_list_file(buffer, applications, file);
 								fclose(file);
 							}
 
@@ -464,7 +508,7 @@ void _xdg_mime_applications_read_from_directory(XdgApplications *applications, c
 {
 	char buffer[READ_FROM_FILE_BUFFER_SIZE];
 
-	__xdg_mime_applications_read_from_directory(buffer, applications, directory_name);
+	__xdg_applications_read_from_directory(buffer, applications, directory_name);
 }
 
 const char *_xdg_mime_applications_lookup(XdgApplications *applications, const char *mime)
@@ -486,9 +530,9 @@ XdgApplications *_xdg_mime_applications_new(void)
 
 void _xdg_mime_applications_free(XdgApplications *applications)
 {
-	clear_avl_tree_and_values(&applications->app_files_map, (DestroyValue)_xdg_mime_app_map_item_free);
+	clear_avl_tree_and_values(&applications->app_files_map, (DestroyValue)_xdg_app_map_item_free);
 	clear_avl_tree_and_values(&applications->lst_files_map, (DestroyValue)_xdg_mime_group_map_item_free);
-	clear_avl_tree_and_values(&applications->asoc_map, (DestroyValue)free);
+	clear_avl_tree_and_values(&applications->asoc_map, (DestroyValue)_xdg_mime_type_map_item_free);
 	free(applications);
 }
 
