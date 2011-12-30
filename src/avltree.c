@@ -527,7 +527,7 @@ VALUE_TYPE *search_or_create_node(AvlTree *tree, const KEY_TYPE key)
 	}
 }
 
-VALUE_TYPE *search_node(AvlTree *tree, const KEY_TYPE key)
+VALUE_TYPE *search_node(const AvlTree *tree, const KEY_TYPE key)
 {
 	AvlNode *parent_node = 0;
 	AvlNode *res = *search_routine(key, &tree->tree_root, &parent_node, tree->compareKeys);

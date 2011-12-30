@@ -72,7 +72,7 @@ void clear_avl_tree(AvlTree *tree);
 void clear_avl_tree_and_values(AvlTree *tree, DestroyValue destroyValue);
 
 VALUE_TYPE *search_or_create_node(AvlTree *tree, const KEY_TYPE key);
-VALUE_TYPE *search_node(AvlTree *tree, const KEY_TYPE key);
+VALUE_TYPE *search_node(const AvlTree *tree, const KEY_TYPE key);
 VALUE_TYPE delete_node(AvlTree *tree, const KEY_TYPE key);
 
 #endif /* AVLTREE_H_ */
