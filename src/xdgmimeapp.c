@@ -471,7 +471,7 @@ static void _xdg_applications_read_list_file(char *buffer, XdgApplications *appl
 					break;
 }
 
-static void __xdg_applications_read_from_directory(char *buffer, XdgApplications *applications, const char *directory_name)
+static void __xdg_applications_read_from_directory(char *buffer, XdgApplications *applications, const char *directory_name, const char *preffix)
 {
 	DIR *dir;
 
@@ -479,6 +479,7 @@ static void __xdg_applications_read_from_directory(char *buffer, XdgApplications
 	{
 		FILE *file;
 		char *file_name;
+		char *file_name_preffix;
 		struct dirent *entry;
 
 		while ((entry = readdir(dir)) != NULL)
@@ -489,8 +490,12 @@ static void __xdg_applications_read_from_directory(char *buffer, XdgApplications
 					file_name = malloc(strlen(directory_name) + strlen(entry->d_name) + 2);
 					strcpy(file_name, directory_name); strcat(file_name, "/"); strcat(file_name, entry->d_name);
 
-					__xdg_applications_read_from_directory(buffer, applications, file_name);
+					file_name_preffix = malloc(strlen(preffix) + strlen(entry->d_name) + 2);
+					strcpy(file_name_preffix, preffix); strcat(file_name_preffix, entry->d_name); strcat(file_name_preffix, "-");
 
+					__xdg_applications_read_from_directory(buffer, applications, file_name, file_name_preffix);
+
+					free(file_name_preffix);
 					free(file_name);
 				}
 			}
@@ -503,7 +508,12 @@ static void __xdg_applications_read_from_directory(char *buffer, XdgApplications
 
 						if (file = fopen(file_name, "r"))
 						{
-							_xdg_applications_read_desktop_file(buffer, applications, file, entry->d_name);
+							file_name_preffix = malloc(strlen(preffix) + strlen(entry->d_name) + 1);
+							strcpy(file_name_preffix, preffix); strcat(file_name_preffix, entry->d_name);
+
+							_xdg_applications_read_desktop_file(buffer, applications, file, file_name_preffix);
+
+							free(file_name_preffix);
 							fclose(file);
 						}
 
@@ -543,8 +553,9 @@ XdgApplications *_xdg_mime_applications_new(void)
 void _xdg_mime_applications_read_from_directory(XdgApplications *applications, const char *directory_name)
 {
 	char buffer[READ_FROM_FILE_BUFFER_SIZE];
+	const char *file_name_preffix = "";
 
-	__xdg_applications_read_from_directory(buffer, applications, directory_name);
+	__xdg_applications_read_from_directory(buffer, applications, directory_name, file_name_preffix);
 }
 
 void _xdg_mime_applications_free(XdgApplications *applications)
