@@ -38,7 +38,7 @@
 #include "xdgmimeicon.h"
 #include "xdgmimeparent.h"
 #include "xdgmimecache.h"
-#include "xdgmimeapp.h"
+#include "xdgmimeapp_p.h"
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -946,4 +946,19 @@ xdg_mime_get_generic_icon (const char *mime)
     return _xdg_mime_cache_get_generic_icon (mime);
 
   return _xdg_mime_icon_list_lookup (generic_icon_list, mime);
+}
+
+const XdgAppArray *xdg_mime_default_apps_lookup(const char *mimeType)
+{
+	return _xdg_mime_default_apps_lookup(application_list, mimeType);
+}
+
+const XdgAppArray *xdg_mime_user_apps_lookup(const char *mimeType)
+{
+	return _xdg_mime_user_apps_lookup(application_list, mimeType);
+}
+
+const XdgAppArray *xdg_mime_known_apps_lookup(const char *mimeType)
+{
+	return _xdg_mime_known_apps_lookup(application_list, mimeType);
 }

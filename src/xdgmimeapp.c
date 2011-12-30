@@ -24,8 +24,9 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#include "xdgmimeapp.h"
+#include "xdgmimeapp_p.h"
 #include "avltree.h"
+#include <stdlib.h>
 #include <dirent.h>
 #include <stdio.h>
 #include <string.h>
@@ -70,7 +71,6 @@ struct XdgApp
 {
 	AvlTree groups;
 };
-typedef struct XdgApp XdgApp;
 
 
 struct XdgAppArray
@@ -79,7 +79,6 @@ struct XdgAppArray
 	int count;
 	int capacity;
 };
-typedef struct XdgAppArray XdgAppArray;
 
 
 struct XdgMimeSubType
@@ -313,6 +312,32 @@ static XdgMimeSubType *_xdg_mime_sub_type_item_read(AvlTree *map, const char *na
 	return 0;
 }
 
+static XdgMimeSubType *_xdg_mime_sub_type_item_search(AvlTree *map, const char *name)
+{
+	char *sep;
+
+	if ((sep = strchr(name, '/')) != NULL)
+	{
+		*sep = 0;
+		XdgMimeType **type = (XdgMimeType **)search_node(map, name);
+
+		if (type)
+		{
+			char *start = (++sep);
+
+			if (*start && *start != '\n')
+			{
+				XdgMimeSubType **res = (XdgMimeSubType **)search_node(&(*type)->sub_types, start);
+
+				if (res)
+					return (*res);
+			}
+		}
+	}
+
+	return 0;
+}
+
 static void _xdg_app_group_read_entry(XdgGroup *group, XdgApp *app, AvlTree *asoc_map, const char *line)
 {
 	char *sep;
@@ -504,18 +529,6 @@ static void __xdg_applications_read_from_directory(char *buffer, XdgApplications
 	}
 }
 
-void _xdg_mime_applications_read_from_directory(XdgApplications *applications, const char *directory_name)
-{
-	char buffer[READ_FROM_FILE_BUFFER_SIZE];
-
-	__xdg_applications_read_from_directory(buffer, applications, directory_name);
-}
-
-const char *_xdg_mime_applications_lookup(XdgApplications *applications, const char *mime)
-{
-	return 0;
-}
-
 XdgApplications *_xdg_mime_applications_new(void)
 {
 	XdgApplications *list;
@@ -528,6 +541,13 @@ XdgApplications *_xdg_mime_applications_new(void)
 	return list;
 }
 
+void _xdg_mime_applications_read_from_directory(XdgApplications *applications, const char *directory_name)
+{
+	char buffer[READ_FROM_FILE_BUFFER_SIZE];
+
+	__xdg_applications_read_from_directory(buffer, applications, directory_name);
+}
+
 void _xdg_mime_applications_free(XdgApplications *applications)
 {
 	clear_avl_tree_and_values(&applications->app_files_map, (DestroyValue)_xdg_app_map_item_free);
@@ -536,7 +556,52 @@ void _xdg_mime_applications_free(XdgApplications *applications)
 	free(applications);
 }
 
-void _xdg_mime_applications_dump(XdgApplications *applications)
+const XdgAppArray *_xdg_mime_default_apps_lookup(XdgApplications *applications, const char *mimeType)
 {
+	XdgMimeGroup **group = (XdgMimeGroup **)search_node(&applications->lst_files_map, "Default Applications");
 
+	if (group)
+	{
+		XdgMimeSubType *sub_type = _xdg_mime_sub_type_item_search(&(*group)->types, mimeType);
+
+		if (sub_type)
+			return &sub_type->apps;
+	}
+
+	return 0;
+}
+
+const XdgAppArray *_xdg_mime_user_apps_lookup(XdgApplications *applications, const char *mimeType)
+{
+	XdgMimeGroup **group = (XdgMimeGroup **)search_node(&applications->lst_files_map, "Added Associations");
+
+	if (group)
+	{
+		XdgMimeSubType *sub_type = _xdg_mime_sub_type_item_search(&(*group)->types, mimeType);
+
+		if (sub_type)
+			return &sub_type->apps;
+	}
+
+	return 0;
+}
+
+const XdgAppArray *_xdg_mime_known_apps_lookup(XdgApplications *applications, const char *mimeType)
+{
+	XdgMimeSubType *sub_type = _xdg_mime_sub_type_item_search(&applications->asoc_map, mimeType);
+
+	if (sub_type)
+		return &sub_type->apps;
+	else
+		return 0;
+}
+
+int xdg_app_array_size(const XdgAppArray *array)
+{
+	return array->count;
+}
+
+const XdgApp *xdg_app_array_item_at(const XdgAppArray *array, int index)
+{
+	return array->list[index];
 }

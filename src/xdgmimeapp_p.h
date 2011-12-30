@@ -1,4 +1,4 @@
-/* xdgmimeapp.h: Public file.  Datastructure for storing
+/* xdgmimeapp_p.h: Private file.  Datastructure for storing
  * the .desktop and .list files.
  *
  * More info can be found at http://www.freedesktop.org/standards/
@@ -24,26 +24,21 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#ifndef __XDG_MIME_APP_H_
-#define __XDG_MIME_APP_H_
+#ifndef __XDG_MIME_APP_P_H_
+#define __XDG_MIME_APP_P_H_
+
+#include "xdgmimeapp.h"
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
-
-typedef struct XdgApp      XdgApp;
-typedef struct XdgAppArray XdgAppArray;
+typedef struct XdgApplications XdgApplications;
 
 
-const XdgAppArray *xdg_mime_default_apps_lookup(const char *mimeType);
-const XdgAppArray *xdg_mime_user_apps_lookup(const char *mimeType);
-const XdgAppArray *xdg_mime_known_apps_lookup(const char *mimeType);
+XdgApplications *_xdg_mime_applications_new(void);
+void _xdg_mime_applications_read_from_directory(XdgApplications *applications, const char *directory_name);
+void _xdg_mime_applications_free(XdgApplications *applications);
 
-int xdg_app_array_size(const XdgAppArray *array);
-const XdgApp *xdg_app_array_item_at(const XdgAppArray *array, int index);
+const XdgAppArray *_xdg_mime_default_apps_lookup(XdgApplications *applications, const char *mimeType);
+const XdgAppArray *_xdg_mime_user_apps_lookup(XdgApplications *applications, const char *mimeType);
+const XdgAppArray *_xdg_mime_known_apps_lookup(XdgApplications *applications, const char *mimeType);
 
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
-#endif /* __XDG_MIME_APP_H_ */
+#endif /* __XDG_MIME_APP_P_H_ */

@@ -32,6 +32,7 @@
 
 #include <stdlib.h>
 #include <sys/stat.h>
+#include "xdgmimeapp.h"
 
 #ifdef __cplusplus
 extern "C" {
