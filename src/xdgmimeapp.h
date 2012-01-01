@@ -32,10 +32,10 @@
 extern "C" {
 #endif /* __cplusplus */
 
-typedef struct XdgApp                XdgApp;
-typedef struct XdgAppArray           XdgAppArray;
-typedef struct XdgAppGroup           XdgAppGroup;
-typedef struct XdgAppEntryValueArray XdgAppEntryValueArray;
+typedef struct XdgApp             XdgApp;
+typedef struct XdgAppArray        XdgAppArray;
+typedef struct XdgAppGroup        XdgAppGroup;
+typedef struct XdgEntryValueArray XdgEntryValueArray;
 
 
 const XdgAppArray *xdg_mime_default_apps_lookup(const char *mimeType);
@@ -43,13 +43,13 @@ const XdgAppArray *xdg_mime_user_apps_lookup(const char *mimeType);
 const XdgAppArray *xdg_mime_known_apps_lookup(const char *mimeType);
 
 const XdgAppGroup *xdg_mime_app_group_lookup(const XdgApp *app, const char *group);
-const XdgAppEntryValueArray *xdg_mime_app_entry_lookup(const XdgAppGroup *group, const char *entry);
+const XdgEntryValueArray *xdg_mime_app_entry_lookup(const XdgAppGroup *group, const char *entry);
 
 int xdg_mime_app_array_size(const XdgAppArray *array);
 const XdgApp *xdg_mime_app_array_item_at(const XdgAppArray *array, int index);
 
-int xdg_mime_entry_value_array_size(const XdgAppEntryValueArray *list);
-const char *xdg_mime_entry_value_array_item_at(const XdgAppEntryValueArray *array, int index);
+int xdg_mime_entry_value_array_size(const XdgEntryValueArray *list);
+const char *xdg_mime_entry_value_array_item_at(const XdgEntryValueArray *array, int index);
 
 #ifdef __cplusplus
 }

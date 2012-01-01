@@ -35,6 +35,7 @@ typedef struct XdgApplications XdgApplications;
 
 XdgApplications *_xdg_mime_applications_new(void);
 void _xdg_mime_applications_read_from_directory(XdgApplications *applications, const char *directory_name);
+void _xdg_mime_themes_read_from_directory(XdgApplications *applications, const char *directory_name);
 void _xdg_mime_applications_free(XdgApplications *applications);
 
 const XdgAppArray *_xdg_mime_default_apps_lookup(XdgApplications *applications, const char *mimeType);
