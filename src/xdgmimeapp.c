@@ -738,6 +738,11 @@ static void __xdg_mime_themes_read_from_directory(char *buffer, XdgApplications 
 	}
 }
 
+static const char *__xdg_mime_icon_lookup(XdgTheme *theme, const char *iconName)
+{
+
+}
+
 XdgApplications *_xdg_mime_applications_new(void)
 {
 	XdgApplications *list;
@@ -819,6 +824,26 @@ const XdgAppArray *_xdg_mime_known_apps_lookup(XdgApplications *applications, co
 		return &sub_type->apps;
 	else
 		return 0;
+}
+
+const char *_xdg_mime_app_icon_lookup(XdgApplications *applications, const XdgApp *app, const char *themeName, int size)
+{
+	XdgTheme **theme = (XdgTheme **)search_node(&applications->themes_files_map, themeName);
+
+	if (theme)
+	{
+		XdgAppGroup **group = (XdgAppGroup **)search_node(&app->groups, "Desktop Entry");
+
+		if (group)
+		{
+			XdgAppGroupEntry **entry = (XdgAppGroupEntry **)search_node(&(*group)->entries, "Icon");
+
+			if (entry && (*entry)->values.count)
+				return __xdg_mime_icon_lookup(*theme, (*entry)->values.list[0]);
+		}
+	}
+
+	return 0;
 }
 
 const XdgAppGroup *xdg_mime_app_group_lookup(const XdgApp *app, const char *group)

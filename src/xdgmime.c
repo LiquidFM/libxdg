@@ -1044,3 +1044,8 @@ const XdgAppArray *xdg_mime_known_apps_lookup(const char *mimeType)
 {
 	return _xdg_mime_known_apps_lookup(application_list, mimeType);
 }
+
+const char *xdg_mime_app_icon_lookup(const XdgApp *app, const char *themeName, int size)
+{
+	return _xdg_mime_app_icon_lookup(application_list, app, themeName, size);
+}
