@@ -35,12 +35,12 @@ typedef struct XdgApplications XdgApplications;
 
 XdgApplications *_xdg_mime_applications_new(void);
 void _xdg_mime_applications_read_from_directory(XdgApplications *applications, const char *directory_name);
-void _xdg_mime_themes_read_from_directory(XdgApplications *applications, const char *directory_name);
+void _xdg_mime_themes_read_from_directory(XdgApplications *applications);
 void _xdg_mime_applications_free(XdgApplications *applications);
 
-const XdgAppArray *_xdg_mime_default_apps_lookup(XdgApplications *applications, const char *mimeType);
-const XdgAppArray *_xdg_mime_user_apps_lookup(XdgApplications *applications, const char *mimeType);
-const XdgAppArray *_xdg_mime_known_apps_lookup(XdgApplications *applications, const char *mimeType);
+const XdgArray *_xdg_mime_default_apps_lookup(XdgApplications *applications, const char *mimeType);
+const XdgArray *_xdg_mime_user_apps_lookup(XdgApplications *applications, const char *mimeType);
+const XdgArray *_xdg_mime_known_apps_lookup(XdgApplications *applications, const char *mimeType);
 const char *_xdg_mime_app_icon_lookup(XdgApplications *applications, const XdgApp *app, const char *themeName, int size);
 
 #endif /* __XDG_MIME_APP_P_H_ */
