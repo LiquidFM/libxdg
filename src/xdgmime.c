@@ -39,6 +39,7 @@
 #include "xdgmimeparent.h"
 #include "xdgmimecache.h"
 #include "xdgmimeapp_p.h"
+#include "xdgmimetheme_p.h"
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -62,6 +63,7 @@ static XdgCallbackList *callback_list = NULL;
 static XdgIconList *icon_list = NULL;
 static XdgIconList *generic_icon_list = NULL;
 static XdgApplications *application_list = NULL;
+static XdgThemes *themes_list = NULL;
 
 XdgMimeCache **_caches = NULL;
 static int n_caches = 0;
@@ -463,9 +465,10 @@ xdg_mime_init (void)
       icon_list = _xdg_mime_icon_list_new ();
       generic_icon_list = _xdg_mime_icon_list_new ();
       application_list = _xdg_mime_applications_new ();
+      themes_list = _xdg_mime_themes_new ();
 
       xdg_run_command_on_dirs((XdgDirectoryFunc)xdg_mime_init_from_directory, NULL);
-      _xdg_mime_themes_read_from_directory(application_list);
+      _xdg_mime_themes_read_from_directory(themes_list);
 
       need_reread = FALSE;
     }
@@ -664,6 +667,12 @@ xdg_mime_shutdown (void)
     {
       _xdg_mime_applications_free (application_list);
       application_list = NULL;
+    }
+
+  if (themes_list)
+    {
+      _xdg_mime_themes_free (themes_list);
+      themes_list = NULL;
     }
 
   if (_caches)
@@ -948,6 +957,7 @@ xdg_mime_get_generic_icon (const char *mime)
   return _xdg_mime_icon_list_lookup (generic_icon_list, mime);
 }
 
+/* XdgApplications */
 const XdgArray *xdg_mime_default_apps_lookup(const char *mimeType)
 {
 	return _xdg_mime_default_apps_lookup(application_list, mimeType);
@@ -966,4 +976,10 @@ const XdgArray *xdg_mime_known_apps_lookup(const char *mimeType)
 const char *xdg_mime_app_icon_lookup(const XdgApp *app, const char *themeName, int size)
 {
 	return _xdg_mime_app_icon_lookup(application_list, app, themeName, size);
+}
+
+/* XdgThemes */
+const char *xdg_mime_icon_lookup(const char *icon, int size, const char *theme)
+{
+	return _xdg_mime_icon_lookup(themes_list, icon, size, theme);
 }

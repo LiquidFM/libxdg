@@ -1,5 +1,4 @@
-/* xdgmimeapp_p.h: Private file.  Datastructure for storing
- * the .desktop and .list files.
+/* xdgmimetheme_p.h: Private file.
  *
  * More info can be found at http://www.freedesktop.org/standards/
  *
@@ -24,22 +23,20 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#ifndef __XDG_MIME_APP_P_H_
-#define __XDG_MIME_APP_P_H_
+#ifndef __XDG_MIME_THEME_P_H_
+#define __XDG_MIME_THEME_P_H_
 
-#include "xdgmimeapp.h"
-
-
-typedef struct XdgApplications XdgApplications;
+#include "xdgmimetheme.h"
+#include "avltree.h"
 
 
-XdgApplications *_xdg_mime_applications_new(void);
-void _xdg_mime_applications_read_from_directory(XdgApplications *applications, const char *directory_name);
-void _xdg_mime_applications_free(XdgApplications *applications);
+typedef struct XdgThemes XdgThemes;
 
-const XdgArray *_xdg_mime_default_apps_lookup(XdgApplications *applications, const char *mimeType);
-const XdgArray *_xdg_mime_user_apps_lookup(XdgApplications *applications, const char *mimeType);
-const XdgArray *_xdg_mime_known_apps_lookup(XdgApplications *applications, const char *mimeType);
-const char *_xdg_mime_app_icon_lookup(XdgApplications *applications, const XdgApp *app, const char *themeName, int size);
 
-#endif /* __XDG_MIME_APP_P_H_ */
+XdgThemes *_xdg_mime_themes_new(void);
+void _xdg_mime_themes_read_from_directory(XdgThemes *themes);
+void _xdg_mime_themes_free(XdgThemes *themes);
+
+const char *_xdg_mime_icon_lookup(XdgThemes *themes, const char *icon, int size, const char *theme);
+
+#endif /* __XDG_MIME_THEME_P_H_ */

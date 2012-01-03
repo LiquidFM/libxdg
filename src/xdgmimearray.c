@@ -1,5 +1,4 @@
-/* xdgmimeapp.h: Public file.  Datastructure for storing
- * the .desktop and .list files.
+/* xdgmimearray.c: Private file.
  *
  * More info can be found at http://www.freedesktop.org/standards/
  *
@@ -24,33 +23,57 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#ifndef __XDG_MIME_APP_H_
-#define __XDG_MIME_APP_H_
-
-#include "xdgmimearray.h"
+#include "xdgmimearray_p.h"
+#include <stdlib.h>
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
+void **_xdg_array_item_add(XdgArray *array, int alloc_granularity)
+{
+	void **res;
 
-typedef struct XdgApp      XdgApp;
-typedef struct XdgAppGroup XdgAppGroup;
+	if (array->capacity == 0)
+		if (array->list == NULL)
+		{
+			array->list = malloc(alloc_granularity * sizeof(void *));
+			array->capacity = alloc_granularity;
+		}
+		else
+		{
+			array->list = realloc(array->list, array->count * 2 * sizeof(void *));
+			array->capacity = array->count;
+		}
 
+	res = &array->list[array->count];
+	++array->count;
+	--array->capacity;
 
-const XdgArray *xdg_mime_default_apps_lookup(const char *mimeType);
-const XdgArray *xdg_mime_user_apps_lookup(const char *mimeType);
-const XdgArray *xdg_mime_known_apps_lookup(const char *mimeType);
-
-const char *xdg_mime_app_icon_lookup(const XdgApp *app, const char *themeName, int size);
-const XdgAppGroup *xdg_mime_app_group_lookup(const XdgApp *app, const char *group);
-const XdgArray *xdg_mime_app_entry_lookup(const XdgAppGroup *group, const char *entry);
-
-/* XdgArray */
-const XdgApp *xdg_mime_array_app_item_at(const XdgArray *array, int index);
-
-#ifdef __cplusplus
+	return res;
 }
-#endif /* __cplusplus */
 
-#endif /* __XDG_MIME_APP_H_ */
+void _xdg_array_and_values_free(XdgArray *array)
+{
+	if (array->list)
+	{
+		int i = 0, size = array->count;
+
+		for (; i < size; ++i)
+			free(array->list[i]);
+
+		free(array->list);
+	}
+}
+
+void _xdg_array_free(XdgArray *array)
+{
+	free(array->list);
+}
+
+int xdg_mime_array_size(const XdgArray *array)
+{
+	return array->count;
+}
+
+const char *xdg_mime_array_string_item_at(const XdgArray *array, int index)
+{
+	return (char *)array->list[index];
+}

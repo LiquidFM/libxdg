@@ -33,6 +33,7 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 #include "xdgmimeapp.h"
+#include "xdgmimetheme.h"
 
 #ifdef __cplusplus
 extern "C" {
