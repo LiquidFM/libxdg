@@ -42,7 +42,7 @@ const XdgArray *xdg_mime_default_apps_lookup(const char *mimeType);
 const XdgArray *xdg_mime_user_apps_lookup(const char *mimeType);
 const XdgArray *xdg_mime_known_apps_lookup(const char *mimeType);
 
-const char *xdg_mime_app_icon_lookup(const XdgApp *app, const char *themeName, int size);
+char *xdg_mime_app_icon_lookup(const XdgApp *app, const char *themeName, int size);
 const XdgAppGroup *xdg_mime_app_group_lookup(const XdgApp *app, const char *group);
 const XdgArray *xdg_mime_app_entry_lookup(const XdgAppGroup *group, const char *entry);
 

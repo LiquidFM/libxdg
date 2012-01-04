@@ -40,6 +40,6 @@ void _xdg_mime_applications_free(XdgApplications *applications);
 const XdgArray *_xdg_mime_default_apps_lookup(XdgApplications *applications, const char *mimeType);
 const XdgArray *_xdg_mime_user_apps_lookup(XdgApplications *applications, const char *mimeType);
 const XdgArray *_xdg_mime_known_apps_lookup(XdgApplications *applications, const char *mimeType);
-const char *_xdg_mime_app_icon_lookup(XdgApplications *applications, const XdgApp *app, const char *themeName, int size);
+char *_xdg_mime_app_icon_lookup(XdgApplications *applications, const XdgApp *app, const char *theme, int size);
 
 #endif /* __XDG_MIME_APP_P_H_ */

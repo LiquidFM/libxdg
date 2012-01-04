@@ -26,6 +26,7 @@
 
 #include "xdgmimeapp_p.h"
 #include "xdgmimearray_p.h"
+#include "xdgmimetheme.h"
 #include "xdgmimedefs.h"
 #include "avltree.h"
 #include <stdlib.h>
@@ -35,6 +36,7 @@
 #include <fnmatch.h>
 
 
+#define READ_FROM_FILE_BUFFER_SIZE 1024
 #define MIME_TYPE_NAME_BUFFER_SIZE 128
 
 
@@ -540,8 +542,18 @@ const XdgArray *_xdg_mime_known_apps_lookup(XdgApplications *applications, const
 		return 0;
 }
 
-const char *_xdg_mime_app_icon_lookup(XdgApplications *applications, const XdgApp *app, const char *themeName, int size)
+char *_xdg_mime_app_icon_lookup(XdgApplications *applications, const XdgApp *app, const char *theme, int size)
 {
+	XdgAppGroup **group = (XdgAppGroup **)search_node(&app->groups, "Desktop Entry");
+
+	if (group)
+	{
+		XdgAppGroupEntry **entry = (XdgAppGroupEntry **)search_node(&(*group)->entries, "Icon");
+
+		if (entry && (*entry)->values.count)
+			return xdg_mime_icon_lookup((*entry)->values.list[0], size, Applications, theme);
+	}
+
 	return 0;
 }
 

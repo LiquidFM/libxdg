@@ -26,8 +26,6 @@
 #ifndef __XDG_MIME_DEFS_H_
 #define __XDG_MIME_DEFS_H_
 
-#define READ_FROM_FILE_BUFFER_SIZE 1024
-
 #define REMOVE_WHITE_SPACES_LEFT(line, ptr) \
 	do { *ptr = 0; --ptr; } while(ptr > line && (*ptr) == ' ');
 

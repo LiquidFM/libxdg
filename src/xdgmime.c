@@ -973,13 +973,13 @@ const XdgArray *xdg_mime_known_apps_lookup(const char *mimeType)
 	return _xdg_mime_known_apps_lookup(application_list, mimeType);
 }
 
-const char *xdg_mime_app_icon_lookup(const XdgApp *app, const char *themeName, int size)
+char *xdg_mime_app_icon_lookup(const XdgApp *app, const char *themeName, int size)
 {
 	return _xdg_mime_app_icon_lookup(application_list, app, themeName, size);
 }
 
 /* XdgThemes */
-const char *xdg_mime_icon_lookup(const char *icon, int size, const char *theme)
+char *xdg_mime_icon_lookup(const char *icon, int size, Context context, const char *theme)
 {
-	return _xdg_mime_icon_lookup(themes_list, icon, size, theme);
+	return _xdg_mime_icon_lookup(themes_list, icon, size, context, theme);
 }
