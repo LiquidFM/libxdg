@@ -478,14 +478,14 @@ void _xdg_mime_applications_read_from_directory(XdgApplications *applications, c
 
 XdgApplications *_xdg_mime_applications_new(void)
 {
-	XdgApplications *list;
+	XdgApplications *res;
 
-	list = malloc(sizeof(XdgApplications));
-	init_avl_tree(&list->app_files_map, strdup, (DestroyKey)free, strcmp);
-	init_avl_tree(&list->lst_files_map, strdup, (DestroyKey)free, strcmp);
-	init_avl_tree(&list->asoc_map, strdup, (DestroyKey)free, strcmp);
+	res = malloc(sizeof(XdgApplications));
+	init_avl_tree(&res->app_files_map, strdup, (DestroyKey)free, strcmp);
+	init_avl_tree(&res->lst_files_map, strdup, (DestroyKey)free, strcmp);
+	init_avl_tree(&res->asoc_map, strdup, (DestroyKey)free, strcmp);
 
-	return list;
+	return res;
 }
 
 void _xdg_mime_applications_free(XdgApplications *applications)

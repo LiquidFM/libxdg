@@ -3,6 +3,9 @@
  *
  * More info can be found at http://www.freedesktop.org/standards/
  *
+ * Specification:
+ *  http://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html
+ *
  * Copyright (C) 2011  Dmitriy Vilkov <dav.daemon@gmail.com>
  *
  * Licensed under the Academic Free License version 2.0

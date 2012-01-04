@@ -380,12 +380,12 @@ static void _xdg_run_command_on_icons_dirs(char *buffer, XdgThemes *themes, XdgI
 
 XdgThemes *_xdg_mime_themes_new(void)
 {
-	XdgThemes *list;
+	XdgThemes *res;
 
-	list = malloc(sizeof(XdgThemes));
-	init_avl_tree(&list->themes_files_map, strdup, (DestroyKey)free, strcmp);
+	res = malloc(sizeof(XdgThemes));
+	init_avl_tree(&res->themes_files_map, strdup, (DestroyKey)free, strcmp);
 
-	return list;
+	return res;
 }
 
 void _xdg_mime_themes_read_from_directory(XdgThemes *themes)

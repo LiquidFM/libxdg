@@ -2,6 +2,10 @@
  *
  * More info can be found at http://www.freedesktop.org/standards/
  *
+ * Specifications:
+ *  http://standards.freedesktop.org/icon-theme-spec/icon-theme-spec-latest.html
+ *  http://standards.freedesktop.org/icon-naming-spec/icon-naming-spec-latest.html
+ *
  * Copyright (C) 2011  Dmitriy Vilkov <dav.daemon@gmail.com>
  *
  * Licensed under the Academic Free License version 2.0
