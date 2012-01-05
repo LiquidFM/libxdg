@@ -949,6 +949,11 @@ char *xdg_mime_app_icon_lookup(const XdgApp *app, const char *themeName, int siz
 }
 
 /* XdgThemes */
+char *xdg_mime_type_icon_lookup(const char *mime, int size, const char *theme)
+{
+	return _xdg_mime_type_icon_lookup(themes_list, mime, size, theme);
+}
+
 char *xdg_mime_icon_lookup(const char *icon, int size, Context context, const char *theme)
 {
 	return _xdg_mime_icon_lookup(themes_list, icon, size, context, theme);

@@ -36,6 +36,7 @@
 #include <sys/stat.h>
 
 
+#define MIME_TYPE_NAME_BUFFER_SIZE 128
 #define READ_FROM_FILE_BUFFER_SIZE 2048
 typedef unsigned char BOOL;
 #define TRUE 1
@@ -747,6 +748,30 @@ static char *_xdg_mime_find_icon(const char *icon, int size, Context context, Xd
 		return res;
 	else
 		return _xdg_mime_lookup_fallback_icon(icon, size, theme);
+}
+
+char *_xdg_mime_type_icon_lookup(XdgThemes *themes, const char *mime, int size, const char *themeName)
+{
+	XdgTheme **hicolor = (XdgTheme **)search_node(&themes->themes_files_map, "hicolor");
+
+	if (hicolor)
+	{
+		XdgTheme **theme = (XdgTheme **)search_node(&themes->themes_files_map, themeName);
+
+		if (theme)
+		{
+			char *sep;
+			char mimeTypeCopy[MIME_TYPE_NAME_BUFFER_SIZE];
+			strncpy(mimeTypeCopy, mime, MIME_TYPE_NAME_BUFFER_SIZE);
+
+			if ((sep = strchr(mimeTypeCopy, '/')) != NULL)
+				(*sep) = '-';
+
+			return _xdg_mime_find_icon(mimeTypeCopy, size, MimeTypes, *theme, *hicolor);
+		}
+	}
+
+	return 0;
 }
 
 char *_xdg_mime_icon_lookup(XdgThemes *themes, const char *icon, int size, Context context, const char *themeName)

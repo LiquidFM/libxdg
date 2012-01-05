@@ -35,6 +35,7 @@ XdgThemes *_xdg_mime_themes_new(void);
 void _xdg_mime_themes_read_from_directory(XdgThemes *themes);
 void _xdg_mime_themes_free(XdgThemes *themes);
 
+char *_xdg_mime_type_icon_lookup(XdgThemes *themes, const char *mime, int size, const char *theme);
 char *_xdg_mime_icon_lookup(XdgThemes *themes, const char *icon, int size, Context context, const char *theme);
 
 #endif /* __XDG_MIME_THEME_P_H_ */

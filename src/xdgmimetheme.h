@@ -56,6 +56,7 @@ typedef enum
 	Stock
 } Context;
 
+char *xdg_mime_type_icon_lookup(const char *mime, int size, const char *theme);
 char *xdg_mime_icon_lookup(const char *icon, int size, Context context, const char *theme);
 
 #ifdef __cplusplus
