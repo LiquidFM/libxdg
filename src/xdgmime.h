@@ -88,6 +88,9 @@ extern const char xdg_mime_type_textplain[];
 #define XDG_MIME_TYPE_EMPTY xdg_mime_type_empty
 #define XDG_MIME_TYPE_TEXTPLAIN xdg_mime_type_textplain
 
+void         xdg_mime_init (void);
+void         xdg_mime_refresh (void);
+
 const char  *xdg_mime_get_mime_type_for_data       (const void *data,
 						    size_t      len,
 						    int        *result_prio);
