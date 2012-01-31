@@ -27,7 +27,7 @@
 #define XDG_H_
 
 #include "xdgmime.h"
-#include "xdgmimeapp.h"
+#include "xdgapp.h"
 #include "xdgmimetheme.h"
 
 #ifdef __cplusplus

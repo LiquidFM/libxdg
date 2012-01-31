@@ -26,6 +26,8 @@
 #ifndef __XDG_MIME_DEFS_H_
 #define __XDG_MIME_DEFS_H_
 
+#include "xdgmimeint.h"
+
 #define REMOVE_WHITE_SPACES_LEFT(line, ptr) \
 	do { *ptr = 0; --ptr; } while(ptr > line && (*ptr) == ' ');
 

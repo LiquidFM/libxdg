@@ -24,16 +24,18 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#include "xdgmimeapp_p.h"
+#include "xdgapp_p.h"
 #include "xdgmimearray_p.h"
 #include "xdgmimetheme.h"
 #include "xdgmimedefs.h"
+#include "xdgbasedirectory.h"
 #include "avltree.h"
 #include <stdlib.h>
 #include <dirent.h>
 #include <stdio.h>
 #include <string.h>
 #include <fnmatch.h>
+#include <assert.h>
 
 
 #define READ_FROM_FILE_BUFFER_SIZE 1024
@@ -91,6 +93,10 @@ struct XdgApplications
 	AvlTree lst_files_map;
 	AvlTree asoc_map;
 };
+typedef struct XdgApplications XdgApplications;
+
+
+static XdgApplications *applications_list = NULL;
 
 
 /**
@@ -401,7 +407,7 @@ static void _xdg_applications_read_list_file(char *buffer, XdgApplications *appl
 					break;
 }
 
-static void __xdg_applications_read_from_directory(char *buffer, XdgApplications *applications, const char *directory_name, const char *preffix)
+static void _xdg_applications_read_from_directory(char *buffer, XdgApplications *applications, const char *directory_name, const char *preffix)
 {
 	DIR *dir;
 
@@ -423,7 +429,7 @@ static void __xdg_applications_read_from_directory(char *buffer, XdgApplications
 					file_name_preffix = malloc(strlen(preffix) + strlen(entry->d_name) + 2);
 					strcpy(file_name_preffix, preffix); strcat(file_name_preffix, entry->d_name); strcat(file_name_preffix, "-");
 
-					__xdg_applications_read_from_directory(buffer, applications, file_name, file_name_preffix);
+					_xdg_applications_read_from_directory(buffer, applications, file_name, file_name_preffix);
 
 					free(file_name_preffix);
 					free(file_name);
@@ -468,15 +474,30 @@ static void __xdg_applications_read_from_directory(char *buffer, XdgApplications
 	}
 }
 
-void _xdg_mime_applications_read_from_directory(XdgApplications *applications, const char *directory_name)
+static int _init_from_directory(const char *directory, void *user_data)
 {
-	char buffer[READ_FROM_FILE_BUFFER_SIZE];
-	const char *file_name_preffix = "";
+	char *file_name;
+//	struct stat st;
 
-	__xdg_applications_read_from_directory(buffer, applications, directory_name, file_name_preffix);
+	assert(directory != NULL);
+
+//	file_name = malloc (strlen (directory) + strlen ("/applications/applications.cache") + 1);
+//	strcpy (file_name, directory); strcat (file_name, "/applications/applications.cache");
+//	if (stat (file_name, &st) == 0)
+//	{
+//
+//	}
+//	free (file_name);
+
+	file_name = malloc (strlen (directory) + strlen ("/applications") + 1);
+	strcpy (file_name, directory); strcat (file_name, "/applications");
+	_xdg_applications_read_from_directory(user_data, applications_list, file_name, "");
+	free (file_name);
+
+	return FALSE; /* Keep processing */
 }
 
-XdgApplications *_xdg_mime_applications_new(void)
+static XdgApplications *_xdg_mime_applications_new(void)
 {
 	XdgApplications *res;
 
@@ -488,7 +509,7 @@ XdgApplications *_xdg_mime_applications_new(void)
 	return res;
 }
 
-void _xdg_mime_applications_free(XdgApplications *applications)
+static void _xdg_mime_applications_free(XdgApplications *applications)
 {
 	clear_avl_tree_and_values(&applications->app_files_map, (DestroyValue)_xdg_app_map_item_free);
 	clear_avl_tree_and_values(&applications->lst_files_map, (DestroyValue)_xdg_mime_group_map_item_free);
@@ -496,9 +517,26 @@ void _xdg_mime_applications_free(XdgApplications *applications)
 	free(applications);
 }
 
-const XdgArray *_xdg_mime_default_apps_lookup(XdgApplications *applications, const char *mimeType)
+void _xdg_app_init()
 {
-	XdgMimeGroup **group = (XdgMimeGroup **)search_node(&applications->lst_files_map, "Default Applications");
+	char buffer[READ_FROM_FILE_BUFFER_SIZE];
+
+	applications_list = _xdg_mime_applications_new();
+	_xdg_for_each_data_dir(_init_from_directory, buffer);
+}
+
+void _xdg_app_shutdown()
+{
+	if (applications_list)
+	{
+		_xdg_mime_applications_free(applications_list);
+		applications_list = NULL;
+	}
+}
+
+const XdgArray *xdg_mime_default_apps_lookup(const char *mimeType)
+{
+	XdgMimeGroup **group = (XdgMimeGroup **)search_node(&applications_list->lst_files_map, "Default Applications");
 
 	if (group)
 	{
@@ -513,9 +551,9 @@ const XdgArray *_xdg_mime_default_apps_lookup(XdgApplications *applications, con
 	return 0;
 }
 
-const XdgArray *_xdg_mime_user_apps_lookup(XdgApplications *applications, const char *mimeType)
+const XdgArray *xdg_mime_user_apps_lookup(const char *mimeType)
 {
-	XdgMimeGroup **group = (XdgMimeGroup **)search_node(&applications->lst_files_map, "Added Associations");
+	XdgMimeGroup **group = (XdgMimeGroup **)search_node(&applications_list->lst_files_map, "Added Associations");
 
 	if (group)
 	{
@@ -530,11 +568,11 @@ const XdgArray *_xdg_mime_user_apps_lookup(XdgApplications *applications, const 
 	return 0;
 }
 
-const XdgArray *_xdg_mime_known_apps_lookup(XdgApplications *applications, const char *mimeType)
+const XdgArray *xdg_mime_known_apps_lookup(const char *mimeType)
 {
 	char mimeTypeCopy[MIME_TYPE_NAME_BUFFER_SIZE];
 	strncpy(mimeTypeCopy, mimeType, MIME_TYPE_NAME_BUFFER_SIZE);
-	XdgMimeSubType *sub_type = _xdg_mime_sub_type_item_search(&applications->asoc_map, mimeTypeCopy);
+	XdgMimeSubType *sub_type = _xdg_mime_sub_type_item_search(&applications_list->asoc_map, mimeTypeCopy);
 
 	if (sub_type)
 		return &sub_type->apps;
@@ -542,7 +580,7 @@ const XdgArray *_xdg_mime_known_apps_lookup(XdgApplications *applications, const
 		return 0;
 }
 
-char *_xdg_mime_app_icon_lookup(XdgApplications *applications, const XdgApp *app, const char *theme, int size)
+char *xdg_mime_app_icon_lookup(const XdgApp *app, const char *themeName, int size)
 {
 	XdgAppGroup **group = (XdgAppGroup **)search_node(&app->groups, "Desktop Entry");
 
@@ -551,7 +589,7 @@ char *_xdg_mime_app_icon_lookup(XdgApplications *applications, const XdgApp *app
 		XdgAppGroupEntry **entry = (XdgAppGroupEntry **)search_node(&(*group)->entries, "Icon");
 
 		if (entry && (*entry)->values.count)
-			return xdg_mime_icon_lookup((*entry)->values.list[0], size, Applications, theme);
+			return xdg_mime_icon_lookup((*entry)->values.list[0], size, Applications, themeName);
 	}
 
 	return 0;

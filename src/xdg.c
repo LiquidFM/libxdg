@@ -25,14 +25,17 @@
 
 #include "xdg.h"
 #include "xdgmime_p.h"
+#include "xdgapp_p.h"
 
 
 void xdg_init()
 {
 	_xdg_mime_init();
+	_xdg_app_init();
 }
 
 void xdg_shutdown()
 {
+	_xdg_app_shutdown();
 	_xdg_mime_shutdown();
 }

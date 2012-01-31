@@ -27,19 +27,10 @@
 #ifndef __XDG_MIME_APP_P_H_
 #define __XDG_MIME_APP_P_H_
 
-#include "xdgmimeapp.h"
+#include "xdgapp.h"
 
 
-typedef struct XdgApplications XdgApplications;
-
-
-XdgApplications *_xdg_mime_applications_new(void);
-void _xdg_mime_applications_read_from_directory(XdgApplications *applications, const char *directory_name);
-void _xdg_mime_applications_free(XdgApplications *applications);
-
-const XdgArray *_xdg_mime_default_apps_lookup(XdgApplications *applications, const char *mimeType);
-const XdgArray *_xdg_mime_user_apps_lookup(XdgApplications *applications, const char *mimeType);
-const XdgArray *_xdg_mime_known_apps_lookup(XdgApplications *applications, const char *mimeType);
-char *_xdg_mime_app_icon_lookup(XdgApplications *applications, const XdgApp *app, const char *theme, int size);
+void _xdg_app_init();
+void _xdg_app_shutdown();
 
 #endif /* __XDG_MIME_APP_P_H_ */
