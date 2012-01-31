@@ -27,15 +27,15 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#ifndef __XDG_MIME_THEME_H_
-#define __XDG_MIME_THEME_H_
+#ifndef __XDG_THEME_H_
+#define __XDG_THEME_H_
 
 #include "xdgmimearray.h"
 
 
 #ifdef __cplusplus
 extern "C" {
-#endif /* __cplusplus */
+#endif
 
 typedef struct XdgThemeGroup XdgThemeGroup;
 typedef struct XdgTheme      XdgTheme;
@@ -61,6 +61,6 @@ char *xdg_mime_icon_lookup(const char *icon, int size, Context context, const ch
 
 #ifdef __cplusplus
 }
-#endif /* __cplusplus */
+#endif
 
-#endif /* __XDG_MIME_THEME_H_ */
+#endif /* __XDG_THEME_H_ */

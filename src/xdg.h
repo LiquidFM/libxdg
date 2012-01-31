@@ -28,7 +28,7 @@
 
 #include "xdgmime.h"
 #include "xdgapp.h"
-#include "xdgmimetheme.h"
+#include "xdgtheme.h"
 
 #ifdef __cplusplus
 extern "C" {

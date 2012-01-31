@@ -28,6 +28,8 @@
 
 #include "xdgmimeint.h"
 
+#define BOOL int
+
 #define REMOVE_WHITE_SPACES_LEFT(line, ptr) \
 	do { *ptr = 0; --ptr; } while(ptr > line && (*ptr) == ' ');
 

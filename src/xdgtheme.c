@@ -23,7 +23,7 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#include "xdgmimetheme_p.h"
+#include "xdgtheme_p.h"
 #include "xdgmimearray_p.h"
 #include "xdgmimedefs.h"
 #include "avltree.h"
@@ -38,9 +38,6 @@
 
 #define MIME_TYPE_NAME_BUFFER_SIZE 128
 #define READ_FROM_FILE_BUFFER_SIZE 2048
-typedef unsigned char BOOL;
-#define TRUE 1
-#define FALSE 0
 
 
 static const char *contextes[] =
@@ -91,6 +88,10 @@ struct XdgThemes
 {
 	AvlTree themes_files_map;
 };
+
+
+typedef struct XdgThemes XdgThemes;
+static XdgThemes *themes_list = NULL;
 
 
 /**
@@ -379,7 +380,7 @@ static void _xdg_run_command_on_icons_dirs(char *buffer, XdgThemes *themes, XdgI
 	func(buffer, themes, "/usr/share/pixmaps/");
 }
 
-XdgThemes *_xdg_mime_themes_new(void)
+static XdgThemes *_xdg_mime_themes_new(void)
 {
 	XdgThemes *res;
 
@@ -389,17 +390,27 @@ XdgThemes *_xdg_mime_themes_new(void)
 	return res;
 }
 
-void _xdg_mime_themes_read_from_directory(XdgThemes *themes)
-{
-	char buffer[READ_FROM_FILE_BUFFER_SIZE];
-
-	_xdg_run_command_on_icons_dirs(buffer, themes, __xdg_mime_themes_read_from_directory);
-}
-
-void _xdg_mime_themes_free(XdgThemes *themes)
+static void _xdg_mime_themes_free(XdgThemes *themes)
 {
 	clear_avl_tree_and_values(&themes->themes_files_map, (DestroyValue)_xdg_theme_map_item_free);
 	free(themes);
+}
+
+void _xdg_themes_init()
+{
+	char buffer[READ_FROM_FILE_BUFFER_SIZE];
+
+	themes_list = _xdg_mime_themes_new();
+	_xdg_run_command_on_icons_dirs(buffer, themes_list, __xdg_mime_themes_read_from_directory);
+}
+
+void _xdg_themes_shutdown()
+{
+	if (themes_list)
+	{
+		_xdg_mime_themes_free(themes_list);
+		themes_list = NULL;
+	}
 }
 
 static char *_xdg_run_command_on_icons_dirs_2(XdgTheme *theme, const char *icon, const char **subdirs, XdgIconsSearchFunc func)
@@ -750,13 +761,13 @@ static char *_xdg_mime_find_icon(const char *icon, int size, Context context, Xd
 		return _xdg_mime_lookup_fallback_icon(icon, size, theme);
 }
 
-char *_xdg_mime_type_icon_lookup(XdgThemes *themes, const char *mime, int size, const char *themeName)
+char *xdg_mime_type_icon_lookup(const char *mime, int size, const char *themeName)
 {
-	XdgTheme **hicolor = (XdgTheme **)search_node(&themes->themes_files_map, "hicolor");
+	XdgTheme **hicolor = (XdgTheme **)search_node(&themes_list->themes_files_map, "hicolor");
 
 	if (hicolor)
 	{
-		XdgTheme **theme = (XdgTheme **)search_node(&themes->themes_files_map, themeName);
+		XdgTheme **theme = (XdgTheme **)search_node(&themes_list->themes_files_map, themeName);
 
 		if (theme)
 		{
@@ -774,13 +785,13 @@ char *_xdg_mime_type_icon_lookup(XdgThemes *themes, const char *mime, int size, 
 	return 0;
 }
 
-char *_xdg_mime_icon_lookup(XdgThemes *themes, const char *icon, int size, Context context, const char *themeName)
+char *xdg_mime_icon_lookup(const char *icon, int size, Context context, const char *themeName)
 {
-	XdgTheme **hicolor = (XdgTheme **)search_node(&themes->themes_files_map, "hicolor");
+	XdgTheme **hicolor = (XdgTheme **)search_node(&themes_list->themes_files_map, "hicolor");
 
 	if (hicolor)
 	{
-		XdgTheme **theme = (XdgTheme **)search_node(&themes->themes_files_map, themeName);
+		XdgTheme **theme = (XdgTheme **)search_node(&themes_list->themes_files_map, themeName);
 
 		if (theme)
 			return _xdg_mime_find_icon(icon, size, context, *theme, *hicolor);

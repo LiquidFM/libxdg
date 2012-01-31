@@ -26,9 +26,9 @@
 
 #include "xdgapp_p.h"
 #include "xdgmimearray_p.h"
-#include "xdgmimetheme.h"
 #include "xdgmimedefs.h"
 #include "xdgbasedirectory.h"
+#include "xdgtheme.h"
 #include "avltree.h"
 #include <stdlib.h>
 #include <dirent.h>
@@ -93,9 +93,9 @@ struct XdgApplications
 	AvlTree lst_files_map;
 	AvlTree asoc_map;
 };
+
+
 typedef struct XdgApplications XdgApplications;
-
-
 static XdgApplications *applications_list = NULL;
 
 
