@@ -41,16 +41,16 @@ typedef struct XdgApp      XdgApp;
 typedef struct XdgAppGroup XdgAppGroup;
 
 
-const XdgArray *xdg_mime_default_apps_lookup(const char *mimeType);
-const XdgArray *xdg_mime_user_apps_lookup(const char *mimeType);
-const XdgArray *xdg_mime_known_apps_lookup(const char *mimeType);
+const XdgArray *xdg_default_apps_lookup(const char *mimeType);
+const XdgArray *xdg_user_apps_lookup(const char *mimeType);
+const XdgArray *xdg_known_apps_lookup(const char *mimeType);
 
-char *xdg_mime_app_icon_lookup(const XdgApp *app, const char *themeName, int size);
-const XdgAppGroup *xdg_mime_app_group_lookup(const XdgApp *app, const char *group);
-const XdgArray *xdg_mime_app_entry_lookup(const XdgAppGroup *group, const char *entry);
+char *xdg_app_icon_lookup(const XdgApp *app, const char *themeName, int size);
+const XdgAppGroup *xdg_app_group_lookup(const XdgApp *app, const char *group);
+const XdgArray *xdg_app_entry_lookup(const XdgAppGroup *group, const char *entry);
 
 /* XdgArray */
-const XdgApp *xdg_mime_array_app_item_at(const XdgArray *array, int index);
+const XdgApp *xdg_array_app_item_at(const XdgArray *array, int index);
 
 #ifdef __cplusplus
 }

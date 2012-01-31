@@ -1,8 +1,8 @@
-/* xdgmimetheme_p.h: Private file.
+/* xdgtheme_p.h: Private file.
  *
  * More info can be found at http://www.freedesktop.org/standards/
  *
- * Copyright (C) 2011  Dmitriy Vilkov <dav.daemon@gmail.com>
+ * Copyright (C) 2011,2012  Dmitriy Vilkov <dav.daemon@gmail.com>
  *
  * Licensed under the Academic Free License version 2.0
  * Or under the following terms:

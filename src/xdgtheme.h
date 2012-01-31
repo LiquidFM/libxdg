@@ -1,4 +1,4 @@
-/* xdgmimetheme.h: Public file.
+/* xdgtheme.h: Public file.
  *
  * More info can be found at http://www.freedesktop.org/standards/
  *
@@ -6,7 +6,7 @@
  *  http://standards.freedesktop.org/icon-theme-spec/icon-theme-spec-latest.html
  *  http://standards.freedesktop.org/icon-naming-spec/icon-naming-spec-latest.html
  *
- * Copyright (C) 2011  Dmitriy Vilkov <dav.daemon@gmail.com>
+ * Copyright (C) 2011,2012  Dmitriy Vilkov <dav.daemon@gmail.com>
  *
  * Licensed under the Academic Free License version 2.0
  * Or under the following terms:
@@ -57,7 +57,7 @@ typedef enum
 } Context;
 
 char *xdg_mime_type_icon_lookup(const char *mime, int size, const char *theme);
-char *xdg_mime_icon_lookup(const char *icon, int size, Context context, const char *theme);
+char *xdg_icon_lookup(const char *icon, int size, Context context, const char *theme);
 
 #ifdef __cplusplus
 }

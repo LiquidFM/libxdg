@@ -534,7 +534,7 @@ void _xdg_app_shutdown()
 	}
 }
 
-const XdgArray *xdg_mime_default_apps_lookup(const char *mimeType)
+const XdgArray *xdg_default_apps_lookup(const char *mimeType)
 {
 	XdgMimeGroup **group = (XdgMimeGroup **)search_node(&applications_list->lst_files_map, "Default Applications");
 
@@ -551,7 +551,7 @@ const XdgArray *xdg_mime_default_apps_lookup(const char *mimeType)
 	return 0;
 }
 
-const XdgArray *xdg_mime_user_apps_lookup(const char *mimeType)
+const XdgArray *xdg_user_apps_lookup(const char *mimeType)
 {
 	XdgMimeGroup **group = (XdgMimeGroup **)search_node(&applications_list->lst_files_map, "Added Associations");
 
@@ -568,7 +568,7 @@ const XdgArray *xdg_mime_user_apps_lookup(const char *mimeType)
 	return 0;
 }
 
-const XdgArray *xdg_mime_known_apps_lookup(const char *mimeType)
+const XdgArray *xdg_known_apps_lookup(const char *mimeType)
 {
 	char mimeTypeCopy[MIME_TYPE_NAME_BUFFER_SIZE];
 	strncpy(mimeTypeCopy, mimeType, MIME_TYPE_NAME_BUFFER_SIZE);
@@ -580,7 +580,7 @@ const XdgArray *xdg_mime_known_apps_lookup(const char *mimeType)
 		return 0;
 }
 
-char *xdg_mime_app_icon_lookup(const XdgApp *app, const char *themeName, int size)
+char *xdg_app_icon_lookup(const XdgApp *app, const char *themeName, int size)
 {
 	XdgAppGroup **group = (XdgAppGroup **)search_node(&app->groups, "Desktop Entry");
 
@@ -589,13 +589,13 @@ char *xdg_mime_app_icon_lookup(const XdgApp *app, const char *themeName, int siz
 		XdgAppGroupEntry **entry = (XdgAppGroupEntry **)search_node(&(*group)->entries, "Icon");
 
 		if (entry && (*entry)->values.count)
-			return xdg_mime_icon_lookup((*entry)->values.list[0], size, Applications, themeName);
+			return xdg_icon_lookup((*entry)->values.list[0], size, Applications, themeName);
 	}
 
 	return 0;
 }
 
-const XdgAppGroup *xdg_mime_app_group_lookup(const XdgApp *app, const char *group)
+const XdgAppGroup *xdg_app_group_lookup(const XdgApp *app, const char *group)
 {
 	XdgAppGroup **res = (XdgAppGroup **)search_node(&app->groups, group);
 
@@ -605,7 +605,7 @@ const XdgAppGroup *xdg_mime_app_group_lookup(const XdgApp *app, const char *grou
 		return 0;
 }
 
-const XdgArray *xdg_mime_app_entry_lookup(const XdgAppGroup *group, const char *entry)
+const XdgArray *xdg_app_entry_lookup(const XdgAppGroup *group, const char *entry)
 {
 	XdgAppGroupEntry **res = (XdgAppGroupEntry **)search_node(&group->entries, entry);
 
@@ -615,7 +615,7 @@ const XdgArray *xdg_mime_app_entry_lookup(const XdgAppGroup *group, const char *
 		return 0;
 }
 
-const XdgApp *xdg_mime_array_app_item_at(const XdgArray *array, int index)
+const XdgApp *xdg_array_app_item_at(const XdgArray *array, int index)
 {
 	return (XdgApp *)array->list[index];
 }

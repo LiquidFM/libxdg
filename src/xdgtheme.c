@@ -1,8 +1,8 @@
-/* xdgmimetheme.c: Private file.
+/* xdgtheme.c: Private file.
  *
  * More info can be found at http://www.freedesktop.org/standards/
  *
- * Copyright (C) 2011  Dmitriy Vilkov <dav.daemon@gmail.com>
+ * Copyright (C) 2011,2012  Dmitriy Vilkov <dav.daemon@gmail.com>
  *
  * Licensed under the Academic Free License version 2.0
  * Or under the following terms:
@@ -785,7 +785,7 @@ char *xdg_mime_type_icon_lookup(const char *mime, int size, const char *themeNam
 	return 0;
 }
 
-char *xdg_mime_icon_lookup(const char *icon, int size, Context context, const char *themeName)
+char *xdg_icon_lookup(const char *icon, int size, Context context, const char *themeName)
 {
 	XdgTheme **hicolor = (XdgTheme **)search_node(&themes_list->themes_files_map, "hicolor");
 
