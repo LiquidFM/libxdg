@@ -5,7 +5,7 @@
  * Specification:
  *  http://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html
  *
- * Copyright (C) 2011-2012  Dmitriy Vilkov <dav.daemon@gmail.com>
+ * Copyright (C) 2011,2012  Dmitriy Vilkov <dav.daemon@gmail.com>
  *
  * Licensed under the Academic Free License version 2.0
  * Or under the following terms:
