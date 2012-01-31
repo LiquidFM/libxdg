@@ -24,8 +24,8 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#ifndef __XDG_MIME_APP_P_H_
-#define __XDG_MIME_APP_P_H_
+#ifndef __XDG_APP_P_H_
+#define __XDG_APP_P_H_
 
 #include "xdgapp.h"
 
@@ -33,4 +33,4 @@
 void _xdg_app_init();
 void _xdg_app_shutdown();
 
-#endif /* __XDG_MIME_APP_P_H_ */
+#endif /* __XDG_APP_P_H_ */

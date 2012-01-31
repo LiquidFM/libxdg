@@ -27,15 +27,15 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#ifndef __XDG_MIME_APP_H_
-#define __XDG_MIME_APP_H_
+#ifndef __XDG_APP_H_
+#define __XDG_APP_H_
 
 #include "xdgmimearray.h"
 
 
 #ifdef __cplusplus
 extern "C" {
-#endif /* __cplusplus */
+#endif
 
 typedef struct XdgApp      XdgApp;
 typedef struct XdgAppGroup XdgAppGroup;
@@ -54,6 +54,6 @@ const XdgApp *xdg_mime_array_app_item_at(const XdgArray *array, int index);
 
 #ifdef __cplusplus
 }
-#endif /* __cplusplus */
+#endif
 
-#endif /* __XDG_MIME_APP_H_ */
+#endif /* __XDG_APP_H_ */
