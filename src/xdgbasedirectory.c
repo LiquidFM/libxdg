@@ -33,8 +33,7 @@ void _xdg_for_each_data_dir(XdgDirectoryFunc func, void *user_data)
 	int stop_processing;
 	const char *xdg_data_dirs;
 
-	xdg_data_dirs = getenv("XDG_DATA_HOME");
-	if (xdg_data_dirs)
+	if ((xdg_data_dirs = getenv("XDG_DATA_HOME")))
 	{
 		if (func(xdg_data_dirs, user_data))
 			return;
@@ -97,4 +96,141 @@ void _xdg_for_each_data_dir(XdgDirectoryFunc func, void *user_data)
 
 		xdg_data_dirs = end_ptr;
 	}
+}
+
+void _xdg_for_each_theme_dir(XdgDirectoryFunc func, void *user_data)
+{
+	const char *xdg_data_dirs;
+
+	if ((xdg_data_dirs = getenv("XDG_DATA_HOME")))
+		func(xdg_data_dirs, user_data);
+	else
+    {
+		const char *home = getenv("HOME");
+
+		if (home != NULL)
+		{
+			char *guessed_xdg_home;
+
+			guessed_xdg_home = malloc(strlen(home) + strlen("/.icons/") + 1);
+			strcpy(guessed_xdg_home, home); strcat(guessed_xdg_home, "/.icons/");
+
+			func(guessed_xdg_home, user_data);
+
+			free(guessed_xdg_home);
+		}
+    }
+
+	xdg_data_dirs = getenv("XDG_DATA_DIRS");
+	if (xdg_data_dirs == NULL)
+		xdg_data_dirs = "/usr/local/share/:/usr/share/";
+
+	while (*xdg_data_dirs != '\000')
+	{
+		const char *end_ptr;
+		char *dir;
+		int len;
+
+		end_ptr = xdg_data_dirs;
+		while (*end_ptr != ':' && *end_ptr != '\000')
+			end_ptr++;
+
+		if (end_ptr == xdg_data_dirs)
+		{
+			xdg_data_dirs++;
+			continue;
+		}
+
+		if (*end_ptr == ':')
+			len = end_ptr - xdg_data_dirs;
+		else
+			len = end_ptr - xdg_data_dirs + 1;
+
+		dir = malloc(len + strlen("/icons/") + 1);
+		strncpy(dir, xdg_data_dirs, len);
+		dir[len] = '\0';
+		strcat(dir, "/icons/");
+		dir[len + strlen("/icons/")] = '\0';
+		func(dir, user_data);
+		free(dir);
+
+		xdg_data_dirs = end_ptr;
+	}
+
+	func("/usr/share/pixmaps/", user_data);
+}
+
+char *_xdg_search_in_each_theme_dir(XdgIconSearchFunc func, void *user_data)
+{
+	char *res;
+	const char *xdg_data_dirs;
+
+	if ((xdg_data_dirs = getenv("XDG_DATA_HOME")))
+	{
+		if (res = func(xdg_data_dirs, user_data))
+			return res;
+	}
+	else
+    {
+		const char *home = getenv("HOME");
+
+		if (home != NULL)
+		{
+			char *guessed_xdg_home;
+
+			guessed_xdg_home = malloc(strlen(home) + strlen("/.icons/") + 1);
+			strcpy(guessed_xdg_home, home); strcat(guessed_xdg_home, "/.icons/");
+
+			res = func(guessed_xdg_home, user_data);
+
+			free(guessed_xdg_home);
+
+			if (res)
+				return res;
+		}
+    }
+
+	xdg_data_dirs = getenv("XDG_DATA_DIRS");
+	if (xdg_data_dirs == NULL)
+		xdg_data_dirs = "/usr/local/share/:/usr/share/";
+
+	while (*xdg_data_dirs != '\000')
+	{
+		const char *end_ptr;
+		char *dir;
+		int len;
+
+		end_ptr = xdg_data_dirs;
+		while (*end_ptr != ':' && *end_ptr != '\000')
+			end_ptr++;
+
+		if (end_ptr == xdg_data_dirs)
+		{
+			xdg_data_dirs++;
+			continue;
+		}
+
+		if (*end_ptr == ':')
+			len = end_ptr - xdg_data_dirs;
+		else
+			len = end_ptr - xdg_data_dirs + 1;
+
+		dir = malloc(len + strlen("/icons/") + 1);
+		strncpy(dir, xdg_data_dirs, len);
+		dir[len] = '\0';
+		strcat(dir, "/icons/");
+		dir[len + strlen("/icons/")] = '\0';
+		res = func(dir, user_data);
+		free(dir);
+
+		if (res)
+			return res;
+
+		xdg_data_dirs = end_ptr;
+	}
+
+	if (res = func("/usr/share/pixmaps/", user_data))
+		return res;
+
+	return 0;
 }

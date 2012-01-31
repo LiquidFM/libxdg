@@ -40,6 +40,15 @@
 #define READ_FROM_FILE_BUFFER_SIZE 2048
 
 
+struct XdgIconSearchFuncData
+{
+	XdgTheme *theme;
+	const char *icon;
+	const char **subdirs;
+};
+typedef struct XdgIconSearchFuncData XdgIconSearchFuncData;
+
+
 static const char *contextes[] =
 {
 	"Actions",
@@ -92,14 +101,6 @@ struct XdgThemes
 
 typedef struct XdgThemes XdgThemes;
 static XdgThemes *themes_list = NULL;
-
-
-/**
- * Function types
- *
- */
-typedef void (*XdgIconsScanFunc)(char *buffer, XdgThemes *applications, const char *directory);
-typedef char *(*XdgIconsSearchFunc)(XdgTheme *theme, const char *icon, const char **subdirs, const char *directory);
 
 
 /**
@@ -261,7 +262,7 @@ static void _xdg_applications_read_theme_file(char *buffer, XdgThemes *themes, F
 					break;
 }
 
-static void ___xdg_mime_themes_read_from_directory(char *buffer, XdgThemes *themes, const char *directory_name, const char *name)
+static void __xdg_mime_themes_read_from_directory(char *buffer, XdgThemes *themes, const char *directory_name, const char *name)
 {
 	DIR *dir;
 
@@ -291,11 +292,11 @@ static void ___xdg_mime_themes_read_from_directory(char *buffer, XdgThemes *them
 	}
 }
 
-static void __xdg_mime_themes_read_from_directory(char *buffer, XdgThemes *themes, const char *directory_name)
+static void _xdg_mime_themes_read_from_directory(const char *directory, char *buffer)
 {
 	DIR *dir;
 
-	if (dir = opendir(directory_name))
+	if (dir = opendir(directory))
 	{
 		char *file_name;
 		struct dirent *entry;
@@ -303,81 +304,16 @@ static void __xdg_mime_themes_read_from_directory(char *buffer, XdgThemes *theme
 		while ((entry = readdir(dir)) != NULL)
 			if (entry->d_type == DT_DIR && strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0)
 			{
-				file_name = malloc(strlen(directory_name) + strlen(entry->d_name) + 2);
-				strcpy(file_name, directory_name); strcat(file_name, "/"); strcat(file_name, entry->d_name);
+				file_name = malloc(strlen(directory) + strlen(entry->d_name) + 2);
+				strcpy(file_name, directory); strcat(file_name, "/"); strcat(file_name, entry->d_name);
 
-				___xdg_mime_themes_read_from_directory(buffer, themes, file_name, entry->d_name);
+				__xdg_mime_themes_read_from_directory(buffer, themes_list, file_name, entry->d_name);
 
 				free(file_name);
 			}
 
 		closedir(dir);
 	}
-}
-
-static void _xdg_run_command_on_icons_dirs(char *buffer, XdgThemes *themes, XdgIconsScanFunc func)
-{
-	const char *xdg_data_home;
-	const char *xdg_data_dirs;
-	const char *ptr;
-
-	if ((xdg_data_home = getenv("XDG_DATA_HOME")))
-		func(buffer, themes, xdg_data_home);
-	else
-    {
-		const char *home = getenv("HOME");
-
-		if (home != NULL)
-		{
-			char *guessed_xdg_home;
-
-			guessed_xdg_home = malloc(strlen(home) + strlen("/.icons/") + 1);
-			strcpy(guessed_xdg_home, home);
-			strcat(guessed_xdg_home, "/.icons/");
-			func(buffer, themes, guessed_xdg_home);
-			free(guessed_xdg_home);
-		}
-    }
-
-	xdg_data_dirs = getenv("XDG_DATA_DIRS");
-	if (xdg_data_dirs == NULL)
-		xdg_data_dirs = "/usr/local/share/:/usr/share/";
-
-	ptr = xdg_data_dirs;
-
-	while (*ptr != '\000')
-	{
-		const char *end_ptr;
-		char *dir;
-		int len;
-
-		end_ptr = ptr;
-		while (*end_ptr != ':' && *end_ptr != '\000')
-			end_ptr++;
-
-		if (end_ptr == ptr)
-		{
-			ptr++;
-			continue;
-		}
-
-		if (*end_ptr == ':')
-			len = end_ptr - ptr;
-		else
-			len = end_ptr - ptr + 1;
-
-		dir = malloc(len + strlen("/icons/") + 1);
-		strncpy(dir, ptr, len);
-		dir[len] = '\0';
-		strcat(dir, "/icons/");
-		dir[len + strlen("/icons/")] = '\0';
-		func(buffer, themes, dir);
-		free(dir);
-
-		ptr = end_ptr;
-	}
-
-	func(buffer, themes, "/usr/share/pixmaps/");
 }
 
 static XdgThemes *_xdg_mime_themes_new(void)
@@ -401,7 +337,7 @@ void _xdg_themes_init()
 	char buffer[READ_FROM_FILE_BUFFER_SIZE];
 
 	themes_list = _xdg_mime_themes_new();
-	_xdg_run_command_on_icons_dirs(buffer, themes_list, __xdg_mime_themes_read_from_directory);
+	_xdg_for_each_theme_dir(_xdg_mime_themes_read_from_directory, buffer);
 }
 
 void _xdg_themes_shutdown()
@@ -413,90 +349,12 @@ void _xdg_themes_shutdown()
 	}
 }
 
-static char *_xdg_run_command_on_icons_dirs_2(XdgTheme *theme, const char *icon, const char **subdirs, XdgIconsSearchFunc func)
-{
-	const char *xdg_data_home;
-	const char *xdg_data_dirs;
-	const char *ptr;
-	char *res;
-
-	if ((xdg_data_home = getenv("XDG_DATA_HOME")))
-	{
-		if (res = func(theme, icon, subdirs, xdg_data_home))
-			return res;
-	}
-	else
-    {
-		const char *home = getenv("HOME");
-
-		if (home != NULL)
-		{
-			char *guessed_xdg_home;
-
-			guessed_xdg_home = malloc(strlen(home) + strlen("/.icons/") + 1);
-			strcpy(guessed_xdg_home, home);
-			strcat(guessed_xdg_home, "/.icons/");
-			res = func(theme, icon, subdirs, guessed_xdg_home);
-			free(guessed_xdg_home);
-
-			if (res)
-				return res;
-		}
-    }
-
-	xdg_data_dirs = getenv("XDG_DATA_DIRS");
-	if (xdg_data_dirs == NULL)
-		xdg_data_dirs = "/usr/local/share/:/usr/share/";
-
-	ptr = xdg_data_dirs;
-
-	while (*ptr != '\000')
-	{
-		const char *end_ptr;
-		char *dir;
-		int len;
-
-		end_ptr = ptr;
-		while (*end_ptr != ':' && *end_ptr != '\000')
-			end_ptr++;
-
-		if (end_ptr == ptr)
-		{
-			ptr++;
-			continue;
-		}
-
-		if (*end_ptr == ':')
-			len = end_ptr - ptr;
-		else
-			len = end_ptr - ptr + 1;
-
-		dir = malloc(len + strlen("/icons/") + 1);
-		strncpy(dir, ptr, len);
-		dir[len] = '\0';
-		strcat(dir, "/icons/");
-		dir[len + strlen("/icons/")] = '\0';
-		res = func(theme, icon, subdirs, dir);
-		free(dir);
-
-		if (res)
-			return res;
-
-		ptr = end_ptr;
-	}
-
-	if (res = func(theme, icon, subdirs, "/usr/share/pixmaps/"))
-		return res;
-
-	return 0;
-}
-
-static char *_xdg_mime_search_icon_file(XdgTheme *theme, const char *icon, const char **subdirs, const char *directory)
+static char *_xdg_search_icon_file(const char *directory, XdgIconSearchFuncData *data)
 {
 	struct stat buf;
 	char *res = NULL;
-	char *theme_dir = malloc(strlen(directory) + strlen(theme->name) + 2);
-	strcpy(theme_dir, directory); strcat(theme_dir, "/"); strcat(theme_dir, theme->name);
+	char *theme_dir = malloc(strlen(directory) + strlen(data->theme->name) + 2);
+	strcpy(theme_dir, directory); strcat(theme_dir, "/"); strcat(theme_dir, data->theme->name);
 
 	if (stat(theme_dir, &buf) == 0)
 	{
@@ -504,16 +362,16 @@ static char *_xdg_mime_search_icon_file(XdgTheme *theme, const char *icon, const
 		char *file_name;
 		const char **extensions;
 
-		for (; *subdirs && res == NULL; ++subdirs)
+		for (; *data->subdirs && res == NULL; ++data->subdirs)
 		{
-			sub_dir = malloc(strlen(theme_dir) + strlen(*subdirs) + 2);
-			strcpy(sub_dir, theme_dir); strcat(sub_dir, "/"); strcat(sub_dir, *subdirs);
+			sub_dir = malloc(strlen(theme_dir) + strlen(*data->subdirs) + 2);
+			strcpy(sub_dir, theme_dir); strcat(sub_dir, "/"); strcat(sub_dir, *data->subdirs);
 
 			for (extensions = icon_extensions; *extensions; ++extensions)
 			{
-				file_name = malloc(strlen(sub_dir) + strlen(icon) + strlen(*extensions) + 3);
+				file_name = malloc(strlen(sub_dir) + strlen(data->icon) + strlen(*extensions) + 3);
 				strcpy(file_name, sub_dir); strcat(file_name, "/");
-				strcat(file_name, icon); strcat(file_name, "."); strcat(file_name, *extensions);
+				strcat(file_name, data->icon); strcat(file_name, "."); strcat(file_name, *extensions);
 
 				if (stat(file_name, &buf) == 0)
 				{
@@ -705,7 +563,10 @@ static char *_xdg_mime_lookup_icon(const char *icon, int size, Context context, 
 				}
 
 			if (*directories)
-				if (dir = _xdg_run_command_on_icons_dirs_2(theme, icon, directories, _xdg_mime_search_icon_file))
+			{
+				XdgIconSearchFuncData data = {theme, icon, directories};
+
+				if (dir = _xdg_search_in_each_theme_dir(_xdg_search_icon_file, &data))
 					res = dir;
 				else
 					if (closestDirName)
@@ -713,9 +574,10 @@ static char *_xdg_mime_lookup_icon(const char *icon, int size, Context context, 
 						directories[0] = closestDirName;
 						directories[1] = NULL;
 
-						if (dir = _xdg_run_command_on_icons_dirs_2(theme, icon, directories, _xdg_mime_search_icon_file))
+						if (dir = _xdg_search_in_each_theme_dir(_xdg_search_icon_file, &data))
 							res = dir;
 					}
+			}
 
 			free(directories);
 		}
