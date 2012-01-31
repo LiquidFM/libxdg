@@ -40,7 +40,6 @@
 #include "xdgmimeparent.h"
 #include "xdgmimecache.h"
 #include "xdgbasedirectory.h"
-#include "xdgmimeapp_p.h"
 #include "xdgmimetheme_p.h"
 #include <stdlib.h>
 #include <sys/stat.h>
@@ -65,7 +64,6 @@ static XdgDirTimeList *dir_time_list = NULL;
 static XdgCallbackList *callback_list = NULL;
 static XdgIconList *icon_list = NULL;
 static XdgIconList *generic_icon_list = NULL;
-static XdgApplications *applications_list = NULL;
 static XdgThemes *themes_list = NULL;
 
 XdgMimeCache **_caches = NULL;
@@ -145,31 +143,6 @@ xdg_mime_init_from_directory (const char *directory)
   struct stat st;
 
   assert (directory != NULL);
-
-  file_name = malloc (strlen (directory) + strlen ("/applications/applications.cache") + 1);
-  strcpy (file_name, directory); strcat (file_name, "/applications/applications.cache");
-  if (stat (file_name, &st) == 0)
-    {
-      XdgMimeCache *cache = _xdg_mime_cache_new_from_file (file_name);
-
-      if (cache != NULL)
-	{
-	  xdg_dir_time_list_add (file_name, st.st_mtime);
-
-	  _caches = realloc (_caches, sizeof (XdgMimeCache *) * (n_caches + 2));
-	  _caches[n_caches] = cache;
-          _caches[n_caches + 1] = NULL;
-	  n_caches++;
-
-	  return FALSE;
-	}
-    }
-  free (file_name);
-
-  file_name = malloc (strlen (directory) + strlen ("/applications") + 1);
-  strcpy (file_name, directory); strcat (file_name, "/applications");
-  _xdg_mime_applications_read_from_directory (applications_list, file_name);
-  free (file_name);
 
   file_name = malloc (strlen (directory) + strlen ("/mime/mime.cache") + 1);
   strcpy (file_name, directory); strcat (file_name, "/mime/mime.cache");
@@ -397,7 +370,6 @@ _xdg_mime_init (void)
 	parent_list = _xdg_mime_parent_list_new ();
 	icon_list = _xdg_mime_icon_list_new ();
 	generic_icon_list = _xdg_mime_icon_list_new ();
-	applications_list = _xdg_mime_applications_new ();
 	themes_list = _xdg_mime_themes_new ();
 
 	_xdg_for_each_data_dir((XdgDirectoryFunc)xdg_mime_init_from_directory, NULL);
@@ -594,12 +566,6 @@ _xdg_mime_shutdown (void)
       generic_icon_list = NULL;
     }
   
-  if (applications_list)
-    {
-      _xdg_mime_applications_free (applications_list);
-      applications_list = NULL;
-    }
-
   if (themes_list)
     {
       _xdg_mime_themes_free (themes_list);
@@ -868,27 +834,6 @@ xdg_mime_get_generic_icon (const char *mime)
     return _xdg_mime_cache_get_generic_icon (mime);
 
   return _xdg_mime_icon_list_lookup (generic_icon_list, mime);
-}
-
-/* XdgApplications */
-const XdgArray *xdg_mime_default_apps_lookup(const char *mimeType)
-{
-	return _xdg_mime_default_apps_lookup(applications_list, mimeType);
-}
-
-const XdgArray *xdg_mime_user_apps_lookup(const char *mimeType)
-{
-	return _xdg_mime_user_apps_lookup(applications_list, mimeType);
-}
-
-const XdgArray *xdg_mime_known_apps_lookup(const char *mimeType)
-{
-	return _xdg_mime_known_apps_lookup(applications_list, mimeType);
-}
-
-char *xdg_mime_app_icon_lookup(const XdgApp *app, const char *themeName, int size)
-{
-	return _xdg_mime_app_icon_lookup(applications_list, app, themeName, size);
 }
 
 /* XdgThemes */
