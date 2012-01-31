@@ -40,7 +40,6 @@
 #include "xdgmimeparent.h"
 #include "xdgmimecache.h"
 #include "xdgbasedirectory.h"
-#include "xdgmimetheme_p.h"
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <stdio.h>
@@ -64,7 +63,6 @@ static XdgDirTimeList *dir_time_list = NULL;
 static XdgCallbackList *callback_list = NULL;
 static XdgIconList *icon_list = NULL;
 static XdgIconList *generic_icon_list = NULL;
-static XdgThemes *themes_list = NULL;
 
 XdgMimeCache **_caches = NULL;
 static int n_caches = 0;
@@ -370,10 +368,8 @@ _xdg_mime_init (void)
 	parent_list = _xdg_mime_parent_list_new ();
 	icon_list = _xdg_mime_icon_list_new ();
 	generic_icon_list = _xdg_mime_icon_list_new ();
-	themes_list = _xdg_mime_themes_new ();
 
 	_xdg_for_each_data_dir((XdgDirectoryFunc)xdg_mime_init_from_directory, NULL);
-	_xdg_mime_themes_read_from_directory(themes_list);
 }
 
 void
@@ -566,12 +562,6 @@ _xdg_mime_shutdown (void)
       generic_icon_list = NULL;
     }
   
-  if (themes_list)
-    {
-      _xdg_mime_themes_free (themes_list);
-      themes_list = NULL;
-    }
-
   if (_caches)
     {
       int i;
@@ -834,15 +824,4 @@ xdg_mime_get_generic_icon (const char *mime)
     return _xdg_mime_cache_get_generic_icon (mime);
 
   return _xdg_mime_icon_list_lookup (generic_icon_list, mime);
-}
-
-/* XdgThemes */
-char *xdg_mime_type_icon_lookup(const char *mime, int size, const char *theme)
-{
-	return _xdg_mime_type_icon_lookup(themes_list, mime, size, theme);
-}
-
-char *xdg_mime_icon_lookup(const char *icon, int size, Context context, const char *theme)
-{
-	return _xdg_mime_icon_lookup(themes_list, icon, size, context, theme);
 }
