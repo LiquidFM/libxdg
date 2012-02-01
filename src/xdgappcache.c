@@ -1,11 +1,12 @@
 #include "xdgappcache_p.h"
 #include <fcntl.h>
 #include <string.h>
+#include <sys/mman.h>
 
 
 XdgAppCahce *_xdg_app_cache_new_empty(const char *file_name)
 {
-	XdgAppCahce cache = {open(file_name, O_RDWR | O_CREAT | O_TRUNC, 0), NULL, 0};
+	XdgAppCahce cache = {open(file_name, O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH), MAP_FAILED, 0};
 
 	if (cache.fd >= 0)
 	{
@@ -27,10 +28,43 @@ XdgAppCahce *_xdg_app_cache_new_empty(const char *file_name)
 	return NULL;
 }
 
+XdgAppCahce *_xdg_app_cache_new(const char *file_name)
+{
+	XdgAppCahce cache = {open(file_name, O_RDONLY, 0), MAP_FAILED, 0};
+
+	if (cache.fd >= 0)
+	{
+		struct stat st;
+
+		if (fstat(cache.fd, &st) == 0)
+		{
+			cache.size = st.st_size;
+			cache.memory = mmap(NULL, st.st_size, PROT_READ | PROT_WRITE, MAP_PRIVATE, cache.fd, 0);
+
+			if (cache.memory != MAP_FAILED)
+			{
+				XdgAppCahce *res = malloc(sizeof(XdgAppCahce));
+				memcpy(res, &cache, sizeof(XdgAppCahce));
+
+				return res;
+			}
+		}
+
+		close(cache.fd);
+	}
+
+	return NULL;
+}
+
 void _xdg_app_cache_free(XdgAppCahce *cache)
 {
 	if (cache->fd >= 0)
+	{
+		if (cache->memory != MAP_FAILED)
+		      munmap(cache->memory, cache->size);
+
 		close(cache->fd);
+	}
 
 	free(cache);
 }

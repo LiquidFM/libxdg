@@ -32,12 +32,13 @@
 struct XdgAppCahce
 {
 	int fd;
-	const char *memory;
+	char *memory;
 	int size;
 };
 
 
 XdgAppCahce *_xdg_app_cache_new_empty(const char *file_name);
+XdgAppCahce *_xdg_app_cache_new(const char *file_name);
 void _xdg_app_cache_free(XdgAppCahce *cache);
 
 #endif /* XDGAPPCACHE_P_H_ */

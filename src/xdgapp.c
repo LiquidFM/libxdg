@@ -535,23 +535,67 @@ void _xdg_app_shutdown()
 	}
 }
 
-static void write_key(int fd, const char *key)
+static void write_app_group_entry_key(int fd, const char *key)
 {
-
+	write(fd, key, strlen(key) + 1);
 }
 
-static void write_value(int fd, const void *value)
+static void write_app_group_entry_value(int fd, const XdgAppGroupEntry *value)
 {
+	int i;
 
+	write(fd, value, sizeof(XdgAppGroupEntry));
+	write(fd, value->values.list, sizeof(void *) * value->values.count);
+
+	for (i = 0; i < value->values.count; ++i)
+		write(fd, value->values.list[i], strlen(value->values.list[i]) + 1);
+}
+
+static char *read_app_group_entry_key(void **memory)
+{
+	char *res = (*memory);
+
+	(*memory) += strlen(res) + 1;
+
+	return res;
+}
+
+static void *read_app_group_entry_value(void **memory)
+{
+	int i;
+	XdgAppGroupEntry *value = (*memory);
+	(*memory) += sizeof(XdgAppGroupEntry);
+
+	value->values.list = (*memory);
+	(*memory) += sizeof(void *) * value->values.count;
+
+	for (i = 0; i < value->values.count; ++i)
+	{
+		value->values.list[i] = (*memory);
+		(*memory) += strlen(*memory) + 1;
+	}
+
+	return value;
 }
 
 XdgAppCahce *xdg_app_rebuild_cache()
 {
+	XdgApp **app = (XdgApp **)search_node(&applications_list->app_files_map, "kde4-ark.desktop");
+	XdgAppGroup **group = (XdgAppGroup **)search_node(&(*app)->groups, "Desktop Entry");
+
 	XdgAppCahce *cache = _xdg_app_cache_new_empty("/home/dav/app.cache");
 
 	if (cache)
 	{
-		write_to_file(cache->fd, &applications_list->app_files_map, write_key, write_value);
+		write_to_file(cache->fd, &(*group)->entries, write_app_group_entry_key, (WriteValue)write_app_group_entry_value);
+		_xdg_app_cache_free(cache);
+	}
+
+	if (cache = _xdg_app_cache_new("/home/dav/app.cache"))
+	{
+		void *memory = cache->memory;
+
+		map_from_memory(&memory, read_app_group_entry_key, read_app_group_entry_value, strcmp);
 		_xdg_app_cache_free(cache);
 	}
 

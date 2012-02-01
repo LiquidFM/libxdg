@@ -27,7 +27,7 @@
 #define XDGAPPCACHE_H_
 
 #ifndef HAVE_MMAP
-#	error !!!
+#	error Building xdgmime without MMAP support. Binary "mime.cache" files will not be used.
 #endif
 
 typedef struct XdgAppCahce XdgAppCahce;
