@@ -26,6 +26,7 @@
 
 #include "xdgapp_p.h"
 #include "xdgarray_p.h"
+#include "xdgappcache_p.h"
 #include "xdgmimedefs.h"
 #include "xdgbasedirectory.h"
 #include "xdgtheme.h"
@@ -532,6 +533,29 @@ void _xdg_app_shutdown()
 		_xdg_mime_applications_free(applications_list);
 		applications_list = NULL;
 	}
+}
+
+static void write_key(int fd, const char *key)
+{
+
+}
+
+static void write_value(int fd, const void *value)
+{
+
+}
+
+XdgAppCahce *xdg_app_rebuild_cache()
+{
+	XdgAppCahce *cache = _xdg_app_cache_new_empty("/home/dav/app.cache");
+
+	if (cache)
+	{
+		write_to_file(cache->fd, &applications_list->app_files_map, write_key, write_value);
+		_xdg_app_cache_free(cache);
+	}
+
+	return NULL;
 }
 
 const XdgArray *xdg_default_apps_lookup(const char *mimeType)

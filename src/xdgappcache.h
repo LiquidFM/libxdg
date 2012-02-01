@@ -1,4 +1,4 @@
-/* xdgarray_p.h: Private file.
+/* xdgappcache.h: Public file.
  *
  * More info can be found at http://www.freedesktop.org/standards/
  *
@@ -23,30 +23,13 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#ifndef __XDG_MIME_ARRAY_P_H_
-#define __XDG_MIME_ARRAY_P_H_
+#ifndef XDGAPPCACHE_H_
+#define XDGAPPCACHE_H_
 
-#include "xdgarray.h"
+#ifndef HAVE_MMAP
+#	error !!!
+#endif
 
+typedef struct XdgAppCahce XdgAppCahce;
 
-/**
- * Data structures
- *
- */
-struct XdgArray
-{
-	void **list;
-	int count;
-	int capacity;
-};
-
-
-/**
- * Functions
- *
- */
-void **_xdg_array_item_add(XdgArray *array, int alloc_granularity);
-void _xdg_array_and_values_free(XdgArray *array);
-void _xdg_array_free(XdgArray *array);
-
-#endif /* __XDG_MIME_ARRAY_P_H_ */
+#endif /* XDGAPPCACHE_H_ */

@@ -1,10 +1,6 @@
-/* xdgmimeapp.h: Public file.  Datastructure for storing
- * the .desktop and .list files.
+/* xdgappcache_p.h: Private file.
  *
  * More info can be found at http://www.freedesktop.org/standards/
- *
- * Specification:
- *  http://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html
  *
  * Copyright (C) 2011,2012  Dmitriy Vilkov <dav.daemon@gmail.com>
  *
@@ -27,36 +23,21 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#ifndef __XDG_APP_H_
-#define __XDG_APP_H_
+#ifndef XDGAPPCACHE_P_H_
+#define XDGAPPCACHE_P_H_
 
-#include "xdgarray.h"
 #include "xdgappcache.h"
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+struct XdgAppCahce
+{
+	int fd;
+	const char *memory;
+	int size;
+};
 
-typedef struct XdgApp      XdgApp;
-typedef struct XdgAppGroup XdgAppGroup;
 
+XdgAppCahce *_xdg_app_cache_new_empty(const char *file_name);
+void _xdg_app_cache_free(XdgAppCahce *cache);
 
-XdgAppCahce *xdg_app_rebuild_cache();
-
-const XdgArray *xdg_default_apps_lookup(const char *mimeType);
-const XdgArray *xdg_user_apps_lookup(const char *mimeType);
-const XdgArray *xdg_known_apps_lookup(const char *mimeType);
-
-char *xdg_app_icon_lookup(const XdgApp *app, const char *themeName, int size);
-const XdgAppGroup *xdg_app_group_lookup(const XdgApp *app, const char *group);
-const XdgArray *xdg_app_entry_lookup(const XdgAppGroup *group, const char *entry);
-
-/* XdgArray */
-const XdgApp *xdg_array_app_item_at(const XdgArray *array, int index);
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* __XDG_APP_H_ */
+#endif /* XDGAPPCACHE_P_H_ */

@@ -1,4 +1,4 @@
-/* xdgmimearray.h: Public file.
+/* xdgarray.h: Public file.
  *
  * More info can be found at http://www.freedesktop.org/standards/
  *

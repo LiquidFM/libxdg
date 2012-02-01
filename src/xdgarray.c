@@ -1,4 +1,4 @@
-/* xdgmimearray.c: Private file.
+/* xdgarray.c: Private file.
  *
  * More info can be found at http://www.freedesktop.org/standards/
  *
