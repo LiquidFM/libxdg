@@ -22,7 +22,8 @@
  */
 
 #include "avltree.h"
-#include <stdlib.h>
+#include <string.h>
+#include <fcntl.h>
 
 #ifdef BOOL
 #	undef BOOL
@@ -36,7 +37,7 @@
 #	undef FALSE
 #endif
 
-#define BOOL unsigned char
+#define BOOL int
 #define TRUE 1
 #define FALSE 0
 
@@ -54,6 +55,15 @@ enum Balanced
 };
 typedef enum Balanced Balanced;
 
+enum Visit
+{
+	NONE_WAS_VISITED = 0,
+	LEFT_IS_VISITED = 1,
+	RIGHT_IS_VISITED = 2,
+	ALL_WAS_VISITED = 3
+};
+typedef enum Visit Visit;
+
 struct Links
 {
 	AvlNode *left;
@@ -64,6 +74,7 @@ typedef struct Links Links;
 
 struct AvlNode
 {
+	Visit visit;
 	Links links;
 	Balanced balance;
 	KEY_TYPE key;
@@ -80,6 +91,7 @@ static AvlNode *create_avl_node(const KEY_TYPE key, AvlNode *parent, DuplicateKe
 	res->links.left = 0;
 	res->links.right = 0;
 	res->links.parent = parent;
+	res->visit = NONE_WAS_VISITED;
 
 	return res;
 }
@@ -554,4 +566,112 @@ VALUE_TYPE delete_node(AvlTree *tree, const KEY_TYPE key)
 	}
 	else
 		return 0;
+}
+
+static void write_two_empty_nodes_to_file(int fd, AvlNode *stack_node)
+{
+	memset(stack_node, 0, sizeof(AvlNode));
+	write(fd, stack_node, sizeof(AvlNode));
+	write(fd, stack_node, sizeof(AvlNode));
+}
+
+static void write_empty_node_to_file(int fd, AvlNode *stack_node)
+{
+	memset(stack_node, 0, sizeof(AvlNode));
+	write(fd, stack_node, sizeof(AvlNode));
+}
+
+static void write_node_to_file(int fd, AvlNode *stack_node, const AvlNode *source_node, WriteKey writeKey, WriteValue writeValue)
+{
+	memcpy(stack_node, source_node, sizeof(AvlNode));
+	memset(&stack_node->visit, (unsigned int)-1, sizeof(Visit));
+
+	write(fd, stack_node, sizeof(AvlNode));
+
+	writeKey(fd, stack_node->key);
+	writeValue(fd, stack_node->value);
+}
+
+static void write_subtree_to_file(int fd, AvlNode *subtree_root, WriteKey writeKey, WriteValue writeValue)
+{
+	if (subtree_root == 0)
+		return;
+
+	AvlNode stack_node;
+	AvlNode *this_node = subtree_root;
+	this_node->visit = NONE_WAS_VISITED;
+
+	write_node_to_file(fd, &stack_node, this_node, writeKey, writeValue);
+
+	/* Depth-first search (DFS) algorithm */
+	while (TRUE)
+		if (this_node->links.left)
+			if (this_node->visit & LEFT_IS_VISITED)
+				if (this_node->links.right)
+					if (this_node->visit & RIGHT_IS_VISITED)
+					{
+						this_node = this_node->links.parent;
+
+						if (this_node == subtree_root)
+							break;
+					}
+					else
+					{
+						write_node_to_file(fd, &stack_node, this_node->links.right, writeKey, writeValue);
+						this_node->visit |= RIGHT_IS_VISITED;
+						this_node = this_node->links.right;
+						this_node->visit = NONE_WAS_VISITED;
+					}
+				else
+				{
+					write_empty_node_to_file(fd, &stack_node);
+					this_node = this_node->links.parent;
+
+					if (this_node == subtree_root)
+						break;
+				}
+			else
+			{
+				write_node_to_file(fd, &stack_node, this_node->links.left, writeKey, writeValue);
+				this_node->visit |= LEFT_IS_VISITED;
+				this_node = this_node->links.left;
+				this_node->visit = NONE_WAS_VISITED;
+			}
+		else
+		{
+			write_empty_node_to_file(fd, &stack_node);
+
+			if (this_node->links.right)
+				if (this_node->visit & RIGHT_IS_VISITED)
+				{
+					this_node = this_node->links.parent;
+
+					if (this_node == subtree_root)
+						break;
+				}
+				else
+				{
+					write_node_to_file(fd, &stack_node, this_node->links.right, writeKey, writeValue);
+					this_node->visit |= RIGHT_IS_VISITED;
+					this_node = this_node->links.right;
+					this_node->visit = NONE_WAS_VISITED;
+				}
+			else
+			{
+				write_empty_node_to_file(fd, &stack_node);
+				this_node = this_node->links.parent;
+
+				if (this_node == subtree_root)
+					break;
+			}
+		}
+}
+
+void write_to_file(int fd, const AvlTree *tree, WriteKey writeKey, WriteValue writeValue)
+{
+	AvlTree saved_tree;
+	memset(&saved_tree, (unsigned int)-1, sizeof(AvlTree));
+	write(fd, &saved_tree, sizeof(AvlTree));
+
+	write_subtree_to_file(fd, (AvlNode *)tree->tree_root, writeKey, writeValue);
 }
