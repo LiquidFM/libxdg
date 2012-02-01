@@ -2,7 +2,7 @@
  *
  * More info can be found at http://www.freedesktop.org/standards/
  *
- * Copyright (C) 2011  Dmitriy Vilkov <dav.daemon@gmail.com>
+ * Copyright (C) 2011,2012  Dmitriy Vilkov <dav.daemon@gmail.com>
  *
  * Licensed under the Academic Free License version 2.0
  * Or under the following terms:
@@ -34,8 +34,8 @@ extern "C" {
 typedef struct XdgArray XdgArray;
 
 
-int xdg_mime_array_size(const XdgArray *array);
-const char *xdg_mime_array_string_item_at(const XdgArray *array, int index);
+int xdg_array_size(const XdgArray *array);
+const char *xdg_array_string_item_at(const XdgArray *array, int index);
 
 #ifdef __cplusplus
 }

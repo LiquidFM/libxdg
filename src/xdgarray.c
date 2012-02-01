@@ -23,7 +23,7 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#include "xdgmimearray_p.h"
+#include "xdgarray_p.h"
 #include <stdlib.h>
 
 
@@ -68,12 +68,12 @@ void _xdg_array_free(XdgArray *array)
 	free(array->list);
 }
 
-int xdg_mime_array_size(const XdgArray *array)
+int xdg_array_size(const XdgArray *array)
 {
 	return array->count;
 }
 
-const char *xdg_mime_array_string_item_at(const XdgArray *array, int index)
+const char *xdg_array_string_item_at(const XdgArray *array, int index)
 {
 	return (char *)array->list[index];
 }

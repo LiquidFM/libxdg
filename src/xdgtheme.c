@@ -24,7 +24,7 @@
  */
 
 #include "xdgtheme_p.h"
-#include "xdgmimearray_p.h"
+#include "xdgarray_p.h"
 #include "xdgmimedefs.h"
 #include "avltree.h"
 #include <stdlib.h>
@@ -185,7 +185,7 @@ static void _xdg_theme_map_item_free(XdgTheme *item)
 /**
  * Main algorithms
  *
- * TODO: Group theme "Directories" by "Context".
+ * TODO: Index "Directories" by "Context".
  */
 static void _xdg_theme_group_read_entry(XdgThemes *themes, XdgTheme *theme, XdgThemeGroup *group, const char *line)
 {

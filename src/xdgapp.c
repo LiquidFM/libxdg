@@ -25,7 +25,7 @@
  */
 
 #include "xdgapp_p.h"
-#include "xdgmimearray_p.h"
+#include "xdgarray_p.h"
 #include "xdgmimedefs.h"
 #include "xdgbasedirectory.h"
 #include "xdgtheme.h"

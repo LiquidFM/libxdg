@@ -30,7 +30,7 @@
 #ifndef __XDG_THEME_H_
 #define __XDG_THEME_H_
 
-#include "xdgmimearray.h"
+#include "xdgarray.h"
 
 
 #ifdef __cplusplus
