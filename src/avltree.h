@@ -42,6 +42,8 @@ typedef void (*DestroyKey)(KEY_TYPE key);
 typedef int (*CompareKeys)(const KEY_TYPE key1, const KEY_TYPE key2);
 typedef void (*DestroyValue)(VALUE_TYPE value);
 
+typedef KEY_TYPE (*ReadKey)(void **memory);
+typedef VALUE_TYPE (*ReadValue)(void **memory);
 typedef void (*WriteKey)(int fd, const KEY_TYPE key);
 typedef void (*WriteValue)(int fd, const VALUE_TYPE value);
 
@@ -78,6 +80,7 @@ VALUE_TYPE *search_or_create_node(AvlTree *tree, const KEY_TYPE key);
 VALUE_TYPE *search_node(const AvlTree *tree, const KEY_TYPE key);
 VALUE_TYPE delete_node(AvlTree *tree, const KEY_TYPE key);
 
+const AvlTree *map_from_memory(void **memory, ReadKey readKey, ReadValue readValue, CompareKeys compareKeys);
 void write_to_file(int fd, const AvlTree *tree, WriteKey writeKey, WriteValue writeValue);
 
 #endif /* AVLTREE_H_ */
