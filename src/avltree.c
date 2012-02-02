@@ -595,65 +595,39 @@ static void write_subtree_to_file(int fd, AvlNode *subtree_root, WriteKey writeK
 
 	/* Depth-first search (DFS) algorithm */
 	while (TRUE)
-		if (this_node->links.left)
-			if (this_node->visit & LEFT_IS_VISITED)
-				if (this_node->links.right)
-					if (this_node->visit & RIGHT_IS_VISITED)
-					{
-						this_node = this_node->links.parent;
+		if (this_node->visit & LEFT_IS_VISITED)
+			if (this_node->visit & RIGHT_IS_VISITED)
+			{
+				this_node = this_node->links.parent;
 
-						if (this_node == subtree_root)
-							break;
-					}
-					else
-					{
-						write_node_to_file(fd, &stack_node, this_node->links.right, writeKey, writeValue);
-						this_node->visit |= RIGHT_IS_VISITED;
-						this_node = this_node->links.right;
-						this_node->visit = NONE_IS_VISITED;
-					}
-				else
-				{
-					write_empty_node_to_file(fd, &stack_node);
-					this_node = this_node->links.parent;
-
-					if (this_node == subtree_root)
-						break;
-				}
+				if (this_node == 0)
+					break;
+			}
 			else
 			{
-				write_node_to_file(fd, &stack_node, this_node->links.left, writeKey, writeValue);
-				this_node->visit |= LEFT_IS_VISITED;
-				this_node = this_node->links.left;
-				this_node->visit = NONE_IS_VISITED;
-			}
-		else
-		{
-			write_empty_node_to_file(fd, &stack_node);
+				this_node->visit |= RIGHT_IS_VISITED;
 
-			if (this_node->links.right)
-				if (this_node->visit & RIGHT_IS_VISITED)
-				{
-					this_node = this_node->links.parent;
-
-					if (this_node == subtree_root)
-						break;
-				}
-				else
+				if (this_node->links.right)
 				{
 					write_node_to_file(fd, &stack_node, this_node->links.right, writeKey, writeValue);
-					this_node->visit |= RIGHT_IS_VISITED;
 					this_node = this_node->links.right;
 					this_node->visit = NONE_IS_VISITED;
 				}
-			else
-			{
-				write_empty_node_to_file(fd, &stack_node);
-				this_node = this_node->links.parent;
-
-				if (this_node == subtree_root)
-					break;
+				else
+					write_empty_node_to_file(fd, &stack_node);
 			}
+		else
+		{
+			this_node->visit |= LEFT_IS_VISITED;
+
+			if (this_node->links.left)
+			{
+				write_node_to_file(fd, &stack_node, this_node->links.left, writeKey, writeValue);
+				this_node = this_node->links.left;
+				this_node->visit = NONE_IS_VISITED;
+			}
+			else
+				write_empty_node_to_file(fd, &stack_node);
 		}
 }
 
@@ -664,89 +638,67 @@ static void map_subtree_from_memory(void **memory, AvlTree *tree, ReadKey readKe
 	if (stack_node->visit)
 	{
 		AvlNode *this_node = tree->tree_root = stack_node;
-		this_node->visit = NONE_IS_VISITED;
 
 		(*memory) += sizeof(AvlNode);
 		this_node->key = readKey(memory);
 		this_node->value = readValue(memory);
 
+		this_node->visit = NONE_IS_VISITED;
 		stack_node = (*memory);
 
 		/* Depth-first search (DFS) algorithm */
 		while (TRUE)
-			if (stack_node->visit)
-				if (this_node->visit & LEFT_IS_VISITED)
-					if (this_node->visit & RIGHT_IS_VISITED)
-					{
-						this_node = this_node->links.parent;
+			if (this_node->visit & LEFT_IS_VISITED)
+				if (this_node->visit & RIGHT_IS_VISITED)
+				{
+					this_node = this_node->links.parent;
 
-						if (this_node == tree->tree_root)
-							break;
-					}
-					else
+					if (this_node == 0)
+						break;
+				}
+				else
+					if (stack_node->visit)
 					{
 						this_node->links.right = stack_node;
 						stack_node->links.parent = this_node;
 						this_node->visit |= RIGHT_IS_VISITED;
 						this_node = stack_node;
-						this_node->visit = NONE_IS_VISITED;
 
 						(*memory) += sizeof(AvlNode);
 						this_node->key = readKey(memory);
 						this_node->value = readValue(memory);
 
+						this_node->visit = NONE_IS_VISITED;
 						stack_node = (*memory);
 					}
-				else
+					else
+					{
+						this_node->visit |= RIGHT_IS_VISITED;
+						stack_node = ((*memory) += sizeof(AvlNode));
+					}
+			else
+				if (stack_node->visit)
 				{
 					this_node->links.left = stack_node;
 					stack_node->links.parent = this_node;
 					this_node->visit |= LEFT_IS_VISITED;
 					this_node = stack_node;
-					this_node->visit = NONE_IS_VISITED;
 
 					(*memory) += sizeof(AvlNode);
 					this_node->key = readKey(memory);
 					this_node->value = readValue(memory);
 
+					this_node->visit = NONE_IS_VISITED;
 					stack_node = (*memory);
 				}
-			else
-			{
-				stack_node = ((*memory) += sizeof(AvlNode));
-
-				if (stack_node->visit)
-					if (this_node->visit & RIGHT_IS_VISITED)
-					{
-						this_node = this_node->links.parent;
-
-						if (this_node == tree->tree_root)
-							break;
-					}
-					else
-					{
-						this_node->links.right = stack_node;
-						stack_node->links.parent = this_node;
-						this_node->visit |= RIGHT_IS_VISITED;
-						this_node = stack_node;
-						this_node->visit = NONE_IS_VISITED;
-
-						(*memory) += sizeof(AvlNode);
-						this_node->key = readKey(memory);
-						this_node->value = readValue(memory);
-
-						stack_node = (*memory);
-					}
 				else
 				{
+					this_node->visit |= LEFT_IS_VISITED;
 					stack_node = ((*memory) += sizeof(AvlNode));
-					this_node = this_node->links.parent;
-
-					if (this_node == tree->tree_root)
-						break;
 				}
-			}
 	}
+	else
+		(*memory) += sizeof(AvlNode);
 }
 
 const AvlTree *map_from_memory(void **memory, ReadKey readKey, ReadValue readValue, CompareKeys compareKeys)
@@ -768,4 +720,9 @@ void write_to_file(int fd, const AvlTree *tree, WriteKey writeKey, WriteValue wr
 
 	if (tree->tree_root)
 		write_subtree_to_file(fd, (AvlNode *)tree->tree_root, writeKey, writeValue);
+	else
+	{
+		AvlNode stack_node;
+		write_empty_node_to_file(fd, &stack_node);
+	}
 }
