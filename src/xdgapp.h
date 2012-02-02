@@ -30,8 +30,11 @@
 #ifndef __XDG_APP_H_
 #define __XDG_APP_H_
 
+#ifndef HAVE_MMAP
+#	error Building xdgmime without MMAP support. Binary "applications.cache" file will not be used.
+#endif
+
 #include "xdgarray.h"
-#include "xdgappcache.h"
 
 
 #ifdef __cplusplus
@@ -42,7 +45,7 @@ typedef struct XdgApp      XdgApp;
 typedef struct XdgAppGroup XdgAppGroup;
 
 
-XdgAppCahce *xdg_app_rebuild_cache();
+void xdg_app_rebuild_cache();
 
 const XdgArray *xdg_default_apps_lookup(const char *mimeType);
 const XdgArray *xdg_user_apps_lookup(const char *mimeType);

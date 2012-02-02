@@ -26,7 +26,7 @@
 #ifndef XDGAPPCACHE_P_H_
 #define XDGAPPCACHE_P_H_
 
-#include "xdgappcache.h"
+#include "xdgapp_p.h"
 
 
 struct XdgAppCahce
@@ -35,10 +35,30 @@ struct XdgAppCahce
 	char *memory;
 	int size;
 };
+typedef struct XdgAppCahce XdgAppCahce;
 
 
+/**
+ * Initialization of cache file
+ */
 XdgAppCahce *_xdg_app_cache_new_empty(const char *file_name);
 XdgAppCahce *_xdg_app_cache_new(const char *file_name);
 void _xdg_app_cache_free(XdgAppCahce *cache);
+
+
+/**
+ * Serialization
+ */
+void write_app_key(int fd, const char *key);
+char *read_app_key(void **memory);
+
+void write_app(int fd, const XdgApp *value);
+void *read_app(void **memory);
+
+void write_list_mime_group(int fd, const XdgMimeGroup *value);
+void *read_list_mime_group(void **memory);
+
+void write_mime_type(int fd, const XdgMimeType *value);
+void *read_mime_type(void **memory);
 
 #endif /* XDGAPPCACHE_P_H_ */

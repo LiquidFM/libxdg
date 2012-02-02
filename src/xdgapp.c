@@ -25,7 +25,6 @@
  */
 
 #include "xdgapp_p.h"
-#include "xdgarray_p.h"
 #include "xdgappcache_p.h"
 #include "xdgmimedefs.h"
 #include "xdgbasedirectory.h"
@@ -41,48 +40,6 @@
 
 #define READ_FROM_FILE_BUFFER_SIZE 1024
 #define MIME_TYPE_NAME_BUFFER_SIZE 128
-
-
-/**
- * ".desktop" files data
- */
-struct XdgAppGroupEntry
-{
-	XdgArray values;
-};
-typedef struct XdgAppGroupEntry XdgAppGroupEntry;
-
-struct XdgAppGroup
-{
-	AvlTree entries;
-};
-
-struct XdgApp
-{
-	AvlTree groups;
-};
-
-
-/**
- * ".list" files data
- */
-struct XdgMimeSubType
-{
-	XdgArray apps;
-};
-typedef struct XdgMimeSubType XdgMimeSubType;
-
-struct XdgMimeType
-{
-	AvlTree sub_types;
-};
-typedef struct XdgMimeType XdgMimeType;
-
-struct XdgMimeGroup
-{
-	AvlTree types;
-};
-typedef struct XdgMimeGroup XdgMimeGroup;
 
 
 /**
@@ -535,59 +492,23 @@ void _xdg_app_shutdown()
 	}
 }
 
-static void write_app_group_entry_key(int fd, const char *key)
+void xdg_app_rebuild_cache()
 {
-	write(fd, key, strlen(key) + 1);
-}
-
-static void write_app_group_entry_value(int fd, const XdgAppGroupEntry *value)
-{
-	int i;
-
-	write(fd, value, sizeof(XdgAppGroupEntry));
-	write(fd, value->values.list, sizeof(void *) * value->values.count);
-
-	for (i = 0; i < value->values.count; ++i)
-		write(fd, value->values.list[i], strlen(value->values.list[i]) + 1);
-}
-
-static char *read_app_group_entry_key(void **memory)
-{
-	char *res = (*memory);
-
-	(*memory) += strlen(res) + 1;
-
-	return res;
-}
-
-static void *read_app_group_entry_value(void **memory)
-{
-	int i;
-	XdgAppGroupEntry *value = (*memory);
-	(*memory) += sizeof(XdgAppGroupEntry);
-
-	value->values.list = (*memory);
-	(*memory) += sizeof(void *) * value->values.count;
-
-	for (i = 0; i < value->values.count; ++i)
-	{
-		value->values.list[i] = (*memory);
-		(*memory) += strlen(*memory) + 1;
-	}
-
-	return value;
-}
-
-XdgAppCahce *xdg_app_rebuild_cache()
-{
-	XdgApp **app = (XdgApp **)search_node(&applications_list->app_files_map, "kde4-ark.desktop");
-	XdgAppGroup **group = (XdgAppGroup **)search_node(&(*app)->groups, "Desktop Entry");
-
 	XdgAppCahce *cache = _xdg_app_cache_new_empty("/home/dav/app.cache");
 
 	if (cache)
 	{
-		write_to_file(cache->fd, &(*group)->entries, write_app_group_entry_key, (WriteValue)write_app_group_entry_value);
+//		AvlTree tree;
+//
+//		init_avl_tree(&tree, strdup, (DestroyKey)free, strcmp);
+//		*search_or_create_node(&tree, "AAA") = "aaa";
+//		*search_or_create_node(&tree, "BBB") = "bbb";
+//		write_to_file(cache->fd, &tree, write_app_key, write_app_key);
+
+
+		write_to_file(cache->fd, &applications_list->app_files_map, write_app_key, (WriteValue)write_app);
+//		write_to_file(cache->fd, &applications_list->lst_files_map, write_app_key, (WriteValue)write_list_mime_group);
+//		write_to_file(cache->fd, &applications_list->asoc_map, write_app_key, (WriteValue)write_mime_type);
 		_xdg_app_cache_free(cache);
 	}
 
@@ -595,11 +516,11 @@ XdgAppCahce *xdg_app_rebuild_cache()
 	{
 		void *memory = cache->memory;
 
-		map_from_memory(&memory, read_app_group_entry_key, read_app_group_entry_value, strcmp);
+//		const AvlTree *tree = map_from_memory(&memory, read_app_key, read_app_key, strcmp);
+		const XdgApp *app = map_from_memory(&memory, read_app_key, read_app, strcmp);
+
 		_xdg_app_cache_free(cache);
 	}
-
-	return NULL;
 }
 
 const XdgArray *xdg_default_apps_lookup(const char *mimeType)

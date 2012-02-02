@@ -28,8 +28,55 @@
 #define __XDG_APP_P_H_
 
 #include "xdgapp.h"
+#include "avltree.h"
+#include "xdgarray_p.h"
 
 
+/**
+ * ".desktop" files data
+ */
+struct XdgAppGroupEntry
+{
+	XdgArray values;
+};
+typedef struct XdgAppGroupEntry XdgAppGroupEntry;
+
+struct XdgAppGroup
+{
+	AvlTree entries;
+};
+
+struct XdgApp
+{
+	AvlTree groups;
+};
+
+
+/**
+ * ".list" files data
+ */
+struct XdgMimeSubType
+{
+	XdgArray apps;
+};
+typedef struct XdgMimeSubType XdgMimeSubType;
+
+struct XdgMimeType
+{
+	AvlTree sub_types;
+};
+typedef struct XdgMimeType XdgMimeType;
+
+struct XdgMimeGroup
+{
+	AvlTree types;
+};
+typedef struct XdgMimeGroup XdgMimeGroup;
+
+
+/**
+ * Initialization
+ */
 void _xdg_app_init();
 void _xdg_app_shutdown();
 
