@@ -80,4 +80,10 @@ typedef struct XdgMimeGroup XdgMimeGroup;
 void _xdg_app_init();
 void _xdg_app_shutdown();
 
+
+/**
+ * Map of known associations of XdgApp with mime type
+ */
+XdgMimeSubType *xdg_mime_sub_type_add(AvlTree *map, const char *mime);
+
 #endif /* __XDG_APP_P_H_ */

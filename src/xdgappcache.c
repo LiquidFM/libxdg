@@ -1,62 +1,60 @@
 #include "xdgappcache_p.h"
+#include "xdgmimedefs.h"
+#include <errno.h>
 #include <fcntl.h>
 #include <string.h>
 #include <sys/mman.h>
 
 
-XdgAppCahce *_xdg_app_cache_new_empty(const char *file_name)
+struct ReadAppGroupEntryData
 {
-	XdgAppCahce cache = {open(file_name, O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH), MAP_FAILED, 0};
+	XdgApp *app;
+	AvlTree *asoc_map;
+	BOOL is_mime_type_entry;
+};
+typedef struct ReadAppGroupEntryData ReadAppGroupEntryData;
 
-	if (cache.fd >= 0)
+
+void _xdg_app_cache_new_empty(XdgAppCahceFile *cache, const char *file_name)
+{
+	cache->error = 0;
+	cache->fd = open(file_name, O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+	cache->memory = MAP_FAILED;
+	cache->size = 0;
+
+	if (cache->fd == -1)
+		cache->error = errno;
+}
+
+void _xdg_app_cache_new(XdgAppCahceFile *cache, const char *file_name)
+{
+	cache->error = 0;
+	cache->fd = open(file_name, O_RDONLY, 0);
+	cache->memory = MAP_FAILED;
+	cache->size = 0;
+
+	if (cache->fd >= 0)
 	{
 		struct stat st;
 
-		if (fstat(cache.fd, &st) == 0)
+		if (fstat(cache->fd, &st) == 0)
 		{
-			XdgAppCahce *res = malloc(sizeof(XdgAppCahce));
+			cache->size = st.st_size;
+			cache->memory = mmap(NULL, st.st_size, PROT_READ | PROT_WRITE, MAP_PRIVATE, cache->fd, 0);
 
-			cache.size = st.st_size;
-			memcpy(res, &cache, sizeof(XdgAppCahce));
-
-			return res;
+			if (cache->memory == MAP_FAILED)
+				cache->error = errno;
 		}
+		else
+			cache->error = errno;
 
-		close(cache.fd);
+		close(cache->fd);
 	}
-
-	return NULL;
+	else
+		cache->error = errno;
 }
 
-XdgAppCahce *_xdg_app_cache_new(const char *file_name)
-{
-	XdgAppCahce cache = {open(file_name, O_RDONLY, 0), MAP_FAILED, 0};
-
-	if (cache.fd >= 0)
-	{
-		struct stat st;
-
-		if (fstat(cache.fd, &st) == 0)
-		{
-			cache.size = st.st_size;
-			cache.memory = mmap(NULL, st.st_size, PROT_READ | PROT_WRITE, MAP_PRIVATE, cache.fd, 0);
-
-			if (cache.memory != MAP_FAILED)
-			{
-				XdgAppCahce *res = malloc(sizeof(XdgAppCahce));
-				memcpy(res, &cache, sizeof(XdgAppCahce));
-
-				return res;
-			}
-		}
-
-		close(cache.fd);
-	}
-
-	return NULL;
-}
-
-void _xdg_app_cache_free(XdgAppCahce *cache)
+void _xdg_app_cache_close(XdgAppCahceFile *cache)
 {
 	if (cache->fd >= 0)
 	{
@@ -65,8 +63,6 @@ void _xdg_app_cache_free(XdgAppCahce *cache)
 
 		close(cache->fd);
 	}
-
-	free(cache);
 }
 
 void write_app_key(int fd, const char *key)
@@ -104,7 +100,18 @@ void write_app(int fd, const XdgApp *value)
 	write_to_file(fd, &value->groups, write_app_key, (WriteValue)write_app_group);
 }
 
-static void *read_app_group_entry(void **memory)
+static char *read_app_group_entry_key(void **memory, ReadAppGroupEntryData *data)
+{
+	char *res = (*memory);
+
+	(*memory) += strlen(res) + 1;
+
+	data->is_mime_type_entry = (strcmp(res, "MimeType") == 0);
+
+	return res;
+}
+
+static void *read_app_group_entry(void **memory, ReadAppGroupEntryData *data)
 {
 	int i;
 	XdgAppGroupEntry *value = (*memory);
@@ -113,29 +120,45 @@ static void *read_app_group_entry(void **memory)
 	value->values.list = (*memory);
 	(*memory) += sizeof(void *) * value->values.count;
 
-	for (i = 0; i < value->values.count; ++i)
+	if (data->is_mime_type_entry)
 	{
-		value->values.list[i] = (*memory);
-		(*memory) += strlen(*memory) + 1;
+		XdgMimeSubType *sub_type;
+
+		for (i = 0; i < value->values.count; ++i)
+		{
+			value->values.list[i] = (*memory);
+
+			if ((sub_type = xdg_mime_sub_type_add(data->asoc_map, (*memory))))
+				(*_xdg_array_item_add(&sub_type->apps, 2)) = data->app;
+
+			(*memory) += strlen(*memory) + 1;
+		}
 	}
+	else
+		for (i = 0; i < value->values.count; ++i)
+		{
+			value->values.list[i] = (*memory);
+			(*memory) += strlen(*memory) + 1;
+		}
 
 	return value;
 }
 
-static void *read_app_group(void **memory)
+static void *read_app_group(void **memory, ReadAppGroupEntryData *data)
 {
 	XdgAppGroup *value = (*memory);
 
-	map_from_memory(memory, read_app_key, read_app_group_entry, strcmp);
+	map_from_memory(memory, (ReadKey)read_app_group_entry_key, (ReadValue)read_app_group_entry, strcmp, data);
 
 	return value;
 }
 
-void *read_app(void **memory)
+void *read_app(void **memory, AvlTree *asoc_map)
 {
 	XdgApp *value = (*memory);
+	ReadAppGroupEntryData data = {value, asoc_map, FALSE};
 
-	map_from_memory(memory, read_app_key, read_app_group, strcmp);
+	map_from_memory(memory, (ReadKey)read_app_key, (ReadValue)read_app_group, strcmp, &data);
 
 	return value;
 }

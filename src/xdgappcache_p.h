@@ -29,21 +29,22 @@
 #include "xdgapp_p.h"
 
 
-struct XdgAppCahce
+struct XdgAppCahceFile
 {
+	int error;
 	int fd;
-	char *memory;
+	void *memory;
 	int size;
 };
-typedef struct XdgAppCahce XdgAppCahce;
+typedef struct XdgAppCahceFile XdgAppCahceFile;
 
 
 /**
  * Initialization of cache file
  */
-XdgAppCahce *_xdg_app_cache_new_empty(const char *file_name);
-XdgAppCahce *_xdg_app_cache_new(const char *file_name);
-void _xdg_app_cache_free(XdgAppCahce *cache);
+void _xdg_app_cache_new_empty(XdgAppCahceFile *cache, const char *file_name);
+void _xdg_app_cache_new(XdgAppCahceFile *cache, const char *file_name);
+void _xdg_app_cache_close(XdgAppCahceFile *cache);
 
 
 /**
@@ -53,7 +54,7 @@ void write_app_key(int fd, const char *key);
 char *read_app_key(void **memory);
 
 void write_app(int fd, const XdgApp *value);
-void *read_app(void **memory);
+void *read_app(void **memory, AvlTree *asoc_map);
 
 void write_list_mime_group(int fd, const XdgMimeGroup *value);
 void *read_list_mime_group(void **memory);
