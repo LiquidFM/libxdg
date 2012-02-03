@@ -631,7 +631,7 @@ static void write_subtree_to_file(int fd, AvlNode *subtree_root, WriteKey writeK
 		}
 }
 
-static void map_subtree_from_memory(void **memory, AvlTree *tree, ReadKey readKey, ReadValue readValue)
+static void map_subtree_from_memory(void **memory, AvlTree *tree, ReadKey readKey, ReadValue readValue, void *user_data)
 {
 	AvlNode *stack_node = (*memory);
 
@@ -640,8 +640,8 @@ static void map_subtree_from_memory(void **memory, AvlTree *tree, ReadKey readKe
 		AvlNode *this_node = tree->tree_root = stack_node;
 
 		(*memory) += sizeof(AvlNode);
-		this_node->key = readKey(memory);
-		this_node->value = readValue(memory);
+		this_node->key = readKey(memory, user_data);
+		this_node->value = readValue(memory, user_data);
 
 		this_node->visit = NONE_IS_VISITED;
 		stack_node = (*memory);
@@ -665,8 +665,8 @@ static void map_subtree_from_memory(void **memory, AvlTree *tree, ReadKey readKe
 						this_node = stack_node;
 
 						(*memory) += sizeof(AvlNode);
-						this_node->key = readKey(memory);
-						this_node->value = readValue(memory);
+						this_node->key = readKey(memory, user_data);
+						this_node->value = readValue(memory, user_data);
 
 						this_node->visit = NONE_IS_VISITED;
 						stack_node = (*memory);
@@ -685,8 +685,8 @@ static void map_subtree_from_memory(void **memory, AvlTree *tree, ReadKey readKe
 					this_node = stack_node;
 
 					(*memory) += sizeof(AvlNode);
-					this_node->key = readKey(memory);
-					this_node->value = readValue(memory);
+					this_node->key = readKey(memory, user_data);
+					this_node->value = readValue(memory, user_data);
 
 					this_node->visit = NONE_IS_VISITED;
 					stack_node = (*memory);
@@ -701,13 +701,13 @@ static void map_subtree_from_memory(void **memory, AvlTree *tree, ReadKey readKe
 		(*memory) += sizeof(AvlNode);
 }
 
-const AvlTree *map_from_memory(void **memory, ReadKey readKey, ReadValue readValue, CompareKeys compareKeys)
+const AvlTree *map_from_memory(void **memory, ReadKey readKey, ReadValue readValue, CompareKeys compareKeys, void *user_data)
 {
 	AvlTree *res = (*memory);
 	(*memory) += sizeof(AvlTree);
 
 	init_avl_tree(res, NULL, NULL, compareKeys);
-	map_subtree_from_memory(memory, res, readKey, readValue);
+	map_subtree_from_memory(memory, res, readKey, readValue, user_data);
 
 	return res;
 }
