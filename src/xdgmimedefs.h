@@ -30,6 +30,9 @@
 
 #define BOOL int
 
+#define READ_FROM_FILE_BUFFER_SIZE 1024
+#define MIME_TYPE_NAME_BUFFER_SIZE 128
+
 #define REMOVE_WHITE_SPACES_LEFT(line, ptr) \
 	do { *ptr = 0; --ptr; } while(ptr > line && (*ptr) == ' ');
 

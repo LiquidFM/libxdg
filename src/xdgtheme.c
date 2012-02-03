@@ -36,10 +36,6 @@
 #include <sys/stat.h>
 
 
-#define MIME_TYPE_NAME_BUFFER_SIZE 128
-#define READ_FROM_FILE_BUFFER_SIZE 2048
-
-
 struct XdgIconSearchFuncData
 {
 	XdgTheme *theme;
