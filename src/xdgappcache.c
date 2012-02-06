@@ -116,34 +116,34 @@ static char *read_app_group_entry_key(void **memory, ReadAppGroupEntryData *data
 static void *read_app_group_entry(void **memory, ReadAppGroupEntryData *data)
 {
 	int i;
-	XdgAppGroupEntry *value = (*memory);
+	XdgAppGroupEntry *res = (*memory);
 	(*memory) += sizeof(XdgAppGroupEntry);
 
-	value->values.list = (*memory);
-	(*memory) += sizeof(void *) * value->values.count;
+	res->values.list = (*memory);
+	(*memory) += sizeof(void *) * res->values.count;
 
 	if (data->is_mime_type_entry)
 	{
 		XdgMimeSubType *sub_type;
 
-		for (i = 0; i < value->values.count; ++i)
+		for (i = 0; i < res->values.count; ++i)
 		{
-			value->values.list[i] = (*memory);
+			res->values.list[i] = (*memory);
 
-			if ((sub_type = xdg_mime_sub_type_add(data->asoc_map, (*memory))))
-				(*_xdg_array_item_add(&sub_type->apps, 2)) = data->app;
+			if ((sub_type = _xdg_mime_sub_type_add(data->asoc_map, (*memory))))
+				_xdg_array_app_item_add(&sub_type->apps, "", data->app);
 
 			(*memory) += strlen(*memory) + 1;
 		}
 	}
 	else
-		for (i = 0; i < value->values.count; ++i)
+		for (i = 0; i < res->values.count; ++i)
 		{
-			value->values.list[i] = (*memory);
+			res->values.list[i] = (*memory);
 			(*memory) += strlen(*memory) + 1;
 		}
 
-	return value;
+	return res;
 }
 
 static void *read_app_group(void **memory, ReadAppGroupEntryData *data)
@@ -165,24 +165,70 @@ void *read_app(void **memory, AvlTree *asoc_map)
 	return value;
 }
 
-void write_list_mime_group(int fd, const XdgMimeGroup *value)
+static void write_mime_group_sub_type(int fd, const XdgMimeSubType *value)
 {
+	int i;
 
+	write(fd, value, sizeof(XdgMimeSubType));
+	write(fd, value->apps.list, sizeof(void *) * value->apps.count);
+
+	for (i = 0; i < value->apps.count; ++i)
+		write(fd, value->apps.list[i], sizeof(XdgMimeSubTypeValue) + strlen(((XdgMimeSubTypeValue *)value->apps.list[i])->name));
 }
 
-void *read_list_mime_group(void **memory)
+static void write_mime_group_type(int fd, const XdgMimeType *value)
 {
-	return NULL;
+	write_to_file(fd, &value->sub_types, write_app_key, (WriteValue)write_mime_group_sub_type);
 }
 
-void write_mime_type(int fd, const XdgMimeType *value)
+void write_mime_group(int fd, const XdgMimeGroup *value)
 {
-
+	write_to_file(fd, &value->types, write_app_key, (WriteValue)write_mime_group_type);
 }
 
-void *read_mime_type(void **memory)
+static void *read_mime_group_sub_type(void **memory, const AvlTree *app_files_map)
 {
-	return NULL;
+	int i;
+	XdgApp **app;
+	XdgMimeSubTypeValue *value;
+
+	XdgMimeSubType *res = (*memory);
+	(*memory) += sizeof(XdgMimeSubType);
+
+	res->apps.list = (*memory);
+	(*memory) += sizeof(void *) * res->apps.count;
+
+	for (i = 0; i < res->apps.count; ++i)
+	{
+		res->apps.list[i] = value = (*memory);
+
+		if (app = (XdgApp **)search_node(app_files_map, value->name))
+			value->app = (*app);
+		else
+			value->app = 0;
+
+		(*memory) += sizeof(XdgMimeSubTypeValue) + strlen(value->name);
+	}
+
+	return res;
+}
+
+static void *read_mime_group_type(void **memory, const AvlTree *app_files_map)
+{
+	XdgMimeType *value = (*memory);
+
+	map_from_memory(memory, (ReadKey)read_app_key, (ReadValue)read_mime_group_sub_type, strcmp, (void *)app_files_map);
+
+	return value;
+}
+
+void *read_mime_group(void **memory, const AvlTree *app_files_map)
+{
+	XdgMimeGroup *value = (*memory);
+
+	map_from_memory(memory, (ReadKey)read_app_key, (ReadValue)read_mime_group_type, strcmp, (void *)app_files_map);
+
+	return value;
 }
 
 void write_file_watcher_list(int fd, const XdgFileWatcher *list)

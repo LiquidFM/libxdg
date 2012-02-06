@@ -56,11 +56,8 @@ char *read_app_key(void **memory);
 void write_app(int fd, const XdgApp *value);
 void *read_app(void **memory, AvlTree *asoc_map);
 
-void write_list_mime_group(int fd, const XdgMimeGroup *value);
-void *read_list_mime_group(void **memory);
-
-void write_mime_type(int fd, const XdgMimeType *value);
-void *read_mime_type(void **memory);
+void write_mime_group(int fd, const XdgMimeGroup *value);
+void *read_mime_group(void **memory, const AvlTree *app_files_map);
 
 void write_file_watcher_list(int fd, const XdgFileWatcher *list);
 const XdgFileWatcher *read_file_watcher_list(void **memory);

@@ -69,6 +69,13 @@ struct XdgApp
 /**
  * ".list" files data
  */
+struct XdgMimeSubTypeValue
+{
+	XdgApp *app;
+	char name[1];
+};
+typedef struct XdgMimeSubTypeValue XdgMimeSubTypeValue;
+
 struct XdgMimeSubType
 {
 	XdgArray apps;
@@ -98,6 +105,7 @@ void _xdg_app_shutdown();
 /**
  * Map of known associations of XdgApp with mime type
  */
-XdgMimeSubType *xdg_mime_sub_type_add(AvlTree *map, const char *mime);
+XdgMimeSubType *_xdg_mime_sub_type_add(AvlTree *map, const char *mime);
+void _xdg_array_app_item_add(XdgArray *array, const char *name, XdgApp *app);
 
 #endif /* __XDG_APP_P_H_ */
