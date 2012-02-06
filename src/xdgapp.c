@@ -30,6 +30,7 @@
 #include "xdgbasedirectory.h"
 #include "xdgtheme.h"
 #include "avltree.h"
+#include <sys/stat.h>
 #include <stdlib.h>
 #include <dirent.h>
 #include <stdio.h>
@@ -47,6 +48,7 @@
 struct XdgAppCahce
 {
 	XdgAppCahceFile file;
+	const XdgFileWatcher *files;
 	const AvlTree *app_files_map;
 	const AvlTree *lst_files_map;
 	AvlTree asoc_map;
@@ -60,9 +62,20 @@ struct XdgApplications
 	AvlTree app_files_map;
 	AvlTree lst_files_map;
 	AvlTree asoc_map;
+	XdgFileWatcher *files;
 };
-
 typedef struct XdgApplications XdgApplications;
+
+
+struct InitFromDirectoryData
+{
+	char *buffer;
+	XdgApplications *applications;
+
+};
+typedef struct InitFromDirectoryData InitFromDirectoryData;
+
+
 static XdgApplications *applications_list = NULL;
 
 
@@ -71,6 +84,48 @@ static XdgApplications *applications_list = NULL;
  * Memory allocation functions
  *
  */
+static void _xdg_file_watcher_list_add(XdgFileWatcher **list, const char *path, struct stat *st)
+{
+	XdgFileWatcher *res = malloc(sizeof(XdgFileWatcher) + strlen(path));
+
+	if (*list)
+	{
+		res->head = (*list)->head;
+		res->next = NULL;
+		(*list)->next = res;
+		(*list) = res;
+	}
+	else
+	{
+		(*list) = res;
+		res->head = res;
+		res->next = NULL;
+	}
+
+	if (stat(path, st) == 0)
+		res->mtime = st->st_mtime;
+	else
+		res->mtime = 0;
+
+	strcpy(res->path, path);
+}
+
+static void _xdg_file_watcher_list_free(XdgFileWatcher *list)
+{
+	if (list)
+	{
+		XdgFileWatcher *next;
+		XdgFileWatcher *file = list->head;
+
+		while (file)
+		{
+			next = file->next;
+			free(file);
+			file = next;
+		}
+	}
+}
+
 static void _xdg_array_string_item_add(XdgArray *array, const char *name)
 {
 	(*_xdg_array_item_add(array, 2)) = strdup(name);
@@ -325,7 +380,7 @@ static void _xdg_mime_group_read_entry(AvlTree *app_files_map, XdgMimeGroup *gro
 	}
 }
 
-static void _xdg_applications_read_desktop_file(char *buffer, XdgApplications *applications, FILE *file, const char *name, const char *file_path)
+static void _xdg_applications_read_desktop_file(char *buffer, XdgApplications *applications, FILE *file, const char *name)
 {
 	char *sep;
 	XdgApp *app;
@@ -352,7 +407,7 @@ static void _xdg_applications_read_desktop_file(char *buffer, XdgApplications *a
 					break;
 }
 
-static void _xdg_applications_read_list_file(char *buffer, XdgApplications *applications, FILE *file, const char *file_path)
+static void _xdg_applications_read_list_file(char *buffer, XdgApplications *applications, FILE *file)
 {
 	char *sep;
 	XdgMimeGroup *group = NULL;
@@ -379,13 +434,16 @@ static void _xdg_applications_read_list_file(char *buffer, XdgApplications *appl
 static void _xdg_applications_read_from_directory(char *buffer, XdgApplications *applications, const char *directory_name, const char *preffix)
 {
 	DIR *dir;
+	struct stat st;
+
+	_xdg_file_watcher_list_add(&applications->files, directory_name, &st);
 
 	if (dir = opendir(directory_name))
 	{
 		FILE *file;
 		char *file_name;
-		char *file_name_preffix;
 		struct dirent *entry;
+		char *file_name_preffix;
 
 		while ((entry = readdir(dir)) != NULL)
 			if (entry->d_type == DT_DIR)
@@ -413,10 +471,12 @@ static void _xdg_applications_read_from_directory(char *buffer, XdgApplications 
 
 						if (file = fopen(file_name, "r"))
 						{
+							_xdg_file_watcher_list_add(&applications->files, file_name, &st);
+
 							file_name_preffix = malloc(strlen(preffix) + strlen(entry->d_name) + 1);
 							strcpy(file_name_preffix, preffix); strcat(file_name_preffix, entry->d_name);
 
-							_xdg_applications_read_desktop_file(buffer, applications, file, file_name_preffix, file_name);
+							_xdg_applications_read_desktop_file(buffer, applications, file, file_name_preffix);
 
 							free(file_name_preffix);
 							fclose(file);
@@ -432,7 +492,8 @@ static void _xdg_applications_read_from_directory(char *buffer, XdgApplications 
 
 							if (file = fopen(file_name, "r"))
 							{
-								_xdg_applications_read_list_file(buffer, applications, file, file_name);
+								_xdg_file_watcher_list_add(&applications->files, file_name, &st);
+								_xdg_applications_read_list_file(buffer, applications, file);
 								fclose(file);
 							}
 
@@ -443,88 +504,104 @@ static void _xdg_applications_read_from_directory(char *buffer, XdgApplications 
 	}
 }
 
-static int _init_from_directory(const char *directory, void *user_data)
+static int _init_from_directory(const char *directory, InitFromDirectoryData *user_data)
 {
 	char *file_name;
 	assert(directory != NULL);
 
 	file_name = malloc (strlen (directory) + strlen ("/applications") + 1);
 	strcpy (file_name, directory); strcat (file_name, "/applications");
-	_xdg_applications_read_from_directory(user_data, applications_list, file_name, "");
+	_xdg_applications_read_from_directory(user_data->buffer, user_data->applications, file_name, "");
 	free (file_name);
 
 	return FALSE; /* Keep processing */
 }
 
-static XdgApplications *_xdg_mime_applications_new(void)
+static void xdg_app_cache_init(XdgAppCahce *cache)
+{
+	_xdg_app_cache_new(&cache->file, APPLICATIONS_CACHE_FILE);
+	init_avl_tree(&cache->asoc_map, strdup, (DestroyKey)free, strcmp);
+	cache->files = NULL;
+}
+
+static void xdg_app_cache_free(XdgAppCahce *cache)
+{
+	clear_avl_tree_and_values(&cache->asoc_map, (DestroyValue)_xdg_mime_type_map_item_free);
+	_xdg_app_cache_close(&cache->file);
+}
+
+static XdgApplications *_xdg_applications_new(void)
 {
 	XdgApplications *res = malloc(sizeof(XdgApplications));
 
-	_xdg_app_cache_new(&res->cache.file, APPLICATIONS_CACHE_FILE);
-	init_avl_tree(&res->cache.asoc_map, strdup, (DestroyKey)free, strcmp);
-
+	xdg_app_cache_init(&res->cache);
 	init_avl_tree(&res->app_files_map, strdup, (DestroyKey)free, strcmp);
 	init_avl_tree(&res->lst_files_map, strdup, (DestroyKey)free, strcmp);
 	init_avl_tree(&res->asoc_map, strdup, (DestroyKey)free, strcmp);
+	res->files = NULL;
 
 	return res;
 }
 
-static void _xdg_mime_applications_free(XdgApplications *applications)
+static void _xdg_applications_free(XdgApplications *applications)
 {
+	_xdg_file_watcher_list_free(applications->files);
 	clear_avl_tree_and_values(&applications->app_files_map, (DestroyValue)_xdg_app_map_item_free);
 	clear_avl_tree_and_values(&applications->lst_files_map, (DestroyValue)_xdg_mime_group_map_item_free);
 	clear_avl_tree_and_values(&applications->asoc_map, (DestroyValue)_xdg_mime_type_map_item_free);
-
-	clear_avl_tree_and_values(&applications->cache.asoc_map, (DestroyValue)_xdg_mime_type_map_item_free);
-	_xdg_app_cache_close(&applications->cache.file);
-
+	xdg_app_cache_free(&applications->cache);
 	free(applications);
 }
 
 void _xdg_app_init()
 {
 	char buffer[READ_FROM_FILE_BUFFER_SIZE];
+	InitFromDirectoryData data = {buffer, applications_list = _xdg_applications_new()};
 
-	applications_list = _xdg_mime_applications_new();
-	_xdg_for_each_data_dir(_init_from_directory, buffer);
+	_xdg_for_each_data_dir((XdgDirectoryFunc)_init_from_directory, &data);
 }
 
 void _xdg_app_shutdown()
 {
 	if (applications_list)
 	{
-		_xdg_mime_applications_free(applications_list);
+		_xdg_applications_free(applications_list);
 		applications_list = NULL;
 	}
 }
 
 void xdg_app_rebuild_cache()
 {
-//	XdgAppCahceFile *cache = _xdg_app_cache_new_empty("/home/dav/app.cache");
-//
-//	if (cache)
-//	{
-//		write_to_file(cache->fd, &applications_list->app_files_map, write_app_key, (WriteValue)write_app);
-//		write_to_file(cache->fd, &applications_list->lst_files_map, write_app_key, (WriteValue)write_list_mime_group);
-//		_xdg_app_cache_close(cache);
-//	}
-//
-//	if (cache = _xdg_app_cache_new("/home/dav/app.cache"))
-//	{
-//		AvlTree asoc_map;
-//		init_avl_tree(&asoc_map, strdup, (DestroyKey)free, strcmp);
-//
-//		void *memory = cache->memory;
-//		const AvlTree *app_files_map = map_from_memory(&memory, (ReadKey)read_app_key, (ReadValue)read_app, strcmp, &asoc_map);
-//
-//		clear_avl_tree_and_values(&asoc_map, (DestroyValue)_xdg_mime_type_map_item_free);
-//
-//		XdgApp **app = (XdgApp **)search_node(app_files_map, "kde4-ark.desktop");
-//		XdgAppGroup **group = (XdgAppGroup **)search_node(&(*app)->groups, "Desktop Entry");
-//
-//		_xdg_app_cache_close(cache);
-//	}
+	XdgAppCahceFile cache;
+
+	_xdg_app_cache_new_empty(&cache, "/home/dav/app.cache");
+
+	if (cache.error == 0)
+	{
+		write_file_watcher_list(cache.fd, applications_list->files);
+		write_to_file(cache.fd, &applications_list->app_files_map, write_app_key, (WriteValue)write_app);
+		write_to_file(cache.fd, &applications_list->lst_files_map, write_app_key, (WriteValue)write_list_mime_group);
+		_xdg_app_cache_close(&cache);
+	}
+
+	_xdg_app_cache_new(&cache, "/home/dav/app.cache");
+
+	if (cache.error == 0)
+	{
+		AvlTree asoc_map;
+		init_avl_tree(&asoc_map, strdup, (DestroyKey)free, strcmp);
+
+		void *memory = cache.memory;
+		read_file_watcher_list(&memory);
+		const AvlTree *app_files_map = map_from_memory(&memory, (ReadKey)read_app_key, (ReadValue)read_app, strcmp, &asoc_map);
+
+		clear_avl_tree_and_values(&asoc_map, (DestroyValue)_xdg_mime_type_map_item_free);
+
+		XdgApp **app = (XdgApp **)search_node(app_files_map, "kde4-ark.desktop");
+		XdgAppGroup **group = (XdgAppGroup **)search_node(&(*app)->groups, "Desktop Entry");
+
+		_xdg_app_cache_close(&cache);
+	}
 }
 
 const XdgArray *xdg_default_apps_lookup(const char *mimeType)

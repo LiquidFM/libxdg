@@ -62,4 +62,7 @@ void *read_list_mime_group(void **memory);
 void write_mime_type(int fd, const XdgMimeType *value);
 void *read_mime_type(void **memory);
 
+void write_file_watcher_list(int fd, const XdgFileWatcher *list);
+const XdgFileWatcher *read_file_watcher_list(void **memory);
+
 #endif /* XDGAPPCACHE_P_H_ */

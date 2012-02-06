@@ -27,9 +27,23 @@
 #ifndef __XDG_APP_P_H_
 #define __XDG_APP_P_H_
 
+#include <time.h>
 #include "xdgapp.h"
 #include "avltree.h"
 #include "xdgarray_p.h"
+
+
+/**
+ * Files which should be watched for modifications
+ */
+typedef struct XdgFileWatcher XdgFileWatcher;
+struct XdgFileWatcher
+{
+	XdgFileWatcher *head;
+	XdgFileWatcher *next;
+	time_t mtime;
+	char path[1];
+};
 
 
 /**

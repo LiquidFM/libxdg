@@ -44,6 +44,8 @@ void _xdg_app_cache_new(XdgAppCahceFile *cache, const char *file_name)
 
 			if (cache->memory == MAP_FAILED)
 				cache->error = errno;
+			else
+				return;
 		}
 		else
 			cache->error = errno;
@@ -180,5 +182,54 @@ void write_mime_type(int fd, const XdgMimeType *value)
 
 void *read_mime_type(void **memory)
 {
+	return NULL;
+}
+
+void write_file_watcher_list(int fd, const XdgFileWatcher *list)
+{
+	XdgFileWatcher empty;
+	memset(&empty, 0, sizeof(XdgFileWatcher));
+
+	if (list)
+	{
+		XdgFileWatcher *next;
+		XdgFileWatcher *file = list->head;
+
+		while (file)
+		{
+			next = file->next;
+			write(fd, file, sizeof(XdgFileWatcher) + strlen(file->path));
+			file = next;
+		}
+	}
+
+	write(fd, &empty, sizeof(XdgFileWatcher));
+}
+
+const XdgFileWatcher *read_file_watcher_list(void **memory)
+{
+	XdgFileWatcher *res = (*memory);
+
+	(*memory) += sizeof(XdgFileWatcher) + strlen(res->path);
+
+	if (res->head)
+	{
+		XdgFileWatcher *prev = res;
+		res->head = res;
+
+		while ((res = (*memory))->head)
+		{
+			prev->next = res;
+			res->head = prev->head;
+			prev = res;
+
+			(*memory) += sizeof(XdgFileWatcher) + strlen(res->path);
+		}
+
+		(*memory) += sizeof(XdgFileWatcher);
+
+		return prev;
+	}
+
 	return NULL;
 }
