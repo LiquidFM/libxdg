@@ -539,13 +539,22 @@ static void _xdg_app_cache_read(XdgAppCahce *cache)
 {
 	void *memory = cache->file.memory;
 
-	cache->files = read_file_watcher_list(&memory);
-	cache->app_files_map = map_from_memory(&memory, (ReadKey)read_app_key, (ReadValue)read_app, strcmp, &cache->asoc_map);
-	cache->lst_files_map = map_from_memory(&memory, (ReadKey)read_app_key, (ReadValue)read_mime_group, strcmp, (void *)cache->app_files_map);
+	if ((*(int *)memory) == 1)
+	{
+		memory += sizeof(int);
+
+		cache->files = read_file_watcher_list(&memory);
+		cache->app_files_map = map_from_memory(&memory, (ReadKey)read_app_key, (ReadValue)read_app, strcmp, &cache->asoc_map);
+		cache->lst_files_map = map_from_memory(&memory, (ReadKey)read_app_key, (ReadValue)read_mime_group, strcmp, (void *)cache->app_files_map);
+	}
 }
 
 static void _xdg_app_cache_write(XdgAppCahceFile *file, XdgApplications *applications)
 {
+	int version = 1;
+
+	write(file->fd, &version, sizeof(int));
+
 	write_file_watcher_list(file->fd, applications->files);
 	write_to_file(file->fd, &applications->app_files_map, write_app_key, (WriteValue)write_app);
 	write_to_file(file->fd, &applications->lst_files_map, write_app_key, (WriteValue)write_mime_group);
@@ -641,12 +650,13 @@ void _xdg_app_shutdown()
 	}
 }
 
-void xdg_app_rebuild_cache()
+int xdg_app_rebuild_cache()
 {
+	int res = 0;
 	XdgApplications applications;
 
 	_xdg_applications_init(&applications);
-	_xdg_app_cache_new_empty(&applications.cache.file, "/home/dav/app.cache");
+	_xdg_app_cache_new_empty(&applications.cache.file, APPLICATIONS_CACHE_FILE);
 
 	if (applications.cache.file.error == 0)
 	{
@@ -658,16 +668,12 @@ void xdg_app_rebuild_cache()
 		_xdg_app_cache_write(&applications.cache.file, &applications);
 		_xdg_app_cache_close(&applications.cache.file);
 	}
-
-	_xdg_app_cache_new(&applications.cache.file, "/home/dav/app.cache");
-
-	if (applications.cache.file.error == 0)
-	{
-		_xdg_app_cache_read(&applications.cache);
-		_xdg_app_cache_close(&applications.cache.file);
-	}
+	else
+		res = applications.cache.file.error;
 
 	_xdg_applications_clear(&applications);
+
+	return res;
 }
 
 const XdgArray *xdg_default_apps_lookup(const char *mimeType)

@@ -45,7 +45,7 @@ typedef struct XdgApp      XdgApp;
 typedef struct XdgAppGroup XdgAppGroup;
 
 
-void xdg_app_rebuild_cache();
+int xdg_app_rebuild_cache();
 
 const XdgArray *xdg_default_apps_lookup(const char *mimeType);
 const XdgArray *xdg_user_apps_lookup(const char *mimeType);
