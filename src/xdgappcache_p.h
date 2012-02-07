@@ -50,6 +50,9 @@ void _xdg_app_cache_close(XdgAppCahceFile *cache);
 /**
  * Serialization
  */
+void write_version(int fd, int version);
+int read_version(void **memory);
+
 void write_app_key(int fd, const char *key);
 char *read_app_key(void **memory);
 

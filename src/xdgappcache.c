@@ -67,6 +67,20 @@ void _xdg_app_cache_close(XdgAppCahceFile *cache)
 	}
 }
 
+void write_version(int fd, int version)
+{
+	write(fd, &version, sizeof(int));
+}
+
+int read_version(void **memory)
+{
+	int version = (*(int *)(*memory));
+
+	(*memory) += sizeof(int);
+
+	return version;
+}
+
 void write_app_key(int fd, const char *key)
 {
 	write(fd, key, strlen(key) + 1);

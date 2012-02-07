@@ -539,10 +539,8 @@ static void _xdg_app_cache_read(XdgAppCahce *cache)
 {
 	void *memory = cache->file.memory;
 
-	if ((*(int *)memory) == 1)
+	if (read_version(&memory) == 1)
 	{
-		memory += sizeof(int);
-
 		cache->files = read_file_watcher_list(&memory);
 		cache->app_files_map = map_from_memory(&memory, (ReadKey)read_app_key, (ReadValue)read_app, strcmp, &cache->asoc_map);
 		cache->lst_files_map = map_from_memory(&memory, (ReadKey)read_app_key, (ReadValue)read_mime_group, strcmp, (void *)cache->app_files_map);
@@ -551,10 +549,7 @@ static void _xdg_app_cache_read(XdgAppCahce *cache)
 
 static void _xdg_app_cache_write(XdgAppCahceFile *file, XdgApplications *applications)
 {
-	int version = 1;
-
-	write(file->fd, &version, sizeof(int));
-
+	write_version(file->fd, 1);
 	write_file_watcher_list(file->fd, applications->files);
 	write_to_file(file->fd, &applications->app_files_map, write_app_key, (WriteValue)write_app);
 	write_to_file(file->fd, &applications->lst_files_map, write_app_key, (WriteValue)write_mime_group);
@@ -597,31 +592,6 @@ static void _xdg_applications_free(XdgApplications *applications)
 {
 	_xdg_applications_clear(applications);
 	free(applications);
-}
-
-static BOOL _xdg_check_time_stamp(const XdgFileWatcher *files)
-{
-	struct stat st;
-	XdgFileWatcher *next;
-	XdgFileWatcher *file = files->head;
-
-	while (file)
-	{
-		next = file->next;
-
-		if (stat(file->path, &st) == 0)
-		{
-			if (st.st_mtime != file->mtime)
-				return FALSE;
-		}
-		else
-			if (file->mtime)
-				return FALSE;
-
-		file = next;
-	}
-
-	return TRUE;
 }
 
 void _xdg_app_init()
@@ -672,6 +642,55 @@ int xdg_app_rebuild_cache()
 		res = applications.cache.file.error;
 
 	_xdg_applications_clear(&applications);
+
+	return res;
+}
+
+static BOOL _xdg_check_time_stamp(const XdgFileWatcher *files)
+{
+	struct stat st;
+	XdgFileWatcher *next;
+	XdgFileWatcher *file = files->head;
+
+	while (file)
+	{
+		next = file->next;
+
+		if (stat(file->path, &st) == 0)
+		{
+			if (st.st_mtime != file->mtime)
+				return FALSE;
+		}
+		else
+			if (file->mtime)
+				return FALSE;
+
+		file = next;
+	}
+
+	return TRUE;
+}
+
+int xdg_app_cache_is_valid()
+{
+	int res = FALSE;
+	XdgAppCahce cache;
+
+	_xdg_app_cache_init(&cache);
+	_xdg_app_cache_new(&cache.file, APPLICATIONS_CACHE_FILE);
+
+	if (cache.file.error == 0)
+	{
+		void *memory = cache.file.memory;
+
+		if (read_version(&memory) == 1)
+		{
+			cache.files = read_file_watcher_list(&memory);
+			res = _xdg_check_time_stamp(cache.files);
+		}
+
+		_xdg_app_cache_close(&cache.file);
+	}
 
 	return res;
 }
