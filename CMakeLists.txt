@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 2.8)
-project (applications_cache)
+project (exdgmime)
 
 
 # Main information
@@ -61,6 +61,21 @@ set (CMAKE_CXX_FLAGS "${PROJECT_COMP_FLAGS}")
 
 
 # 3rdparty
+find_package (Doxygen 1.7)
+if (DOXYGEN_FOUND)
+    # Config file variables
+    set (DOXY_PROJECT_NAME   ${PROJECT_NAME})
+    set (DOXY_PROJECT_NUMBER "1")
+    set (DOXY_PROJECT_BRIEF  "\"This library is a fork of the official freedesktop.org library xdgmime.\"")
+    
+    configure_file (${CMAKE_SOURCE_DIR}/doc/Doxyfile.in ${CMAKE_BINARY_DIR}/doc/Doxyfile @ONLY)
+    
+    add_custom_target (doc
+        ALL
+        ${DOXYGEN_EXECUTABLE} ${CMAKE_BINARY_DIR}/doc/Doxyfile
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/doc
+        COMMENT "Generating API documentation with Doxygen" VERBATIM)
+endif ()
 
 # Includes
 
@@ -68,7 +83,7 @@ set (CMAKE_CXX_FLAGS "${PROJECT_COMP_FLAGS}")
 
 # Libs
 if (USE_GPROF)
-	set (applications_cache_LIBS ${applications_cache_LIBS} gmon)
+	set (exdgmime_LIBS ${exdgmime_LIBS} gmon)
 endif (USE_GPROF)
  
 # Definitions
@@ -86,8 +101,8 @@ if (USE_GPROF)
 endif (USE_GPROF)
 
 # Target - update-applications-cache
-add_executable (update-applications-cache ${applications_cache_SOURCES})
-target_link_libraries (update-applications-cache ${applications_cache_LIBS})
+add_executable (update-applications-cache ${exdgmime_SOURCES})
+target_link_libraries (update-applications-cache ${exdgmime_LIBS})
 
 # Install
 include ("cmake/Install.cmake")
