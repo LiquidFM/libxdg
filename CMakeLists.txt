@@ -61,7 +61,7 @@ set (CMAKE_CXX_FLAGS "${PROJECT_COMP_FLAGS}")
 
 
 # 3rdparty
-find_package (Doxygen 1.7)
+find_package (Doxygen 1.7.5)
 if (DOXYGEN_FOUND)
     # Config file variables
     set (DOXY_PROJECT_NAME   ${PROJECT_NAME})
