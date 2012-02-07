@@ -67,6 +67,7 @@ if (DOXYGEN_FOUND)
     set (DOXY_PROJECT_NAME   ${PROJECT_NAME})
     set (DOXY_PROJECT_NUMBER "1")
     set (DOXY_PROJECT_BRIEF  "\"This library is a fork of the official freedesktop.org library xdgmime.\"")
+    set (DOXY_INPUT          ${CMAKE_SOURCE_DIR}/src)
     
     configure_file (${CMAKE_SOURCE_DIR}/doc/Doxyfile.in ${CMAKE_BINARY_DIR}/doc/Doxyfile @ONLY)
     
