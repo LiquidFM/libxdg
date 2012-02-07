@@ -49,7 +49,8 @@ int xdg_app_rebuild_cache();
 int xdg_app_cache_is_valid();
 
 const XdgArray *xdg_default_apps_lookup(const char *mimeType);
-const XdgArray *xdg_user_apps_lookup(const char *mimeType);
+const XdgArray *xdg_added_apps_lookup(const char *mimeType);
+const XdgArray *xdg_removed_apps_lookup(const char *mimeType);
 const XdgArray *xdg_known_apps_lookup(const char *mimeType);
 
 char *xdg_app_icon_lookup(const XdgApp *app, const char *themeName, int size);

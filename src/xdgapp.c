@@ -712,9 +712,26 @@ const XdgArray *xdg_default_apps_lookup(const char *mimeType)
 	return 0;
 }
 
-const XdgArray *xdg_user_apps_lookup(const char *mimeType)
+const XdgArray *xdg_added_apps_lookup(const char *mimeType)
 {
 	XdgMimeGroup **group = (XdgMimeGroup **)search_node(&applications_list->lst_files_map, "Added Associations");
+
+	if (group)
+	{
+		char mimeTypeCopy[MIME_TYPE_NAME_BUFFER_SIZE];
+		strncpy(mimeTypeCopy, mimeType, MIME_TYPE_NAME_BUFFER_SIZE);
+		XdgMimeSubType *sub_type = _xdg_mime_sub_type_item_search(&(*group)->types, mimeTypeCopy);
+
+		if (sub_type)
+			return &sub_type->apps;
+	}
+
+	return 0;
+}
+
+const XdgArray *xdg_removed_apps_lookup(const char *mimeType)
+{
+	XdgMimeGroup **group = (XdgMimeGroup **)search_node(&applications_list->lst_files_map, "Removed Associations");
 
 	if (group)
 	{
