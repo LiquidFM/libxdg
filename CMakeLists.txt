@@ -43,7 +43,8 @@ message (STATUS "CMake generates " ${CMAKE_GENERATOR})
 
 
 # Main settings
-set (USE_GPROF )
+set (USE_GPROF                   NO)
+set (GENERATE_DOXY_INTERNAL_DOCS NO)
 
 
 # Custom modules
@@ -68,6 +69,12 @@ if (DOXYGEN_FOUND)
     set (DOXY_PROJECT_NUMBER "1")
     set (DOXY_PROJECT_BRIEF  "\"This library is a fork of the official freedesktop.org library xdgmime.\"")
     set (DOXY_INPUT          ${CMAKE_SOURCE_DIR}/src)
+    
+    if (GENERATE_DOXY_INTERNAL_DOCS)
+        set (DOXY_INTERNAL_DOCS "YES")
+    else ()
+        set (DOXY_INTERNAL_DOCS "NO")
+    endif ()
     
     configure_file (${CMAKE_SOURCE_DIR}/doc/Doxyfile.in ${CMAKE_BINARY_DIR}/doc/Doxyfile @ONLY)
     

@@ -1,23 +1,26 @@
-/* xdgmimeapp.c: Private file.  Datastructure for storing
- * the .desktop files.
+/** @internal @file xdgapp.c
+ *  @brief Private file.
+ *
+ * Data structures for storing \a ".desktop" and \a ".list" files contents.
  *
  * More info can be found at http://www.freedesktop.org/standards/
  *
+ * @copyright
  * Copyright (C) 2011,2012  Dmitriy Vilkov <dav.daemon@gmail.com>
- *
+ * @n@n
  * Licensed under the Academic Free License version 2.0
  * Or under the following terms:
- *
+ * @n@n
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2 of the License, or (at your option) any later version.
- *
+ * @n@n
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the GNU
  * Lesser General Public License for more details.
- *
+ * @n@n
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the
  * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
@@ -43,7 +46,7 @@
 
 
 /**
- * Main data structures
+ * Holds cache data
  */
 struct XdgAppCahce
 {
@@ -56,6 +59,9 @@ struct XdgAppCahce
 typedef struct XdgAppCahce XdgAppCahce;
 
 
+/**
+ * Holds dynamically indexed data
+ */
 struct XdgApplications
 {
 	XdgAppCahce cache;
@@ -67,6 +73,9 @@ struct XdgApplications
 typedef struct XdgApplications XdgApplications;
 
 
+/**
+ * Just for passing arguments into "_init_from_directory"
+ */
 struct InitFromDirectoryData
 {
 	char *buffer;
@@ -79,10 +88,8 @@ typedef struct InitFromDirectoryData InitFromDirectoryData;
 static XdgApplications *applications_list = NULL;
 
 
-
 /**
  * Memory allocation functions
- *
  */
 static void _xdg_file_watcher_list_add(XdgFileWatcher **list, const char *path, struct stat *st)
 {
