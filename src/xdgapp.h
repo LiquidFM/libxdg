@@ -37,16 +37,15 @@
 #	error Building exdgmime without MMAP is not yet supported.
 #endif
 
-#include "xdgarray.h"
+#include "xdglist.h"
 
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef struct XdgApp      XdgApp;
-typedef struct XdgAppGroup XdgAppGroup;
-
+typedef struct XdgApp          XdgApp;
+typedef struct XdgAppGroup     XdgAppGroup;
 
 /**
  * Rebuilds cache which contains information from all
@@ -72,10 +71,10 @@ int xdg_app_cache_is_valid();
  * \a ".desktop" files.
  *
  * @param mimeType name of the mime type.
- * @return a \c const pointer to XdgArray of XdgApp elements
+ * @return a \c const pointer to XdgList of XdgApp elements
  * or \c NULL if there is no corresponding \a ".desktop" files.
  */
-const XdgArray *xdg_default_apps_lookup(const char *mimeType);
+const XdgList *xdg_default_apps_lookup(const char *mimeType);
 
 /**
  * Looks in \a "Added Associations" section of all \a ".list"
@@ -83,10 +82,10 @@ const XdgArray *xdg_default_apps_lookup(const char *mimeType);
  * \a ".desktop" files.
  *
  * @param mimeType name of the mime type.
- * @return a \c const pointer to XdgArray of XdgApp elements
+ * @return a \c const pointer to XdgList of XdgApp elements
  * or \c NULL if there is no corresponding \a ".desktop" files.
  */
-const XdgArray *xdg_added_apps_lookup(const char *mimeType);
+const XdgList *xdg_added_apps_lookup(const char *mimeType);
 
 /**
  * Looks in \a "Removed Associations" section of all \a ".list"
@@ -94,20 +93,20 @@ const XdgArray *xdg_added_apps_lookup(const char *mimeType);
  * \a ".desktop" files.
  *
  * @param mimeType name of the mime type.
- * @return a \c const pointer to XdgArray of XdgApp elements
+ * @return a \c const pointer to XdgList of XdgApp elements
  * or \c NULL if there is no corresponding \a ".desktop" files.
  */
-const XdgArray *xdg_removed_apps_lookup(const char *mimeType);
+const XdgList *xdg_removed_apps_lookup(const char *mimeType);
 
 /**
  * Looks in all \a ".desktop" files for association of
  * a given \p "mimeType" with \a ".desktop" files.
  *
  * @param mimeType name of the mime type.
- * @return a \c const pointer to XdgArray of XdgApp elements
+ * @return a \c const pointer to XdgList of XdgApp elements
  * or \c NULL if there is no corresponding \a ".desktop" files.
  */
-const XdgArray *xdg_known_apps_lookup(const char *mimeType);
+const XdgList *xdg_known_apps_lookup(const char *mimeType);
 
 /**
  * Takes an icon name from "Icon" entry of a given \p "app"
@@ -140,21 +139,33 @@ const XdgAppGroup *xdg_app_group_lookup(const XdgApp *app, const char *group);
  *
  * @param group a \c const pointer to XdgAppGroup.
  * @param entry name of the entry.
- * @return a \c const pointer to XdgArray of \c "const char *" values
+ * @return a \c const pointer to XdgList of \c "const char *" values
  * or \c NULL if there is no corresponding \p "entry".
  */
-const XdgArray *xdg_app_entry_lookup(const XdgAppGroup *group, const char *entry);
+const XdgList *xdg_app_entry_lookup(const XdgAppGroup *group, const char *entry);
 
 /**
- * Returns a XdgApp item from an XdgArray.
+ * Searches for an localized \p "entry" (for example \a "Name[ru]") in a given \p "group"
+ * (for example \a "Desktop Entry").
  *
- * @param array a \c const pointer to the array.
- * @param index index of the required item.
- * @return a \c const pointer to XdgApp.
- *
- *\note This function does not check array boundaries!
+ * @param group a \c const pointer to XdgAppGroup.
+ * @param entry name of the entry.
+ * @param lang language of the localized value.
+ * @param country country of the localized value.
+ * @param modifier modifier of the localized value.
+ * @return a \c const pointer to XdgList of \c XdgEncodedValue values
+ * or \c NULL if there is no corresponding \p "entry".
  */
-const XdgApp *xdg_array_app_item_at(const XdgArray *array, int index);
+const XdgList *xdg_app_localized_entry_lookup(
+		const XdgAppGroup *group,
+		const char *entry,
+		const char *lang,
+		const char *country,
+		const char *modifier);
+
+const XdgApp *xdg_list_item_app(const XdgList *list);
+const char *xdg_list_item_app_group_entry_value(const XdgList *list);
+const char *xdg_list_item_app_group_localized_entry_value(const XdgList *list);
 
 #ifdef __cplusplus
 }

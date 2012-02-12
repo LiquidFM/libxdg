@@ -34,29 +34,46 @@
 #include "xdgapp.h"
 #include "avltree.h"
 #include "xdgarray_p.h"
+#include "xdglist_p.h"
 
 
 /**
  * Files which should be watched for modifications
  */
-typedef struct XdgFileWatcher XdgFileWatcher;
 struct XdgFileWatcher
 {
-	XdgFileWatcher *head;
-	XdgFileWatcher *next;
+	XdgList list;
 	time_t mtime;
 	char path[1];
 };
+typedef struct XdgFileWatcher XdgFileWatcher;
 
 
 /**
  * ".desktop" files data
  */
-struct XdgAppGroupEntry
+struct XdgValue
 {
-	XdgArray values;
+	XdgList list;
+	char value[1];
 };
-typedef struct XdgAppGroupEntry XdgAppGroupEntry;
+typedef struct XdgValue XdgValue;
+
+struct XdgEncodedValue
+{
+	XdgList list;
+	char *encoding;
+	char *value;
+	char data[2];
+};
+typedef struct XdgEncodedValue XdgEncodedValue;
+
+struct XdgAppGroupEntryValue
+{
+	XdgValue *values;
+	AvlTree localized;
+};
+typedef struct XdgAppGroupEntryValue XdgAppGroupEntryValue;
 
 struct XdgAppGroup
 {
