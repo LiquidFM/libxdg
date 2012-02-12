@@ -58,15 +58,6 @@ struct XdgValue
 };
 typedef struct XdgValue XdgValue;
 
-struct XdgEncodedValue
-{
-	XdgList list;
-	char *encoding;
-	char *value;
-	char data[2];
-};
-typedef struct XdgEncodedValue XdgEncodedValue;
-
 struct XdgAppGroupEntryValue
 {
 	XdgValue *values;

@@ -95,25 +95,25 @@ char *read_app_key(void **memory)
 	return res;
 }
 
-static void write_app_group_localized_entry(int fd, const XdgEncodedValue *value)
+static void write_app_group_localized_entry(int fd, const XdgValue *value)
 {
-	XdgEncodedValue empty;
-	memset(&empty, 0, sizeof(XdgEncodedValue));
+	XdgValue empty;
+	memset(&empty, 0, sizeof(XdgValue));
 
 	if (value)
 	{
-		XdgEncodedValue *next;
-		XdgEncodedValue *item = (XdgEncodedValue *)value->list.head;
+		XdgValue *next;
+		XdgValue *item = (XdgValue *)value->list.head;
 
 		while (item)
 		{
-			next = (XdgEncodedValue *)item->list.next;
-			write(fd, item, sizeof(XdgEncodedValue) + strlen(item->encoding) + strlen(item->value));
+			next = (XdgValue *)item->list.next;
+			write(fd, item, sizeof(XdgValue) + strlen(item->value));
 			item = next;
 		}
 	}
 
-	write(fd, &empty, sizeof(XdgEncodedValue));
+	write(fd, &empty, sizeof(XdgValue));
 }
 
 static void write_app_group_entry(int fd, const XdgAppGroupEntryValue *value)
@@ -164,14 +164,12 @@ static char *read_app_group_entry_key(void **memory, ReadAppGroupEntryArgs *data
 
 static void *read_app_group_localized_entry(void **memory, ReadAppGroupEntryArgs *data)
 {
-	XdgEncodedValue *res = (*memory);
-	res->encoding = res->data;
-	res->value = res->data + strlen(res->encoding) + 1;
-	(*memory) += sizeof(XdgEncodedValue) + strlen(res->encoding) + strlen(res->value);
+	XdgValue *res = (*memory);
+	(*memory) += sizeof(XdgValue) + strlen(res->value);
 
 	if (res->list.head)
 	{
-		XdgEncodedValue *prev = res;
+		XdgValue *prev = res;
 		res->list.head = (XdgList *)res;
 
 		while ((res = (*memory))->list.head)
@@ -180,12 +178,10 @@ static void *read_app_group_localized_entry(void **memory, ReadAppGroupEntryArgs
 			res->list.head = prev->list.head;
 			prev = res;
 
-			res->encoding = res->data;
-			res->value = res->data + strlen(res->encoding) + 1;
-			(*memory) += sizeof(XdgEncodedValue) + strlen(res->encoding) + strlen(res->value);
+			(*memory) += sizeof(XdgValue) + strlen(res->value);
 		}
 
-		(*memory) += sizeof(XdgEncodedValue);
+		(*memory) += sizeof(XdgValue);
 
 		return prev;
 	}

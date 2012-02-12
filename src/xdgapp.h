@@ -163,9 +163,28 @@ const XdgList *xdg_app_localized_entry_lookup(
 		const char *country,
 		const char *modifier);
 
+/**
+ * Get XdgApp item from current list item.
+ *
+ * @note This function works for XdgList returned by
+ * xdg_default_apps_lookup(), xdg_added_apps_lookup(),
+ * xdg_removed_apps_lookup(), xdg_known_apps_lookup() functions.
+ *
+ * @param list current list item.
+ * @return a \c const pointer to XdgApp.
+ */
 const XdgApp *xdg_list_item_app(const XdgList *list);
+
+/**
+ * Get \c "const char *" value from current list item.
+ *
+ * @note This function works for XdgList returned by
+ * xdg_app_entry_lookup(), xdg_app_localized_entry_lookup() functions.
+ *
+ * @param list current list item.
+ * @return a \c const pointer to XdgApp.
+ */
 const char *xdg_list_item_app_group_entry_value(const XdgList *list);
-const char *xdg_list_item_app_group_localized_entry_value(const XdgList *list);
 
 #ifdef __cplusplus
 }

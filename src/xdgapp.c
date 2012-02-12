@@ -42,8 +42,7 @@
 #include <assert.h>
 
 
-#define APPLICATIONS_CACHE_FILE "/home/dav/applications.cache"
-//#define APPLICATIONS_CACHE_FILE "/usr/share/applications/applications.cache"
+#define APPLICATIONS_CACHE_FILE "/usr/share/applications/applications.cache"
 
 
 /**
@@ -119,24 +118,6 @@ static void _xdg_list_value_item_free(XdgValue *list)
 	_xdg_list_free((XdgList *)list, free);
 }
 
-static void _xdg_list_encoded_value_item_add(XdgList **list, const char *encoding, const char *line)
-{
-	XdgEncodedValue *value = malloc(sizeof(XdgEncodedValue) + strlen(encoding) + strlen(line));
-
-	_xdg_list_apped(list, (XdgList *)value);
-
-	value->encoding = value->data;
-	strcpy(value->encoding, encoding);
-
-	value->value = value->encoding + strlen(value->encoding) + 1;
-	strcpy(value->value, line);
-}
-
-static void _xdg_list_encoded_value_item_free(XdgEncodedValue *list)
-{
-	_xdg_list_free((XdgList *)list, free);
-}
-
 static void _xdg_file_watcher_list_add(XdgList **list, const char *path, struct stat *st)
 {
 	XdgFileWatcher *res = malloc(sizeof(XdgFileWatcher) + strlen(path));
@@ -195,7 +176,7 @@ static XdgAppGroupEntryValue *_xdg_app_group_entry_map_item_add(AvlTree *map, co
 static void _xdg_app_group_entry_map_item_free(XdgAppGroupEntryValue *item)
 {
 	_xdg_list_value_item_free(item->values);
-	clear_avl_tree_and_values(&item->localized, (DestroyValue)_xdg_list_encoded_value_item_free);
+	clear_avl_tree_and_values(&item->localized, (DestroyValue)_xdg_list_value_item_free);
 	free(item);
 }
 
@@ -328,29 +309,6 @@ static XdgMimeSubType *_xdg_mime_sub_type_item_search(const AvlTree *map, const 
 	return 0;
 }
 
-static void _xdg_app_group_read_encoded_entry_value(XdgList **list, const char *encoding, char *line)
-{
-	static const char *default_encoding = "UTF-8";
-	char *sep;
-
-	if (encoding == NULL)
-		encoding = default_encoding;
-
-	for (sep = line; *sep && *sep != '\n'; ++sep)
-		if (*sep == ';')
-		{
-			*sep = 0;
-			_xdg_list_encoded_value_item_add(list, encoding, line);
-			line = sep + 1;
-		}
-
-	if (*line != 0 && *line != '\n')
-	{
-		*sep = 0;
-		_xdg_list_encoded_value_item_add(list, encoding, line);
-	}
-}
-
 static void _xdg_app_group_read_entry_value(XdgList **list, char *line)
 {
 	char *sep;
@@ -418,19 +376,12 @@ static void _xdg_app_group_read_entry(XdgAppGroup *group, XdgApp *app, AvlTree *
 			{
 				*sep = 0;
 				char *modifier = NULL;
-				char *encoding = NULL;
 				char buffer[LOCALE_NAME_BUFFER_SIZE];
 
 				if ((sep = strchr(locale, '@')) != NULL)
 				{
 					*sep = 0;
 					modifier = sep + 1;
-				}
-
-				if ((sep = strchr(locale, '.')) != NULL)
-				{
-					*sep = 0;
-					encoding = sep + 1;
 				}
 
 				strcpy(buffer, locale);
@@ -441,7 +392,7 @@ static void _xdg_app_group_read_entry(XdgAppGroup *group, XdgApp *app, AvlTree *
 					strcat(buffer, modifier);
 				}
 
-				_xdg_app_group_read_encoded_entry_value((XdgList **)search_or_create_node(&entry->localized, buffer), encoding, start);
+				_xdg_app_group_read_entry_value((XdgList **)search_or_create_node(&entry->localized, buffer), start);
 			}
 			else
 				_xdg_app_group_read_entry_value((XdgList **)&entry->values, start);
@@ -917,20 +868,120 @@ const XdgList *xdg_app_entry_lookup(const XdgAppGroup *group, const char *entry)
 
 const XdgList *xdg_app_localized_entry_lookup(const XdgAppGroup *group, const char *entry, const char *lang, const char *country, const char *modifier)
 {
+	XdgAppGroupEntryValue **value = (XdgAppGroupEntryValue **)search_node(&group->entries, entry);
+
+	if (value && *value)
+	{
+		XdgValue **res;
+		char buffer[LOCALE_NAME_BUFFER_SIZE];
+
+		if (lang)
+			if (country)
+				if (modifier)
+				{
+					strcpy(buffer, lang);
+					strcat(buffer, "_");
+					strcat(buffer, country);
+					strcat(buffer, "@");
+					strcat(buffer, modifier);
+
+					res = (XdgValue **)search_node(&(*value)->localized, buffer);
+
+					if (res && *res)
+						return (XdgList *)*res;
+					else
+					{
+						(*strchr(buffer, '@')) = 0;
+
+						res = (XdgValue **)search_node(&(*value)->localized, buffer);
+
+						if (res && *res)
+							return (XdgList *)*res;
+						else
+						{
+							(*strchr(buffer, '_')) = 0;
+							strcat(buffer, "@");
+							strcat(buffer, modifier);
+
+							res = (XdgValue **)search_node(&(*value)->localized, buffer);
+
+							if (res && *res)
+								return (XdgList *)*res;
+							else
+							{
+								res = (XdgValue **)search_node(&(*value)->localized, lang);
+
+								if (res && *res)
+									return (XdgList *)*res;
+								else
+									return (XdgList *)(*value)->values;
+							}
+						}
+					}
+				}
+				else
+				{
+					strcpy(buffer, lang);
+					strcat(buffer, "_");
+					strcat(buffer, country);
+
+					res = (XdgValue **)search_node(&(*value)->localized, buffer);
+
+					if (res && *res)
+						return (XdgList *)*res;
+					else
+					{
+						res = (XdgValue **)search_node(&(*value)->localized, lang);
+
+						if (res && *res)
+							return (XdgList *)*res;
+						else
+							return (XdgList *)(*value)->values;
+					}
+				}
+			else
+				if (modifier)
+				{
+					strcpy(buffer, lang);
+					strcat(buffer, "@");
+					strcat(buffer, modifier);
+
+					res = (XdgValue **)search_node(&(*value)->localized, buffer);
+
+					if (res && *res)
+						return (XdgList *)*res;
+					else
+					{
+						res = (XdgValue **)search_node(&(*value)->localized, lang);
+
+						if (res && *res)
+							return (XdgList *)*res;
+						else
+							return (XdgList *)(*value)->values;
+					}
+				}
+				else
+				{
+					res = (XdgValue **)search_node(&(*value)->localized, lang);
+
+					if (res && *res)
+						return (XdgList *)*res;
+					else
+						return (XdgList *)(*value)->values;
+				}
+
+		return (XdgList *)(*value)->values;
+	}
+
 	return 0;
 }
 
 const XdgApp *xdg_list_item_app(const XdgList *list)
 {
-	return 0;
+	return ((XdgMimeSubTypeValue *)list)->app;
 }
 
 const char *xdg_list_item_app_group_entry_value(const XdgList *list)
 {
 	return ((XdgValue *)list)->value;
-}
-
-const char *xdg_list_item_app_group_localized_entry_value(const XdgList *list)
-{
-	return ((XdgEncodedValue *)list)->value;
 }
