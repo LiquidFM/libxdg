@@ -25,6 +25,7 @@
 
 #include "xdgtheme_p.h"
 #include "xdgarray_p.h"
+#include "xdgbasedirectory.h"
 #include "xdgmimedefs.h"
 #include "avltree.h"
 #include <stdlib.h>
@@ -333,7 +334,7 @@ void _xdg_themes_init()
 	char buffer[READ_FROM_FILE_BUFFER_SIZE];
 
 	themes_list = _xdg_mime_themes_new();
-	_xdg_for_each_theme_dir(_xdg_mime_themes_read_from_directory, buffer);
+	_xdg_for_each_theme_dir((XdgDirectoryFunc)_xdg_mime_themes_read_from_directory, buffer);
 }
 
 void _xdg_themes_shutdown()
@@ -562,7 +563,7 @@ static char *_xdg_mime_lookup_icon(const char *icon, int size, Context context, 
 			{
 				XdgIconSearchFuncData data = {theme, icon, directories};
 
-				if (dir = _xdg_search_in_each_theme_dir(_xdg_search_icon_file, &data))
+				if (dir = _xdg_search_in_each_theme_dir((XdgIconSearchFunc)_xdg_search_icon_file, &data))
 					res = dir;
 				else
 					if (closestDirName)
@@ -570,7 +571,7 @@ static char *_xdg_mime_lookup_icon(const char *icon, int size, Context context, 
 						directories[0] = closestDirName;
 						directories[1] = NULL;
 
-						if (dir = _xdg_search_in_each_theme_dir(_xdg_search_icon_file, &data))
+						if (dir = _xdg_search_in_each_theme_dir((XdgIconSearchFunc)_xdg_search_icon_file, &data))
 							res = dir;
 					}
 			}
