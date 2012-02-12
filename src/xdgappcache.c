@@ -209,7 +209,7 @@ static void *read_app_group_entry(void **memory, ReadAppGroupEntryArgs *data)
 			XdgMimeSubType *sub_type;
 
 			if ((sub_type = _xdg_mime_sub_type_add(data->asoc_map, res->values->value)))
-				_xdg_array_app_item_add(&sub_type->apps, "", data->app);
+				_xdg_list_app_item_add((XdgList **)&sub_type->apps, "", data->app);
 
 			while ((res->values = (*memory))->list.head)
 			{
@@ -218,7 +218,7 @@ static void *read_app_group_entry(void **memory, ReadAppGroupEntryArgs *data)
 				prev = res->values;
 
 				if ((sub_type = _xdg_mime_sub_type_add(data->asoc_map, res->values->value)))
-					_xdg_array_app_item_add(&sub_type->apps, "", data->app);
+					_xdg_list_app_item_add((XdgList **)&sub_type->apps, "", data->app);
 
 				(*memory) += sizeof(XdgValue) + strlen(res->values->value);
 			}
@@ -264,13 +264,24 @@ void *read_app(void **memory, AvlTree *asoc_map)
 
 static void write_mime_group_sub_type(int fd, const XdgMimeSubType *value)
 {
-	int i;
-
 	write(fd, value, sizeof(XdgMimeSubType));
-	write(fd, value->apps.list, sizeof(void *) * value->apps.count);
 
-	for (i = 0; i < value->apps.count; ++i)
-		write(fd, value->apps.list[i], sizeof(XdgMimeSubTypeValue) + strlen(((XdgMimeSubTypeValue *)value->apps.list[i])->name));
+	if (value->apps)
+	{
+		XdgMimeSubTypeValue *next;
+		XdgMimeSubTypeValue *item = (XdgMimeSubTypeValue *)value->apps->list.head;
+		XdgMimeSubTypeValue empty;
+		memset(&empty, 0, sizeof(XdgMimeSubTypeValue));
+
+		while (item)
+		{
+			next = (XdgMimeSubTypeValue *)item->list.next;
+			write(fd, item, sizeof(XdgMimeSubTypeValue) + strlen(item->name));
+			item = next;
+		}
+
+		write(fd, &empty, sizeof(XdgMimeSubTypeValue));
+	}
 }
 
 static void write_mime_group_type(int fd, const XdgMimeType *value)
@@ -285,26 +296,43 @@ void write_mime_group(int fd, const XdgMimeGroup *value)
 
 static void *read_mime_group_sub_type(void **memory, const AvlTree *app_files_map)
 {
-	int i;
-	XdgApp **app;
-	XdgMimeSubTypeValue *value;
-
 	XdgMimeSubType *res = (*memory);
 	(*memory) += sizeof(XdgMimeSubType);
 
-	res->apps.list = (*memory);
-	(*memory) += sizeof(void *) * res->apps.count;
-
-	for (i = 0; i < res->apps.count; ++i)
+	if (res->apps)
 	{
-		res->apps.list[i] = value = (*memory);
+		XdgApp **app;
+		XdgMimeSubTypeValue *prev;
 
-		if (app = (XdgApp **)search_node(app_files_map, value->name))
-			value->app = (*app);
+		res->apps = (*memory);
+
+		if (app = (XdgApp **)search_node(app_files_map, res->apps->name))
+			res->apps->app = (*app);
 		else
-			value->app = 0;
+			res->apps->app = 0;
 
-		(*memory) += sizeof(XdgMimeSubTypeValue) + strlen(value->name);
+		(*memory) += sizeof(XdgMimeSubTypeValue) + strlen(res->apps->name);
+
+		prev = (XdgMimeSubTypeValue *)res->apps;
+		res->apps->list.head = (XdgList *)res->apps;
+
+		while ((res->apps = (*memory))->list.head)
+		{
+			prev->list.next = (XdgList *)res->apps;
+			res->apps->list.head = prev->list.head;
+			prev = res->apps;
+
+			if (app = (XdgApp **)search_node(app_files_map, res->apps->name))
+				res->apps->app = (*app);
+			else
+				res->apps->app = 0;
+
+			(*memory) += sizeof(XdgMimeSubTypeValue) + strlen(res->apps->name);
+		}
+
+		(*memory) += sizeof(XdgMimeSubTypeValue);
+
+		res->apps = prev;
 	}
 
 	return res;

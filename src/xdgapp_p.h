@@ -33,7 +33,6 @@
 #include <time.h>
 #include "xdgapp.h"
 #include "avltree.h"
-#include "xdgarray_p.h"
 #include "xdglist_p.h"
 
 
@@ -91,6 +90,7 @@ struct XdgApp
  */
 struct XdgMimeSubTypeValue
 {
+	XdgList list;
 	XdgApp *app;
 	char name[1];
 };
@@ -98,7 +98,7 @@ typedef struct XdgMimeSubTypeValue XdgMimeSubTypeValue;
 
 struct XdgMimeSubType
 {
-	XdgArray apps;
+	XdgMimeSubTypeValue *apps;
 };
 typedef struct XdgMimeSubType XdgMimeSubType;
 
@@ -126,6 +126,6 @@ void _xdg_app_shutdown();
  * Map of known associations of XdgApp with mime type
  */
 XdgMimeSubType *_xdg_mime_sub_type_add(AvlTree *map, const char *mime);
-void _xdg_array_app_item_add(XdgArray *array, const char *name, XdgApp *app);
+void _xdg_list_app_item_add(XdgList **list, const char *name, XdgApp *app);
 
 #endif /* __XDG_APP_P_H_ */

@@ -156,24 +156,19 @@ static void _xdg_file_watcher_list_free(XdgFileWatcher *list)
 	_xdg_list_free((XdgList *)list, free);
 }
 
-void _xdg_array_app_item_add(XdgArray *array, const char *name, XdgApp *app)
+void _xdg_list_app_item_add(XdgList **list, const char *name, XdgApp *app)
 {
 	XdgMimeSubTypeValue *val = malloc(sizeof(XdgMimeSubTypeValue) + strlen(name));
 
+	_xdg_list_apped(list, (XdgList *)val);
+
 	val->app = app;
 	strcpy(val->name, name);
-
-	(*_xdg_array_item_add(array, 2)) = val;
 }
 
 static void _xdg_mime_sub_type_map_item_free(XdgMimeSubType *sub_type)
 {
-	int i = 0;
-
-	for (; i < sub_type->apps.count; ++i)
-		free(sub_type->apps.list[i]);
-
-	_xdg_array_free(&sub_type->apps);
+	_xdg_list_free((XdgList *)sub_type->apps, free);
 	free(sub_type);
 }
 
@@ -387,7 +382,7 @@ static void _xdg_app_group_read_mime_type_entry_value(XdgList **list, XdgApp *ap
 			_xdg_list_value_item_add(list, line);
 
 			if (sub_type = _xdg_mime_sub_type_add(asoc_map, line))
-				_xdg_array_app_item_add(&sub_type->apps, "", app);
+				_xdg_list_app_item_add((XdgList **)&sub_type->apps, "", app);
 
 			line = sep + 1;
 		}
@@ -398,7 +393,7 @@ static void _xdg_app_group_read_mime_type_entry_value(XdgList **list, XdgApp *ap
 		_xdg_list_value_item_add(list, line);
 
 		if (sub_type = _xdg_mime_sub_type_add(asoc_map, line))
-			_xdg_array_app_item_add(&sub_type->apps, "", app);
+			_xdg_list_app_item_add((XdgList **)&sub_type->apps, "", app);
 	}
 }
 
@@ -480,14 +475,14 @@ static void _xdg_mime_group_read_entry(AvlTree *app_files_map, XdgMimeGroup *gro
 				if (*sep == ';')
 				{
 					*sep = 0;
-					_xdg_array_app_item_add(&sub_type->apps, start, _xdg_app_map_item_add(app_files_map, start));
+					_xdg_list_app_item_add((XdgList **)&sub_type->apps, start, _xdg_app_map_item_add(app_files_map, start));
 					start = sep + 1;
 				}
 
 			if (*start != 0 && *start != '\n')
 			{
 				*sep = 0;
-				_xdg_array_app_item_add(&sub_type->apps, start, _xdg_app_map_item_add(app_files_map, start));
+				_xdg_list_app_item_add((XdgList **)&sub_type->apps, start, _xdg_app_map_item_add(app_files_map, start));
 			}
 		}
 	}
@@ -833,7 +828,7 @@ const XdgList *xdg_default_apps_lookup(const char *mimeType)
 		XdgMimeSubType *sub_type = _xdg_mime_sub_type_item_search(&(*group)->types, mimeTypeCopy);
 
 		if (sub_type)
-			return &sub_type->apps;
+			return (XdgList *)&sub_type->apps;
 	}
 
 	return 0;
@@ -850,7 +845,7 @@ const XdgList *xdg_added_apps_lookup(const char *mimeType)
 		XdgMimeSubType *sub_type = _xdg_mime_sub_type_item_search(&(*group)->types, mimeTypeCopy);
 
 		if (sub_type)
-			return &sub_type->apps;
+			return (XdgList *)&sub_type->apps;
 	}
 
 	return 0;
@@ -867,7 +862,7 @@ const XdgList *xdg_removed_apps_lookup(const char *mimeType)
 		XdgMimeSubType *sub_type = _xdg_mime_sub_type_item_search(&(*group)->types, mimeTypeCopy);
 
 		if (sub_type)
-			return &sub_type->apps;
+			return (XdgList *)&sub_type->apps;
 	}
 
 	return 0;
@@ -880,7 +875,7 @@ const XdgList *xdg_known_apps_lookup(const char *mimeType)
 	XdgMimeSubType *sub_type = _xdg_mime_sub_type_item_search(applications_list->asoc_map, mimeTypeCopy);
 
 	if (sub_type)
-		return &sub_type->apps;
+		return (XdgList *)&sub_type->apps;
 	else
 		return 0;
 }
