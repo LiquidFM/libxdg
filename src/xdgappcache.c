@@ -45,7 +45,10 @@ void _xdg_app_cache_new(XdgAppCahceFile *cache, const char *file_name)
 			if (cache->memory == MAP_FAILED)
 				cache->error = errno;
 			else
+			{
+				madvise(cache->memory, cache->size, POSIX_MADV_SEQUENTIAL);
 				return;
+			}
 		}
 		else
 			cache->error = errno;
