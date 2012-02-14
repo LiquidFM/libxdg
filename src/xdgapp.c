@@ -779,7 +779,7 @@ const XdgList *xdg_default_apps_lookup(const char *mimeType)
 		XdgMimeSubType *sub_type = _xdg_mime_sub_type_item_search(&(*group)->types, mimeTypeCopy);
 
 		if (sub_type)
-			return (XdgList *)&sub_type->apps;
+			return (XdgList *)sub_type->apps;
 	}
 
 	return 0;
@@ -796,7 +796,7 @@ const XdgList *xdg_added_apps_lookup(const char *mimeType)
 		XdgMimeSubType *sub_type = _xdg_mime_sub_type_item_search(&(*group)->types, mimeTypeCopy);
 
 		if (sub_type)
-			return (XdgList *)&sub_type->apps;
+			return (XdgList *)sub_type->apps;
 	}
 
 	return 0;
@@ -813,7 +813,7 @@ const XdgList *xdg_removed_apps_lookup(const char *mimeType)
 		XdgMimeSubType *sub_type = _xdg_mime_sub_type_item_search(&(*group)->types, mimeTypeCopy);
 
 		if (sub_type)
-			return (XdgList *)&sub_type->apps;
+			return (XdgList *)sub_type->apps;
 	}
 
 	return 0;
@@ -826,7 +826,7 @@ const XdgList *xdg_known_apps_lookup(const char *mimeType)
 	XdgMimeSubType *sub_type = _xdg_mime_sub_type_item_search(applications_list->asoc_map, mimeTypeCopy);
 
 	if (sub_type)
-		return (XdgList *)&sub_type->apps;
+		return (XdgList *)sub_type->apps;
 	else
 		return 0;
 }
