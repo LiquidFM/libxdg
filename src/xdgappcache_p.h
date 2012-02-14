@@ -59,6 +59,8 @@ char *read_app_key(void **memory);
 void write_app(int fd, const XdgApp *value);
 void *read_app(void **memory, AvlTree *asoc_map);
 
+void write_asoc_map(int fd, const AvlTree *value);
+
 void write_mime_group(int fd, const XdgMimeGroup *value);
 void *read_mime_group(void **memory, const AvlTree *app_files_map);
 

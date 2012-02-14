@@ -261,6 +261,11 @@ void *read_app(void **memory, AvlTree *asoc_map)
 	return value;
 }
 
+void write_asoc_map(int fd, const AvlTree *value)
+{
+
+}
+
 static void write_mime_group_sub_type(int fd, const XdgMimeSubType *value)
 {
 	write(fd, value, sizeof(XdgMimeSubType));
