@@ -139,8 +139,8 @@ const XdgAppGroup *xdg_app_group_lookup(const XdgApp *app, const char *group);
  *
  * @param group a \c const pointer to XdgAppGroup.
  * @param entry name of the entry.
- * @return a \c const pointer to XdgList of \c "const char *" values
- * or \c NULL if there is no corresponding \p "entry".
+ * @return a \c const pointer to XdgList of default \p entry
+ * \c "const char *" values or \c NULL if there is no corresponding \p "entry".
  */
 const XdgList *xdg_app_entry_lookup(const XdgAppGroup *group, const char *entry);
 
@@ -155,6 +155,10 @@ const XdgList *xdg_app_entry_lookup(const XdgAppGroup *group, const char *entry)
  * @param modifier modifier of the localized value.
  * @return a \c const pointer to XdgList of \c XdgEncodedValue values
  * or \c NULL if there is no corresponding \p "entry".
+ *
+ * @note
+ * If there is no corresponding localized value then XdgList of \a default \p "entry"
+ * \c "const char *" values will be returned (if any).
  */
 const XdgList *xdg_app_localized_entry_lookup(
 		const XdgAppGroup *group,
