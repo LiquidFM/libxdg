@@ -24,7 +24,7 @@
  */
 
 #include "xdgtheme_p.h"
-#include "xdgarray_p.h"
+#include "xdglist_p.h"
 #include "xdgbasedirectory.h"
 #include "xdgmimedefs.h"
 #include "avltree.h"
@@ -35,15 +35,6 @@
 #include <fnmatch.h>
 #include <limits.h>
 #include <sys/stat.h>
-
-
-struct XdgIconSearchFuncData
-{
-	XdgTheme *theme;
-	const char *icon;
-	const char **subdirs;
-};
-typedef struct XdgIconSearchFuncData XdgIconSearchFuncData;
 
 
 static const char *contextes[] =
@@ -68,9 +59,16 @@ static const char *icon_extensions[] = {"png", "svg", "xpm", NULL};
 /**
  * ".theme" files data
  */
+struct XdgStringList
+{
+	XdgList list;
+	char value[1];
+};
+typedef struct XdgStringList XdgStringList;
+
 struct XdgThemeGroupEntry
 {
-	XdgArray values;
+	XdgStringList *values;
 };
 typedef struct XdgThemeGroupEntry XdgThemeGroupEntry;
 
@@ -79,10 +77,17 @@ struct XdgThemeGroup
 	AvlTree entries;
 };
 
+struct XdgThemeParents
+{
+	XdgList list;
+	XdgTheme *parent;
+};
+typedef struct XdgThemeParents XdgThemeParents;
+
 struct XdgTheme
 {
 	AvlTree groups;
-	XdgArray parents;
+	XdgThemeParents *parents;
 	char name[1];
 };
 
@@ -90,6 +95,15 @@ struct XdgTheme
 /**
  * Main data structure
  */
+struct XdgIconSearchFuncArgs
+{
+	XdgTheme *theme;
+	const char *icon;
+	XdgStringList *subdirs;
+};
+typedef struct XdgIconSearchFuncArgs XdgIconSearchFuncArgs;
+
+
 struct XdgThemes
 {
 	AvlTree themes_files_map;
@@ -104,14 +118,31 @@ static XdgThemes *themes_list = NULL;
  * Memory allocation functions
  *
  */
-static void _xdg_array_string_item_add(XdgArray *array, const char *name)
+static void _xdg_list_string_item_add(XdgStringList **list, const char *name)
 {
-	(*_xdg_array_item_add(array, 2)) = strdup(name);
+	XdgStringList *res = malloc(sizeof(XdgStringList) + strlen(name));
+
+	_xdg_list_apped((XdgList **)list, (XdgList *)res);
+
+	strcpy(res->value, name);
 }
 
-static void _xdg_array_theme_item_add(XdgArray *array, XdgTheme *theme)
+static void _xdg_list_string_item_copy(XdgStringList **list, XdgStringList *item)
 {
-	(*_xdg_array_item_add(array, 1)) = theme;
+	XdgStringList *res = malloc(sizeof(XdgStringList) + strlen(item->value));
+
+	_xdg_list_apped((XdgList **)list, (XdgList *)res);
+
+	strcpy(res->value, item->value);
+}
+
+static void _xdg_list_theme_item_add(XdgThemeParents **list, XdgTheme *theme)
+{
+	XdgThemeParents *res = malloc(sizeof(XdgThemeParents));
+
+	_xdg_list_apped((XdgList **)list, (XdgList *)res);
+
+	res->parent = theme;
 }
 
 static XdgThemeGroupEntry *_xdg_theme_group_entry_map_item_add(AvlTree *map, const char *name)
@@ -119,17 +150,14 @@ static XdgThemeGroupEntry *_xdg_theme_group_entry_map_item_add(AvlTree *map, con
 	XdgThemeGroupEntry **res = (XdgThemeGroupEntry **)search_or_create_node(map, name);
 
 	if ((*res) == NULL)
-	{
-		(*res) = malloc(sizeof(XdgThemeGroupEntry));
-		memset(&(*res)->values, 0, sizeof(XdgArray));
-	}
+		(*res) = calloc(1, sizeof(XdgThemeGroupEntry));
 
 	return (*res);
 }
 
 static void _xdg_theme_group_entry_map_item_free(XdgThemeGroupEntry *item)
 {
-	_xdg_array_and_values_free(&item->values);
+	_xdg_list_free((XdgList *)item->values, free);
 	free(item);
 }
 
@@ -162,7 +190,7 @@ static XdgTheme *_xdg_theme_map_item_add(AvlTree *map, const char *name)
 		(*res) = malloc(sizeof(XdgTheme) + len);
 
 		init_avl_tree(&(*res)->groups, strdup, (DestroyKey)free, strcmp);
-		memset(&(*res)->parents, 0, sizeof(XdgArray));
+		(*res)->parents = NULL;
 
 		memcpy((*res)->name, name, len);
 		(*res)->name[len] = 0;
@@ -174,7 +202,7 @@ static XdgTheme *_xdg_theme_map_item_add(AvlTree *map, const char *name)
 static void _xdg_theme_map_item_free(XdgTheme *item)
 {
 	clear_avl_tree_and_values(&item->groups, (DestroyValue)_xdg_theme_group_map_item_free);
-	_xdg_array_free(&item->parents);
+	_xdg_list_free((XdgList *)item->parents, free);
 	free(item);
 }
 
@@ -201,16 +229,16 @@ static void _xdg_theme_group_read_entry(XdgThemes *themes, XdgTheme *theme, XdgT
 				if (*sep == ',')
 				{
 					*sep = 0;
-					_xdg_array_string_item_add(&entry->values, start);
-					_xdg_array_theme_item_add(&theme->parents, _xdg_theme_map_item_add(&themes->themes_files_map, start));
+					_xdg_list_string_item_add(&entry->values, start);
+					_xdg_list_theme_item_add(&theme->parents, _xdg_theme_map_item_add(&themes->themes_files_map, start));
 					start = sep + 1;
 				}
 
 			if (*start != 0 && *start != '\n')
 			{
 				*sep = 0;
-				_xdg_array_string_item_add(&entry->values, start);
-				_xdg_array_theme_item_add(&theme->parents, _xdg_theme_map_item_add(&themes->themes_files_map, start));
+				_xdg_list_string_item_add(&entry->values, start);
+				_xdg_list_theme_item_add(&theme->parents, _xdg_theme_map_item_add(&themes->themes_files_map, start));
 			}
 		}
 		else
@@ -219,14 +247,14 @@ static void _xdg_theme_group_read_entry(XdgThemes *themes, XdgTheme *theme, XdgT
 				if (*sep == ',')
 				{
 					*sep = 0;
-					_xdg_array_string_item_add(&entry->values, start);
+					_xdg_list_string_item_add(&entry->values, start);
 					start = sep + 1;
 				}
 
 			if (*start != 0 && *start != '\n')
 			{
 				*sep = 0;
-				_xdg_array_string_item_add(&entry->values, start);
+				_xdg_list_string_item_add(&entry->values, start);
 			}
 		}
 	}
@@ -346,7 +374,7 @@ void _xdg_themes_shutdown()
 	}
 }
 
-static char *_xdg_search_icon_file(const char *directory, XdgIconSearchFuncData *data)
+static char *_xdg_search_icon_file(const char *directory, XdgIconSearchFuncArgs *data)
 {
 	struct stat buf;
 	char *res = NULL;
@@ -358,11 +386,12 @@ static char *_xdg_search_icon_file(const char *directory, XdgIconSearchFuncData 
 		char *sub_dir;
 		char *file_name;
 		const char **extensions;
+		XdgStringList *subdir = (XdgStringList *)data->subdirs->list.head;
 
-		for (; *data->subdirs && res == NULL; ++data->subdirs)
+		do
 		{
-			sub_dir = malloc(strlen(theme_dir) + strlen(*data->subdirs) + 2);
-			strcpy(sub_dir, theme_dir); strcat(sub_dir, "/"); strcat(sub_dir, *data->subdirs);
+			sub_dir = malloc(strlen(theme_dir) + strlen(subdir->value) + 2);
+			strcpy(sub_dir, theme_dir); strcat(sub_dir, "/"); strcat(sub_dir, subdir->value);
 
 			for (extensions = icon_extensions; *extensions; ++extensions)
 			{
@@ -380,7 +409,9 @@ static char *_xdg_search_icon_file(const char *directory, XdgIconSearchFuncData 
 			}
 
 			free(sub_dir);
+			subdir = (XdgStringList *)subdir->list.next;
 		}
+		while (subdir);
 	}
 
 	free(theme_dir);
@@ -391,22 +422,22 @@ static BOOL _xdg_mime_directory_matches_size(XdgThemeGroup *dirGroup, int size, 
 {
 	XdgThemeGroupEntry **entry1 = (XdgThemeGroupEntry **)search_node(&dirGroup->entries, "Type");
 
-	if (entry1 && (*entry1)->values.count)
+	if (entry1 && (*entry1)->values)
 	{
-		const char *type = (*entry1)->values.list[0];
+		const char *type = (*entry1)->values->value;
 		entry1 = (XdgThemeGroupEntry **)search_node(&dirGroup->entries, "Size");
 
-		if (entry1 && (*entry1)->values.count)
+		if (entry1 && (*entry1)->values)
 		{
-			int dirSize = atoi((*entry1)->values.list[0]);
+			int dirSize = atoi((*entry1)->values->value);
 
 			if (strcmp(type, "Threshold") == 0)
 			{
 				int threshold = 2;
 				entry1 = (XdgThemeGroupEntry **)search_node(&dirGroup->entries, "Threshold");
 
-				if (entry1 && (*entry1)->values.count)
-					threshold = atoi((*entry1)->values.list[0]);
+				if (entry1 && (*entry1)->values)
+					threshold = atoi((*entry1)->values->value);
 
 				if (size >= dirSize - threshold && size <= dirSize + threshold)
 					return TRUE;
@@ -419,8 +450,8 @@ static BOOL _xdg_mime_directory_matches_size(XdgThemeGroup *dirGroup, int size, 
 						int minSize = dirSize;
 						entry1 = (XdgThemeGroupEntry **)search_node(&dirGroup->entries, "MinSize");
 
-						if (entry1 && (*entry1)->values.count)
-							minSize = atoi((*entry1)->values.list[0]);
+						if (entry1 && (*entry1)->values)
+							minSize = atoi((*entry1)->values->value);
 
 						if ((tmp_size = minSize - size) < (*minimal_size))
 						{
@@ -434,8 +465,8 @@ static BOOL _xdg_mime_directory_matches_size(XdgThemeGroup *dirGroup, int size, 
 							int maxSize = dirSize;
 							entry1 = (XdgThemeGroupEntry **)search_node(&dirGroup->entries, "MaxSize");
 
-							if (entry1 && (*entry1)->values.count)
-								maxSize = atoi((*entry1)->values.list[0]);
+							if (entry1 && (*entry1)->values)
+								maxSize = atoi((*entry1)->values->value);
 
 							if ((tmp_size = size - maxSize) < (*minimal_size))
 							{
@@ -453,7 +484,7 @@ static BOOL _xdg_mime_directory_matches_size(XdgThemeGroup *dirGroup, int size, 
 			else
 				if (strcmp(type, "Fixed") == 0)
 				{
-					if (entry1 && (*entry1)->values.count)
+					if (entry1 && (*entry1)->values)
 						if (size == dirSize)
 							return TRUE;
 						else
@@ -474,13 +505,13 @@ static BOOL _xdg_mime_directory_matches_size(XdgThemeGroup *dirGroup, int size, 
 						int maxSize = dirSize;
 						entry1 = (XdgThemeGroupEntry **)search_node(&dirGroup->entries, "MinSize");
 
-						if (entry1 && (*entry1)->values.count)
-							minSize = atoi((*entry1)->values.list[0]);
+						if (entry1 && (*entry1)->values)
+							minSize = atoi((*entry1)->values->value);
 
 						entry1 = (XdgThemeGroupEntry **)search_node(&dirGroup->entries, "MaxSize");
 
-						if (entry1 && (*entry1)->values.count)
-							maxSize = atoi((*entry1)->values.list[0]);
+						if (entry1 && (*entry1)->values)
+							maxSize = atoi((*entry1)->values->value);
 
 						if (size >= minSize && size <= maxSize)
 							return TRUE;
@@ -522,8 +553,8 @@ static BOOL _xdg_mime_directory_matches_size_and_context(XdgThemeGroup *dirGroup
 {
 	XdgThemeGroupEntry **entry1 = (XdgThemeGroupEntry **)search_node(&dirGroup->entries, "Context");
 
-	if (entry1 && (*entry1)->values.count &&
-		strcmp((*entry1)->values.list[0], contextes[context]) == 0)
+	if (entry1 && (*entry1)->values &&
+		strcmp((*entry1)->values->value, contextes[context]) == 0)
 			return _xdg_mime_directory_matches_size(dirGroup, size, directory, closestDirName, minimal_size);
 
 	return FALSE;
@@ -538,45 +569,50 @@ static char *_xdg_mime_lookup_icon(const char *icon, int size, Context context, 
 	{
 		XdgThemeGroupEntry **entry = (XdgThemeGroupEntry **)search_node(&(*group)->entries, "Directories");
 
-		if (entry && (*entry)->values.count)
+		if (entry && (*entry)->values)
 		{
 			XdgThemeGroup **dirGroup;
 			int minimal_size = INT_MAX;
-
-			int dirs_array_size = sizeof(const char *) * ((*entry)->values.count + 1);
-			const char **directories = malloc(dirs_array_size);
-			memset(directories, 0, dirs_array_size);
+			XdgStringList *directories = NULL;
+			XdgStringList *directory = (XdgStringList *)(*entry)->values->list.head;
 
 			const char *closestDirName = 0;
-			const char **ptr = directories;
 			char *dir;
 
-			int i = 0, count = (*entry)->values.count;
-			for (; i < count; ++i)
-				if ((dirGroup = (XdgThemeGroup **)search_node(&theme->groups, dir = (*entry)->values.list[i])) &&
+			do
+			{
+				if ((dirGroup = (XdgThemeGroup **)search_node(&theme->groups, dir = directory->value)) &&
 					_xdg_mime_directory_matches_size_and_context(*dirGroup, size, context, dir, &closestDirName, &minimal_size))
 				{
-					(*ptr++) = dir;
+					_xdg_list_string_item_copy(&directories, directory);
 				}
 
-			if (*directories)
+				directory = (XdgStringList *)directory->list.next;
+			}
+			while (directory);
+
+			if (directories)
 			{
-				XdgIconSearchFuncData data = {theme, icon, directories};
+				XdgIconSearchFuncArgs data = {theme, icon, directories};
 
 				if (dir = _xdg_search_in_each_theme_dir((XdgIconSearchFunc)_xdg_search_icon_file, &data))
 					res = dir;
 				else
 					if (closestDirName)
 					{
-						directories[0] = closestDirName;
-						directories[1] = NULL;
+						XdgStringList *tmp_directories = NULL;
+
+						_xdg_list_string_item_add(&tmp_directories, closestDirName);
+						data.subdirs = tmp_directories;
 
 						if (dir = _xdg_search_in_each_theme_dir((XdgIconSearchFunc)_xdg_search_icon_file, &data))
 							res = dir;
+
+						_xdg_list_free((XdgList *)tmp_directories, free);
 					}
 			}
 
-			free(directories);
+			_xdg_list_free((XdgList *)directories, free);
 		}
 	}
 
@@ -590,13 +626,18 @@ static char *_xdg_mime_find_icon_helper(const char *icon, int size, Context cont
 	if (res)
 		return res;
 	else
-		if (theme->parents.count)
+		if (theme->parents)
 		{
-			int i = 0, count = theme->parents.count;
+			XdgThemeParents *parent = (XdgThemeParents *)theme->parents->list.head;
 
-			for (; i < count; ++i)
-				if (res = _xdg_mime_find_icon_helper(icon, size, context, theme->parents.list[i], hicolor))
+			do
+			{
+				if (res = _xdg_mime_find_icon_helper(icon, size, context, theme->parents->parent, hicolor))
 					return res;
+
+				parent = (XdgThemeParents *)parent->list.next;
+			}
+			while (parent);
 		}
 		else
 			if (theme != hicolor)
