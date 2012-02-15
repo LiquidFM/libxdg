@@ -6,15 +6,6 @@
 #include <sys/mman.h>
 
 
-struct ReadAppGroupEntryArgs
-{
-	XdgApp *app;
-	AvlTree *asoc_map;
-	BOOL is_mime_type_entry;
-};
-typedef struct ReadAppGroupEntryArgs ReadAppGroupEntryArgs;
-
-
 void _xdg_app_cache_new_empty(XdgAppCahceFile *cache, const char *file_name)
 {
 	cache->error = 0;
@@ -154,18 +145,7 @@ void write_app(int fd, const XdgApp *value)
 	write_to_file(fd, &value->groups, write_app_key, (WriteValue)write_app_group);
 }
 
-static char *read_app_group_entry_key(void **memory, ReadAppGroupEntryArgs *data)
-{
-	char *res = (*memory);
-
-	(*memory) += strlen(res) + 1;
-
-	data->is_mime_type_entry = (strcmp(res, "MimeType") == 0);
-
-	return res;
-}
-
-static void *read_app_group_localized_entry(void **memory, ReadAppGroupEntryArgs *data)
+static void *read_app_group_localized_entry(void **memory)
 {
 	XdgValue *res = (*memory);
 	(*memory) += sizeof(XdgValue) + strlen(res->value);
@@ -192,7 +172,7 @@ static void *read_app_group_localized_entry(void **memory, ReadAppGroupEntryArgs
 	return NULL;
 }
 
-static void *read_app_group_entry(void **memory, ReadAppGroupEntryArgs *data)
+static void *read_app_group_entry(void **memory)
 {
 	XdgAppGroupEntryValue *res = (*memory);
 	(*memory) += sizeof(XdgAppGroupEntryValue);
@@ -203,67 +183,41 @@ static void *read_app_group_entry(void **memory, ReadAppGroupEntryArgs *data)
 		res->values->list.head = (XdgList *)res->values;
 		(*memory) += sizeof(XdgValue) + strlen(res->values->value);
 
-		if (data->is_mime_type_entry)
+		while ((res->values = (*memory))->list.head)
 		{
-			XdgMimeSubType *sub_type;
+			prev->list.next = (XdgList *)res->values;
+			res->values->list.head = prev->list.head;
+			prev = res->values;
 
-			if ((sub_type = _xdg_mime_sub_type_add(data->asoc_map, res->values->value)))
-				_xdg_list_app_item_add((XdgList **)&sub_type->apps, "", data->app);
-
-			while ((res->values = (*memory))->list.head)
-			{
-				prev->list.next = (XdgList *)res->values;
-				res->values->list.head = prev->list.head;
-				prev = res->values;
-
-				if ((sub_type = _xdg_mime_sub_type_add(data->asoc_map, res->values->value)))
-					_xdg_list_app_item_add((XdgList **)&sub_type->apps, "", data->app);
-
-				(*memory) += sizeof(XdgValue) + strlen(res->values->value);
-			}
+			(*memory) += sizeof(XdgValue) + strlen(res->values->value);
 		}
-		else
-			while ((res->values = (*memory))->list.head)
-			{
-				prev->list.next = (XdgList *)res->values;
-				res->values->list.head = prev->list.head;
-				prev = res->values;
-
-				(*memory) += sizeof(XdgValue) + strlen(res->values->value);
-			}
 
 		(*memory) += sizeof(XdgValue);
 
 		res->values = prev;
 	}
 
-	memcpy(&res->localized, map_from_memory(memory, (ReadKey)read_app_key, (ReadValue)read_app_group_localized_entry, strcmp, data), sizeof(AvlTree));
+	memcpy(&res->localized, map_from_memory(memory, (ReadKey)read_app_key, (ReadValue)read_app_group_localized_entry, strcmp, NULL), sizeof(AvlTree));
 
 	return res;
 }
 
-static void *read_app_group(void **memory, ReadAppGroupEntryArgs *data)
+static void *read_app_group(void **memory)
 {
 	XdgAppGroup *value = (*memory);
 
-	map_from_memory(memory, (ReadKey)read_app_group_entry_key, (ReadValue)read_app_group_entry, strcmp, data);
+	map_from_memory(memory, (ReadKey)read_app_key, (ReadValue)read_app_group_entry, strcmp, NULL);
 
 	return value;
 }
 
-void *read_app(void **memory, AvlTree *asoc_map)
+void *read_app(void **memory)
 {
 	XdgApp *value = (*memory);
-	ReadAppGroupEntryArgs data = {value, asoc_map, FALSE};
 
-	map_from_memory(memory, (ReadKey)read_app_key, (ReadValue)read_app_group, strcmp, &data);
+	map_from_memory(memory, (ReadKey)read_app_key, (ReadValue)read_app_group, strcmp, NULL);
 
 	return value;
-}
-
-void write_asoc_map(int fd, const AvlTree *value)
-{
-
 }
 
 static void write_mime_group_sub_type(int fd, const XdgMimeSubType *value)

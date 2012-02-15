@@ -50,9 +50,9 @@
  */
 struct XdgAppCache
 {
-	AvlTree asoc_map;
 	XdgAppCahceFile file;
 	const XdgFileWatcher *files;
+	const AvlTree *asoc_map;
 	const AvlTree *app_files_map;
 	const AvlTree *lst_files_map;
 };
@@ -328,7 +328,7 @@ static void _xdg_app_group_read_entry_value(XdgList **list, char *line)
 	}
 }
 
-static void _xdg_app_group_read_mime_type_entry_value(XdgList **list, XdgApp *app, AvlTree *asoc_map, char *line)
+static void _xdg_app_group_read_mime_type_entry_value(XdgList **list, XdgApp *app, const char *app_name, AvlTree *asoc_map, char *line)
 {
 	char *sep;
 	XdgMimeSubType *sub_type;
@@ -340,7 +340,7 @@ static void _xdg_app_group_read_mime_type_entry_value(XdgList **list, XdgApp *ap
 			_xdg_list_value_item_add(list, line);
 
 			if (sub_type = _xdg_mime_sub_type_add(asoc_map, line))
-				_xdg_list_app_item_add((XdgList **)&sub_type->apps, "", app);
+				_xdg_list_app_item_add((XdgList **)&sub_type->apps, app_name, app);
 
 			line = sep + 1;
 		}
@@ -351,11 +351,11 @@ static void _xdg_app_group_read_mime_type_entry_value(XdgList **list, XdgApp *ap
 		_xdg_list_value_item_add(list, line);
 
 		if (sub_type = _xdg_mime_sub_type_add(asoc_map, line))
-			_xdg_list_app_item_add((XdgList **)&sub_type->apps, "", app);
+			_xdg_list_app_item_add((XdgList **)&sub_type->apps, app_name, app);
 	}
 }
 
-static void _xdg_app_group_read_entry(XdgAppGroup *group, XdgApp *app, AvlTree *asoc_map, const char *line)
+static void _xdg_app_group_read_entry(XdgAppGroup *group, XdgApp *app, const char *app_name, AvlTree *asoc_map, const char *line)
 {
 	char *sep;
 
@@ -402,7 +402,7 @@ static void _xdg_app_group_read_entry(XdgAppGroup *group, XdgApp *app, AvlTree *
 			XdgAppGroupEntryValue *entry = _xdg_app_group_entry_map_item_add(&group->entries, line);
 
 			if (strcmp(line, "MimeType") == 0)
-				_xdg_app_group_read_mime_type_entry_value((XdgList **)&entry->values, app, asoc_map, start);
+				_xdg_app_group_read_mime_type_entry_value((XdgList **)&entry->values, app, app_name, asoc_map, start);
 			else
 				_xdg_app_group_read_entry_value((XdgList **)&entry->values, start);
 		}
@@ -461,7 +461,7 @@ static void _xdg_app_read_desktop_file(char *buffer, XdgAppData *data, FILE *fil
 			}
 			else
 				if (group)
-					_xdg_app_group_read_entry(group, app, &data->asoc_map, buffer);
+					_xdg_app_group_read_entry(group, app, name, &data->asoc_map, buffer);
 				else
 					break;
 }
@@ -578,8 +578,8 @@ static int _init_from_directory(const char *directory, InitFromDirectoryArgs *us
 
 static void _xdg_app_cache_init(XdgAppCache *cache)
 {
-	init_avl_tree(&cache->asoc_map, strdup, (DestroyKey)free, strcmp);
 	cache->files = NULL;
+	cache->asoc_map = NULL;
 	cache->app_files_map = NULL;
 	cache->lst_files_map = NULL;
 }
@@ -591,7 +591,8 @@ static void _xdg_app_cache_read(XdgAppCache *cache)
 	if (read_version(&memory) == 1)
 	{
 		cache->files = read_file_watcher_list(&memory);
-		cache->app_files_map = map_from_memory(&memory, (ReadKey)read_app_key, (ReadValue)read_app, strcmp, &cache->asoc_map);
+		cache->app_files_map = map_from_memory(&memory, (ReadKey)read_app_key, (ReadValue)read_app, strcmp, NULL);
+		cache->asoc_map = map_from_memory(&memory, (ReadKey)read_app_key, (ReadValue)read_mime_group, strcmp, (void *)cache->app_files_map);
 		cache->lst_files_map = map_from_memory(&memory, (ReadKey)read_app_key, (ReadValue)read_mime_group, strcmp, (void *)cache->app_files_map);
 	}
 }
@@ -601,12 +602,12 @@ static void _xdg_app_cache_write(XdgAppCahceFile *file, XdgAppData *data)
 	write_version(file->fd, 1);
 	write_file_watcher_list(file->fd, data->files);
 	write_to_file(file->fd, &data->app_files_map, write_app_key, (WriteValue)write_app);
+	write_to_file(file->fd, &data->asoc_map, write_app_key, (WriteValue)write_mime_group);
 	write_to_file(file->fd, &data->lst_files_map, write_app_key, (WriteValue)write_mime_group);
 }
 
 static void _xdg_app_cache_free(XdgAppCache *cache)
 {
-	clear_avl_tree_and_values(&cache->asoc_map, (DestroyValue)_xdg_mime_type_map_item_free);
 	_xdg_app_cache_close(&cache->file);
 }
 
@@ -657,17 +658,17 @@ void _xdg_app_init()
 {
 	applications_list = _xdg_applications_new();
 
-	_xdg_app_cache_new(&applications_list->cache.file, APPLICATIONS_CACHE_FILE);
-
-	if (applications_list->cache.file.error == 0)
-	{
-		_xdg_app_cache_read(&applications_list->cache);
-
-		applications_list->asoc_map = &applications_list->cache.asoc_map;
-		applications_list->app_files_map = applications_list->cache.app_files_map;
-		applications_list->lst_files_map = applications_list->cache.lst_files_map;
-	}
-	else
+//	_xdg_app_cache_new(&applications_list->cache.file, APPLICATIONS_CACHE_FILE);
+//
+//	if (applications_list->cache.file.error == 0)
+//	{
+//		_xdg_app_cache_read(&applications_list->cache);
+//
+//		applications_list->asoc_map = &applications_list->cache.asoc_map;
+//		applications_list->app_files_map = applications_list->cache.app_files_map;
+//		applications_list->lst_files_map = applications_list->cache.lst_files_map;
+//	}
+//	else
 	{
 		char buffer[READ_FROM_FILE_BUFFER_SIZE];
 		InitFromDirectoryArgs args = {buffer, &applications_list->data};
