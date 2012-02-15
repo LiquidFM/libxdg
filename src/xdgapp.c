@@ -592,7 +592,7 @@ static void _xdg_app_cache_read(XdgAppCache *cache)
 	{
 		cache->files = read_file_watcher_list(&memory);
 		cache->app_files_map = map_from_memory(&memory, (ReadKey)read_app_key, (ReadValue)read_app, strcmp, NULL);
-		cache->asoc_map = map_from_memory(&memory, (ReadKey)read_app_key, (ReadValue)read_mime_group, strcmp, (void *)cache->app_files_map);
+		cache->asoc_map = map_from_memory(&memory, (ReadKey)read_app_key, (ReadValue)read_mime_group_type, strcmp, (void *)cache->app_files_map);
 		cache->lst_files_map = map_from_memory(&memory, (ReadKey)read_app_key, (ReadValue)read_mime_group, strcmp, (void *)cache->app_files_map);
 	}
 }
@@ -602,7 +602,7 @@ static void _xdg_app_cache_write(XdgAppCahceFile *file, XdgAppData *data)
 	write_version(file->fd, 1);
 	write_file_watcher_list(file->fd, data->files);
 	write_to_file(file->fd, &data->app_files_map, write_app_key, (WriteValue)write_app);
-	write_to_file(file->fd, &data->asoc_map, write_app_key, (WriteValue)write_mime_group);
+	write_to_file(file->fd, &data->asoc_map, write_app_key, (WriteValue)write_mime_group_type);
 	write_to_file(file->fd, &data->lst_files_map, write_app_key, (WriteValue)write_mime_group);
 }
 
@@ -658,17 +658,17 @@ void _xdg_app_init()
 {
 	applications_list = _xdg_applications_new();
 
-//	_xdg_app_cache_new(&applications_list->cache.file, APPLICATIONS_CACHE_FILE);
-//
-//	if (applications_list->cache.file.error == 0)
-//	{
-//		_xdg_app_cache_read(&applications_list->cache);
-//
-//		applications_list->asoc_map = &applications_list->cache.asoc_map;
-//		applications_list->app_files_map = applications_list->cache.app_files_map;
-//		applications_list->lst_files_map = applications_list->cache.lst_files_map;
-//	}
-//	else
+	_xdg_app_cache_new(&applications_list->cache.file, APPLICATIONS_CACHE_FILE);
+
+	if (applications_list->cache.file.error == 0)
+	{
+		_xdg_app_cache_read(&applications_list->cache);
+
+		applications_list->asoc_map = applications_list->cache.asoc_map;
+		applications_list->app_files_map = applications_list->cache.app_files_map;
+		applications_list->lst_files_map = applications_list->cache.lst_files_map;
+	}
+	else
 	{
 		char buffer[READ_FROM_FILE_BUFFER_SIZE];
 		InitFromDirectoryArgs args = {buffer, &applications_list->data};
