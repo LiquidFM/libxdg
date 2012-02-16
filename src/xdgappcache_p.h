@@ -26,6 +26,10 @@
 #ifndef XDGAPPCACHE_P_H_
 #define XDGAPPCACHE_P_H_
 
+#ifndef HAVE_MMAP
+#	error Building exdgmime without MMAP is not yet supported.
+#endif
+
 #include "xdgapp_p.h"
 
 

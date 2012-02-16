@@ -33,10 +33,6 @@
 #ifndef __XDG_APP_H_
 #define __XDG_APP_H_
 
-#ifndef HAVE_MMAP
-#	error Building exdgmime without MMAP is not yet supported.
-#endif
-
 #include "xdglist.h"
 
 
