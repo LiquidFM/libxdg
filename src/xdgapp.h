@@ -48,22 +48,37 @@ typedef struct XdgApp          XdgApp;
 typedef struct XdgAppGroup     XdgAppGroup;
 
 /**
+ * Checks that cache file is valid and exist.
+ * By default cache is located in
+ * "/usr/share/applications/applications.cache".
+ *
+ * @return \c TRUE if cache is valid, \c FALSE otherwise.
+ */
+int xdg_app_cache_file_is_valid();
+
+/**
  * Rebuilds cache which contains information from all
  * \a ".desktop" and \a ".list" files. By default cache
  * is located in "/usr/share/applications/applications.cache".
  *
  * @return a \c errno value if there was an error, otherwise 0.
  */
-int xdg_app_rebuild_cache();
+int xdg_app_rebuild_cache_file();
 
 /**
- * Checks that cache is valid and exist.
- * By default cache is located in
- * "/usr/share/applications/applications.cache".
+ * Checks that loaded cache is valid.
  *
  * @return \c TRUE if cache is valid, \c FALSE otherwise.
  */
 int xdg_app_cache_is_valid();
+
+/**
+ * Reloads cache.
+ *
+ * @return \c TRUE if the library is using cache and that cache
+ * was reloaded, \c FALSE otherwise.
+ */
+int xdg_app_reload_cache();
 
 /**
  * Looks in \a "Default Applications" section of all \a ".list"
@@ -71,7 +86,7 @@ int xdg_app_cache_is_valid();
  * \a ".desktop" files.
  *
  * @param mimeType name of the mime type.
- * @return a \c const pointer to XdgList of XdgApp elements
+ * @return a \c "const pointer" to XdgList of XdgApp elements
  * or \c NULL if there is no corresponding \a ".desktop" files.
  */
 const XdgList *xdg_default_apps_lookup(const char *mimeType);
@@ -82,7 +97,7 @@ const XdgList *xdg_default_apps_lookup(const char *mimeType);
  * \a ".desktop" files.
  *
  * @param mimeType name of the mime type.
- * @return a \c const pointer to XdgList of XdgApp elements
+ * @return a \c "const pointer" to XdgList of XdgApp elements
  * or \c NULL if there is no corresponding \a ".desktop" files.
  */
 const XdgList *xdg_added_apps_lookup(const char *mimeType);
@@ -93,7 +108,7 @@ const XdgList *xdg_added_apps_lookup(const char *mimeType);
  * \a ".desktop" files.
  *
  * @param mimeType name of the mime type.
- * @return a \c const pointer to XdgList of XdgApp elements
+ * @return a \c "const pointer" to XdgList of XdgApp elements
  * or \c NULL if there is no corresponding \a ".desktop" files.
  */
 const XdgList *xdg_removed_apps_lookup(const char *mimeType);
@@ -103,7 +118,7 @@ const XdgList *xdg_removed_apps_lookup(const char *mimeType);
  * a given \p "mimeType" with \a ".desktop" files.
  *
  * @param mimeType name of the mime type.
- * @return a \c const pointer to XdgList of XdgApp elements
+ * @return a \c "const pointer" to XdgList of XdgApp elements
  * or \c NULL if there is no corresponding \a ".desktop" files.
  */
 const XdgList *xdg_known_apps_lookup(const char *mimeType);
@@ -113,7 +128,7 @@ const XdgList *xdg_known_apps_lookup(const char *mimeType);
  * (\a ".*desktop" file) and searches the icon in a given
  * \p "theme" with a given \p "size".
  *
- * @param app a \c const pointer to XdgApp.
+ * @param app a \c "const pointer" to XdgApp.
  * @param theme name of the theme.
  * @param size size of the icon.
  * @return a path to the icon if it was found or \c NULL otherwise.
@@ -126,9 +141,9 @@ char *xdg_app_icon_lookup(const XdgApp *app, const char *theme, int size);
  * Searches for a \p "group" (for example \a "Desktop Entry") in
  * a given \p "app" (\a ".*desktop" file).
  *
- * @param app a \c const pointer to XdgApp.
+ * @param app a \c "const pointer" to XdgApp.
  * @param group name of the group.
- * @return a \c const pointer to XdgAppGroup or \c NULL if there is no
+ * @return a \c "const pointer" to XdgAppGroup or \c NULL if there is no
  * corresponding \p "group".
  */
 const XdgAppGroup *xdg_app_group_lookup(const XdgApp *app, const char *group);
@@ -137,28 +152,28 @@ const XdgAppGroup *xdg_app_group_lookup(const XdgApp *app, const char *group);
  * Searches for an \p "entry" (for example \a "Icon") in a given \p "group"
  * (for example \a "Desktop Entry").
  *
- * @param group a \c const pointer to XdgAppGroup.
+ * @param group a \c "const pointer" to XdgAppGroup.
  * @param entry name of the entry.
- * @return a \c const pointer to XdgList of default \p entry
+ * @return a \c "const pointer" to XdgList of default \p entry
  * \c "const char *" values or \c NULL if there is no corresponding \p "entry".
  */
 const XdgList *xdg_app_entry_lookup(const XdgAppGroup *group, const char *entry);
 
 /**
- * Searches for an localized \p "entry" (for example \a "Name[ru]") in a given \p "group"
+ * Searches for a localized \p "entry" (for example \a "Name[ru]") in a given \p "group"
  * (for example \a "Desktop Entry").
  *
- * @param group a \c const pointer to XdgAppGroup.
+ * @param group a \c "const pointer" to XdgAppGroup.
  * @param entry name of the entry.
  * @param lang language of the localized value.
  * @param country country of the localized value.
  * @param modifier modifier of the localized value.
- * @return a \c const pointer to XdgList of \c XdgEncodedValue values
+ * @return a \c "const pointer" to XdgList of \c XdgEncodedValue values
  * or \c NULL if there is no corresponding \p "entry".
  *
  * @note
- * If there is no corresponding localized value then XdgList of \a default \p "entry"
- * \c "const char *" values will be returned (if any).
+ * If there is no corresponding localized value then it returns a
+ * \c "const pointer" to XdgList of \a default \c "const char *" values (if any).
  */
 const XdgList *xdg_app_localized_entry_lookup(
 		const XdgAppGroup *group,
@@ -168,14 +183,16 @@ const XdgList *xdg_app_localized_entry_lookup(
 		const char *modifier);
 
 /**
- * Get XdgApp item from current list item.
+ * Get XdgApp item from a given \p list item.
  *
- * @note This function works for XdgList returned by
- * xdg_default_apps_lookup(), xdg_added_apps_lookup(),
- * xdg_removed_apps_lookup(), xdg_known_apps_lookup() functions.
+ * @note This function works for XdgList returned by this functions:
+ * @li xdg_default_apps_lookup()
+ * @li xdg_added_apps_lookup()
+ * @li xdg_removed_apps_lookup()
+ * @li xdg_known_apps_lookup()
  *
  * @param list current list item.
- * @return a \c const pointer to XdgApp.
+ * @return a \c "const pointer" to XdgApp.
  */
 const XdgApp *xdg_list_item_app(const XdgList *list);
 
@@ -186,7 +203,7 @@ const XdgApp *xdg_list_item_app(const XdgList *list);
  * xdg_app_entry_lookup(), xdg_app_localized_entry_lookup() functions.
  *
  * @param list current list item.
- * @return a \c const pointer to XdgApp.
+ * @return a \c "const pointer" to XdgApp.
  */
 const char *xdg_list_item_app_group_entry_value(const XdgList *list);
 

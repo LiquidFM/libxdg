@@ -36,7 +36,28 @@ extern "C" {
 typedef struct XdgList XdgList;
 
 
+/**
+ * Returns head of a given list.
+ *
+ * @param list a \c "const pointer" to XdgList.
+ * @return a \c "const pointer" to head of XdgList.
+ *
+ * @note
+ * This function checks if a given \p "list"
+ * is equal to \c NULL and returns \c NULL if it is.
+ */
 const XdgList *xdg_list_begin(const XdgList *list);
+
+/**
+ * Returns next element of a given list.
+ *
+ * @param list a \c "const pointer" to XdgList.
+ * @return a \c "const pointer" to next element of XdgList.
+ *
+ * @note
+ * This function does \a NOT check if a given \p "list"
+ * is equal to \c NULL.
+ */
 const XdgList *xdg_list_next(const XdgList *list);
 
 #ifdef __cplusplus

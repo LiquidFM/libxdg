@@ -578,10 +578,7 @@ static int _init_from_directory(const char *directory, InitFromDirectoryArgs *us
 
 static void _xdg_app_cache_init(XdgAppCache *cache)
 {
-	cache->files = NULL;
-	cache->asoc_map = NULL;
-	cache->app_files_map = NULL;
-	cache->lst_files_map = NULL;
+	memset(cache, 0, sizeof(XdgAppCache));
 }
 
 static void _xdg_app_cache_read(XdgAppCache *cache)
@@ -690,7 +687,56 @@ void _xdg_app_shutdown()
 	}
 }
 
-int xdg_app_rebuild_cache()
+static BOOL _xdg_check_time_stamp(const XdgFileWatcher *files)
+{
+	struct stat st;
+	XdgFileWatcher *next;
+	XdgFileWatcher *file = (XdgFileWatcher *)files->list.head;
+
+	while (file)
+	{
+		next = (XdgFileWatcher *)file->list.next;
+
+		if (stat(file->path, &st) == 0)
+		{
+			if (st.st_mtime != file->mtime)
+				return FALSE;
+		}
+		else
+			if (file->mtime)
+				return FALSE;
+
+		file = next;
+	}
+
+	return TRUE;
+}
+
+int xdg_app_cache_file_is_valid()
+{
+	int res = FALSE;
+	XdgAppCache cache;
+
+	_xdg_app_cache_init(&cache);
+	_xdg_app_cache_new(&cache.file, APPLICATIONS_CACHE_FILE);
+
+	if (cache.file.error == 0)
+	{
+		void *memory = cache.file.memory;
+
+		if (read_version(&memory) == 1)
+		{
+			cache.files = read_file_watcher_list(&memory);
+			res = _xdg_check_time_stamp(cache.files);
+		}
+
+		_xdg_app_cache_close(&cache.file);
+	}
+
+	return res;
+}
+
+int xdg_app_rebuild_cache_file()
 {
 	int res = 0;
 	XdgAppCache cache;
@@ -720,53 +766,42 @@ int xdg_app_rebuild_cache()
 	return res;
 }
 
-static BOOL _xdg_check_time_stamp(const XdgFileWatcher *files)
-{
-	struct stat st;
-	XdgFileWatcher *next;
-	XdgFileWatcher *file = (XdgFileWatcher *)files->list.head;
-
-	while (file)
-	{
-		next = (XdgFileWatcher *)file->list.next;
-
-		if (stat(file->path, &st) == 0)
-		{
-			if (st.st_mtime != file->mtime)
-				return FALSE;
-		}
-		else
-			if (file->mtime)
-				return FALSE;
-
-		file = next;
-	}
-
-	return TRUE;
-}
-
 int xdg_app_cache_is_valid()
 {
-	int res = FALSE;
-	XdgAppCache cache;
+	assert(applications_list);
 
-	_xdg_app_cache_init(&cache);
-	_xdg_app_cache_new(&cache.file, APPLICATIONS_CACHE_FILE);
+	if (applications_list->cache.files)
+		return _xdg_check_time_stamp(applications_list->cache.files);
 
-	if (cache.file.error == 0)
+	return FALSE;
+}
+
+int xdg_app_reload_cache()
+{
+	assert(applications_list);
+
+	if (applications_list->cache.files)
 	{
-		void *memory = cache.file.memory;
+		XdgAppCache cache;
 
-		if (read_version(&memory) == 1)
+		_xdg_app_cache_init(&cache);
+		_xdg_app_cache_new(&cache.file, APPLICATIONS_CACHE_FILE);
+
+		if (cache.file.error == 0)
 		{
-			cache.files = read_file_watcher_list(&memory);
-			res = _xdg_check_time_stamp(cache.files);
-		}
+			_xdg_app_cache_read(&cache);
+			_xdg_app_cache_close(&applications_list->cache.file);
+			memcpy(&applications_list->cache, &cache, sizeof(XdgAppCache));
 
-		_xdg_app_cache_close(&cache.file);
+			applications_list->asoc_map = applications_list->cache.asoc_map;
+			applications_list->app_files_map = applications_list->cache.app_files_map;
+			applications_list->lst_files_map = applications_list->cache.lst_files_map;
+
+			return TRUE;
+		}
 	}
 
-	return res;
+	return FALSE;
 }
 
 const XdgList *xdg_default_apps_lookup(const char *mimeType)
