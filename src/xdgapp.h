@@ -53,6 +53,10 @@ typedef struct XdgAppGroup     XdgAppGroup;
  * "/usr/share/applications/applications.cache".
  *
  * @return \c TRUE if cache is valid, \c FALSE otherwise.
+ *
+ * @note
+ * Initialization of the library is not necessary
+ * before call to this function.
  */
 int xdg_app_cache_file_is_valid();
 
@@ -62,6 +66,10 @@ int xdg_app_cache_file_is_valid();
  * is located in "/usr/share/applications/applications.cache".
  *
  * @return a \c errno value if there was an error, otherwise 0.
+ *
+ * @note
+ * Initialization of the library is not necessary
+ * before call to this function.
  */
 int xdg_app_rebuild_cache_file();
 
