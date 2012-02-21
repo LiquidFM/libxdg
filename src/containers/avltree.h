@@ -1,6 +1,6 @@
 /* avltree.h: Private file. Declaration of AVL trees.
  *
- * Copyright (C) 2011  Dmitriy Vilkov <dav.daemon@gmail.com>
+ * Copyright (C) 2011,2012  Dmitriy Vilkov <dav.daemon@gmail.com>
  *
  * Licensed under the Academic Free License version 2.0
  * Or under the following terms:
@@ -24,6 +24,10 @@
 #ifndef AVLTREE_H_
 #define AVLTREE_H_
 
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * Main data types.
@@ -69,10 +73,10 @@ typedef struct AvlTree AvlTree;
  *
  */
 AvlTree *create_avl_tree(DuplicateKey duplicateKey, DestroyKey destroyKey, CompareKeys compareKeys);
-void init_avl_tree(AvlTree *tree, DuplicateKey duplicateKey, DestroyKey destroyKey, CompareKeys compareKeys);
 void free_avl_tree(AvlTree *tree);
 void free_avl_tree_and_values(AvlTree *tree, DestroyValue destroyValue);
 
+void init_avl_tree(AvlTree *tree, DuplicateKey duplicateKey, DestroyKey destroyKey, CompareKeys compareKeys);
 void clear_avl_tree(AvlTree *tree);
 void clear_avl_tree_and_values(AvlTree *tree, DestroyValue destroyValue);
 
@@ -82,5 +86,9 @@ VALUE_TYPE delete_node(AvlTree *tree, const KEY_TYPE key);
 
 const AvlTree *map_from_memory(void **memory, ReadKey readKey, ReadValue readValue, CompareKeys compareKeys, void *user_data);
 void write_to_file(int fd, const AvlTree *tree, WriteKey writeKey, WriteValue writeValue);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* AVLTREE_H_ */

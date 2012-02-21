@@ -2,12 +2,51 @@
 include ("collect_sources")
 
 
-collect_sources (src_HEADERS src_SOURCES ${CMAKE_SOURCE_DIR})
-
-
-# Headers
-set (exdgmime_HEADERS ${exdgmime_HEADERS} ${src_HEADERS} PARENT_SCOPE)
-
-
 # Sources
-set (exdgmime_SOURCES ${exdgmime_SOURCES} ${src_SOURCES} PARENT_SCOPE)
+set (SOURCES_PATH ${CMAKE_CURRENT_SOURCE_DIR})
+ 
+add_subdirectory ("containers")
+add_subdirectory ("basedirectory")
+
+
+if (BUILD_MIME_SPEC)
+    add_subdirectory ("mime")
+    
+    # Install include files
+    install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/mime/xdgmime.h DESTINATION include/xdg/mime)
+endif ()
+
+if (BUILD_DESKTOP_SPEC OR BUILD_UPDATE_APPLICATIONS_CACHE)
+    add_subdirectory ("desktop")
+
+    # Install include files
+    install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/desktop/xdgapp.h DESTINATION include/xdg/desktop)
+    install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/containers/xdglist.h DESTINATION include/xdg/containers)
+endif ()
+
+if (BUILD_THEMES_SPEC)
+    add_subdirectory ("themes")
+
+    # Install include files
+    install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/themes/xdgtheme.h DESTINATION include/xdg/themes)
+endif ()
+
+
+# Target xdg
+add_library(xdg STATIC xdg.c ${exdgmime_SOURCES})
+target_link_libraries (xdg ${exdgmime_LIBS} xdg)
+
+# Install
+install (
+    TARGETS xdg
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+)
+install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/xdg.h DESTINATION include/xdg)
+
+
+# Target - update-applications-cache
+if (BUILD_UPDATE_APPLICATIONS_CACHE)
+    add_subdirectory ("update-applications-cache")
+endif ()

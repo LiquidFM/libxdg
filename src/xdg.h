@@ -28,9 +28,21 @@
 #ifndef XDG_H_
 #define XDG_H_
 
-#include "mime/xdgmime.h"
-#include "desktop/xdgapp.h"
-#include "themes/xdgtheme.h"
+#ifdef HAVE_CONFIG_H
+#	include <xdg/config.h>
+#endif
+
+#ifdef MIME_SPEC
+#	include "mime/xdgmime.h"
+#endif
+
+#ifdef DESKTOP_SPEC
+#	include "desktop/xdgapp.h"
+#endif
+
+#ifdef THEMES_SPEC
+#	include "themes/xdgtheme.h"
+#endif
 
 #ifdef __cplusplus
 extern "C" {

@@ -26,21 +26,46 @@
  */
 
 #include "xdg.h"
-#include "mime/xdgmime_p.h"
-#include "desktop/xdgapp_p.h"
-#include "themes/xdgtheme_p.h"
+
+#ifdef MIME_SPEC
+#	include "mime/xdgmime_p.h"
+#endif
+
+#ifdef DESKTOP_SPEC
+#	include "desktop/xdgapp_p.h"
+#endif
+
+#ifdef THEMES_SPEC
+#	include "themes/xdgtheme_p.h"
+#endif
 
 
 void xdg_init()
 {
+#ifdef MIME_SPEC
 	_xdg_mime_init();
+#endif
+
+#ifdef DESKTOP_SPEC
 	_xdg_app_init();
+#endif
+
+#ifdef THEMES_SPEC
 	_xdg_themes_init();
+#endif
 }
 
 void xdg_shutdown()
 {
+#ifdef THEMES_SPEC
 	_xdg_themes_shutdown();
+#endif
+
+#ifdef DESKTOP_SPEC
 	_xdg_app_shutdown();
+#endif
+
+#ifdef MIME_SPEC
 	_xdg_mime_shutdown();
+#endif
 }

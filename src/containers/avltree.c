@@ -1,6 +1,6 @@
 /* avltree.c: Private file. Implementation of AVL trees.
  *
- * Copyright (C) 2011  Dmitriy Vilkov <dav.daemon@gmail.com>
+ * Copyright (C) 2011,2012  Dmitriy Vilkov <dav.daemon@gmail.com>
  *
  * Licensed under the Academic Free License version 2.0
  * Or under the following terms:
@@ -493,14 +493,6 @@ AvlTree *create_avl_tree(DuplicateKey duplicateKey, DestroyKey destroyKey, Compa
 	return res;
 }
 
-void init_avl_tree(AvlTree *tree, DuplicateKey duplicateKey, DestroyKey destroyKey, CompareKeys compareKeys)
-{
-	tree->tree_root = NULL;
-	tree->duplicateKey = duplicateKey;
-	tree->destroyKey = destroyKey;
-	tree->compareKeys = compareKeys;
-}
-
 void free_avl_tree(AvlTree *tree)
 {
 	destroy_subtree(tree, &tree->tree_root);
@@ -511,6 +503,14 @@ void free_avl_tree_and_values(AvlTree *tree, DestroyValue destroyValue)
 {
 	destroy_subtree_and_values(tree, &tree->tree_root, destroyValue);
 	free(tree);
+}
+
+void init_avl_tree(AvlTree *tree, DuplicateKey duplicateKey, DestroyKey destroyKey, CompareKeys compareKeys)
+{
+	tree->tree_root = NULL;
+	tree->duplicateKey = duplicateKey;
+	tree->destroyKey = destroyKey;
+	tree->compareKeys = compareKeys;
 }
 
 void clear_avl_tree(AvlTree *tree)

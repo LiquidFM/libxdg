@@ -30,6 +30,10 @@
 #ifndef __XDG_APP_P_H_
 #define __XDG_APP_P_H_
 
+#ifdef HAVE_CONFIG_H
+#	include <xdg/config.h>
+#endif
+
 #include <time.h>
 #include "xdgapp.h"
 #include "../containers/avltree.h"

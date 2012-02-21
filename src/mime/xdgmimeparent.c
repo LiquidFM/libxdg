@@ -5,6 +5,7 @@
  *
  * Copyright (C) 2004  Red Hat, Inc.
  * Copyright (C) 2004  Matthias Clasen <mclasen@redhat.com>
+ * Copyright (C) 2012  Dmitriy Vilkov <dav.daemon@gmail.com>
  *
  * Licensed under the Academic Free License version 2.0
  * Or under the following terms:
@@ -26,7 +27,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include <config.h>
+#	include <xdg/config.h>
 #endif
 
 #include "xdgmimeparent.h"

@@ -43,13 +43,18 @@ message (STATUS "CMake generates " ${CMAKE_GENERATOR})
 
 
 # Main settings
-set (USE_GPROF              NO)
-set (GENERATE_INTERNAL_DOCS NO CACHE BOOL "Generate internal documentation?")
-set (UNIT_TESTING           NO CACHE BOOL "Compile binary executable for unit testing?")
+set (USE_GPROF NO)
+set (GENERATE_INTERNAL_DOCS           NO CACHE BOOL "Generate internal documentation")
+set (UNIT_TESTING                     NO CACHE BOOL "Compile binary executable for unit testing")
+set (BUILD_MIME_SPEC                 YES CACHE BOOL "Build library with \"Shared MIME-info Database\"")
+set (BUILD_DESKTOP_SPEC              YES CACHE BOOL "Build library with \"Desktop Entry Specification\"")
+set (BUILD_THEMES_SPEC               YES CACHE BOOL "Build library with \"Icon Theme Specification\"")
+set (BUILD_UPDATE_APPLICATIONS_CACHE YES CACHE BOOL "Build executable for rebuilding the cache")
 
 
 # Custom modules
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake")
+install (FILES ${CMAKE_SOURCE_DIR}/cmake/FindXDG.cmake DESTINATION share/cmake/Modules)
 
 
 # Fix path delimeters
@@ -81,28 +86,55 @@ if (DOXYGEN_FOUND)
     configure_file (${CMAKE_SOURCE_DIR}/doc/Doxyfile.in ${CMAKE_BINARY_DIR}/doc/Doxyfile @ONLY)
     
     add_custom_target (doc
-        ALL
+        #ALL
         ${DOXYGEN_EXECUTABLE} ${CMAKE_BINARY_DIR}/doc/Doxyfile
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/doc
         COMMENT "Generating API documentation with Doxygen" VERBATIM)
 endif ()
 
+
+# Create config file
+if (BUILD_MIME_SPEC)
+    set (CONFIG_MIME_SPEC "#define MIME_SPEC")
+else ()
+    set (CONFIG_MIME_SPEC "// #define MIME_SPEC")
+endif ()
+
+if (BUILD_DESKTOP_SPEC OR BUILD_UPDATE_APPLICATIONS_CACHE)
+    set (CONFIG_DESKTOP_SPEC "#define DESKTOP_SPEC")
+else ()
+    set (CONFIG_DESKTOP_SPEC "// #define DESKTOP_SPEC")
+endif ()
+
+if (BUILD_THEMES_SPEC)
+    set (CONFIG_THEMES_SPEC "#define THEMES_SPEC")
+else ()
+    set (CONFIG_THEMES_SPEC "// #define THEMES_SPEC")
+endif ()
+
+configure_file (${CMAKE_SOURCE_DIR}/src/config/config.h.in ${CMAKE_BINARY_DIR}/include/xdg/config.h @ONLY)
+install (FILES ${CMAKE_BINARY_DIR}/include/xdg/config.h DESTINATION include/xdg)
+
+
 # Includes
+include_directories (${CMAKE_BINARY_DIR}/include)
+
 
 # Link directories
+
 
 # Libs
 if (USE_GPROF)
 	set (exdgmime_LIBS ${exdgmime_LIBS} gmon)
 endif (USE_GPROF)
- 
-# Definitions
-add_definitions (-DHAVE_MMAP)
 
-# Sources
-add_subdirectory("src")
+
+# Definitions
+add_definitions (-DHAVE_CONFIG_H)
+
 
 # Resources
+
 
 # Compiler flags
 if (USE_GPROF)
@@ -110,9 +142,6 @@ if (USE_GPROF)
     set (CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS} -pg)
 endif (USE_GPROF)
 
-# Target - update-applications-cache
-add_executable (update-applications-cache ${exdgmime_SOURCES})
-target_link_libraries (update-applications-cache ${exdgmime_LIBS})
 
-# Install
-include ("cmake/Install.cmake")
+# Targets
+add_subdirectory ("src")

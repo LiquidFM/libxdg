@@ -4,6 +4,7 @@
  * More info can be found at http://www.freedesktop.org/standards/
  *
  * Copyright (C) 2008  Red Hat, Inc.
+ * Copyright (C) 2012  Dmitriy Vilkov <dav.daemon@gmail.com>
  *
  * Licensed under the Academic Free License version 2.0
  * Or under the following terms:
@@ -25,7 +26,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include <config.h>
+#	include <xdg/config.h>
 #endif
 
 #include "xdgmimeicon.h"
