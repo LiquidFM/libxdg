@@ -131,7 +131,6 @@ endif (USE_GPROF)
 
 
 # Definitions
-add_definitions (-DHAVE_CONFIG_H)
 
 
 # Resources

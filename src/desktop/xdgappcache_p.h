@@ -26,9 +26,7 @@
 #ifndef XDGAPPCACHE_P_H_
 #define XDGAPPCACHE_P_H_
 
-#ifdef HAVE_CONFIG_H
-#	include <xdg/config.h>
-#endif
+#include <xdg/config.h>
 
 #ifndef HAVE_MMAP
 #	error Building exdgmime without MMAP is not yet supported.

@@ -26,9 +26,7 @@
  * Boston, MA 02111-1307, USA.
  */
 
-#ifdef HAVE_CONFIG_H
-#	include <xdg/config.h>
-#endif
+#include <xdg/config.h>
 
 #include "xdgmime.h"
 #include "xdgmime_p.h"

@@ -28,9 +28,7 @@
 #ifndef XDG_H_
 #define XDG_H_
 
-#ifdef HAVE_CONFIG_H
-#	include <xdg/config.h>
-#endif
+#include <xdg/config.h>
 
 #ifdef MIME_SPEC
 #	include "mime/xdgmime.h"

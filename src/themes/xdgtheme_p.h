@@ -26,9 +26,7 @@
 #ifndef __XDG_MIME_THEME_P_H_
 #define __XDG_MIME_THEME_P_H_
 
-#ifdef HAVE_CONFIG_H
-#	include <xdg/config.h>
-#endif
+#include <xdg/config.h>
 
 #include "xdgtheme.h"
 
