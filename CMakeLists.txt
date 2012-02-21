@@ -86,10 +86,11 @@ if (DOXYGEN_FOUND)
     configure_file (${CMAKE_SOURCE_DIR}/doc/Doxyfile.in ${CMAKE_BINARY_DIR}/doc/Doxyfile @ONLY)
     
     add_custom_target (doc
-        #ALL
         ${DOXYGEN_EXECUTABLE} ${CMAKE_BINARY_DIR}/doc/Doxyfile
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/doc
         COMMENT "Generating API documentation with Doxygen" VERBATIM)
+    
+    install (DIRECTORY ${CMAKE_BINARY_DIR}/doc/ DESTINATION doc)
 endif ()
 
 
