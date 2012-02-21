@@ -33,7 +33,7 @@
 #ifndef __XDG_APP_H_
 #define __XDG_APP_H_
 
-#include "xdglist.h"
+#include "../containers/xdglist.h"
 
 
 #ifdef __cplusplus

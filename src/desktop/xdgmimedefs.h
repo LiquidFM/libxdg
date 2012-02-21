@@ -26,7 +26,7 @@
 #ifndef __XDG_MIME_DEFS_H_
 #define __XDG_MIME_DEFS_H_
 
-#include "xdgmimeint.h"
+#include "../mime/xdgmimeint.h"
 
 #define BOOL int
 

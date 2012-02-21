@@ -43,8 +43,9 @@ message (STATUS "CMake generates " ${CMAKE_GENERATOR})
 
 
 # Main settings
-set (USE_GPROF                   NO)
-set (GENERATE_DOXY_INTERNAL_DOCS NO)
+set (USE_GPROF              NO)
+set (GENERATE_INTERNAL_DOCS NO CACHE BOOL "Generate internal documentation?")
+set (UNIT_TESTING           NO CACHE BOOL "Compile binary executable for unit testing?")
 
 
 # Custom modules
@@ -71,7 +72,7 @@ if (DOXYGEN_FOUND)
     set (DOXY_EXAMPLE_PATH   ${CMAKE_SOURCE_DIR}/doc)
     set (DOXY_INPUT          "${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/doc/doc_mainpage.h")
     
-    if (GENERATE_DOXY_INTERNAL_DOCS)
+    if (GENERATE_INTERNAL_DOCS)
         set (DOXY_INTERNAL_DOCS "YES")
     else ()
         set (DOXY_INTERNAL_DOCS "NO")

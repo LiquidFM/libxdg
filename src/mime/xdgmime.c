@@ -39,7 +39,7 @@
 #include "xdgmimeicon.h"
 #include "xdgmimeparent.h"
 #include "xdgmimecache.h"
-#include "xdgbasedirectory.h"
+#include "../basedirectory/xdgbasedirectory.h"
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <stdio.h>

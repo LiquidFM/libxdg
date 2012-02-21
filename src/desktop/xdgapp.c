@@ -30,9 +30,8 @@
 #include "xdgapp_p.h"
 #include "xdgappcache_p.h"
 #include "xdgmimedefs.h"
-#include "xdgbasedirectory.h"
-#include "xdgtheme.h"
-#include "avltree.h"
+#include "../themes/xdgtheme.h"
+#include "../basedirectory/xdgbasedirectory.h"
 #include <sys/stat.h>
 #include <stdlib.h>
 #include <dirent.h>

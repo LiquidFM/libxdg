@@ -32,8 +32,8 @@
 
 #include <time.h>
 #include "xdgapp.h"
-#include "avltree.h"
-#include "xdglist_p.h"
+#include "../containers/avltree.h"
+#include "../containers/xdglist_p.h"
 
 
 /**

@@ -24,10 +24,10 @@
  */
 
 #include "xdgtheme_p.h"
-#include "xdglist_p.h"
-#include "xdgbasedirectory.h"
-#include "xdgmimedefs.h"
-#include "avltree.h"
+#include "../desktop/xdgmimedefs.h"
+#include "../containers/xdglist_p.h"
+#include "../containers/avltree.h"
+#include "../basedirectory/xdgbasedirectory.h"
 #include <stdlib.h>
 #include <dirent.h>
 #include <stdio.h>

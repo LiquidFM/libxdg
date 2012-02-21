@@ -1,4 +1,4 @@
-#include "xdgapp.h"
+#include "../desktop/xdgapp.h"
 #include <stdio.h>
 #include <string.h>
 

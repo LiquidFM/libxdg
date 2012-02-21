@@ -26,9 +26,9 @@
  */
 
 #include "xdg.h"
-#include "xdgmime_p.h"
-#include "xdgapp_p.h"
-#include "xdgtheme_p.h"
+#include "mime/xdgmime_p.h"
+#include "desktop/xdgapp_p.h"
+#include "themes/xdgtheme_p.h"
 
 
 void xdg_init()
