@@ -40,8 +40,8 @@
 extern "C" {
 #endif
 
-typedef struct XdgApp          XdgApp;
-typedef struct XdgAppGroup     XdgAppGroup;
+typedef struct XdgApp      XdgApp;
+typedef struct XdgAppGroup XdgAppGroup;
 
 /**
  * Checks that cache file is valid and exist.
@@ -138,8 +138,7 @@ const XdgList *xdg_known_apps_lookup(const char *mimeType);
  * @return a path to the icon if it was found or \c NULL otherwise.
  *
  * @note This function returns \c NULL if  \c THEMES_SPEC was not
- * defined.
- * @note Result of this function must be freed by the caller!
+ * defined. @n Result of this function must be freed by the caller!
  */
 char *xdg_app_icon_lookup(const XdgApp *app, const char *theme, int size);
 
