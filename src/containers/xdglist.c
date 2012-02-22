@@ -29,6 +29,11 @@
 #include <stddef.h>
 
 
+#if __GNUC__ < 3
+    #define __builtin_expect(foo, bar) (foo)
+#endif
+
+
 void _xdg_list_apped(XdgList **list, XdgList *value)
 {
 	if ((*list) == NULL)
@@ -62,15 +67,52 @@ void _xdg_list_free(XdgList *list, XdgListItemFree list_item_free)
 	}
 }
 
+void _xdg_joint_list_apped(XdgJointList **list, XdgJointList *value)
+{
+	if ((*list) == NULL)
+	{
+		(*list) = value;
+		value->head = value;
+		value->next = NULL;
+	}
+	else
+	{
+		value->head = (*list)->head;
+		value->next = NULL;
+		(*list)->next = value;
+		(*list) = value;
+	}
+}
+
 const XdgList *xdg_list_begin(const XdgList *list)
 {
 	if (list)
 		return list->head;
 	else
-		return 0;
+		return NULL;
 }
 
 const XdgList *xdg_list_next(const XdgList *list)
 {
 	return list->next;
+}
+
+const XdgJointList *xdg_joint_list_begin(const XdgJointList *list)
+{
+	if (list)
+		return list->head;
+	else
+		return NULL;
+}
+
+const XdgJointList *xdg_joint_list_next(const XdgJointList *list)
+{
+	/**
+	 * Branch prediction:
+	 * 	most of the cases list will be contain more than 1 element.
+	 */
+	if (__builtin_expect(list->list.next != NULL, 1))
+		return (XdgJointList *)list->list.next;
+	else
+		return list->next;
 }

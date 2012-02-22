@@ -40,9 +40,17 @@ struct XdgList
 	XdgList *next;
 };
 
+struct XdgJointList
+{
+	XdgList list;
+	XdgJointList *head;
+	XdgJointList *next;
+};
+
 
 void _xdg_list_apped(XdgList **list, XdgList *value);
 void _xdg_list_free(XdgList *list, XdgListItemFree list_item_free);
+void _xdg_joint_list_apped(XdgJointList **list, XdgJointList *value);
 
 
 #endif /* XDGLIST_P_H_ */

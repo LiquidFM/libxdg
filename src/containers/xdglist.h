@@ -33,7 +33,16 @@
 extern "C" {
 #endif
 
-typedef struct XdgList XdgList;
+/**
+ * Represents a linked list.
+ */
+typedef struct XdgList      XdgList;
+
+/**
+ * Represents a linked list which could be join
+ * with other similar lists without memory allocation.
+ */
+typedef struct XdgJointList XdgJointList;
 
 
 /**
@@ -59,6 +68,30 @@ const XdgList *xdg_list_begin(const XdgList *list);
  * is equal to \c NULL.
  */
 const XdgList *xdg_list_next(const XdgList *list);
+
+/**
+ * Returns head of a given list.
+ *
+ * @param list a \c "const pointer" to XdgJointList.
+ * @return a \c "const pointer" to head of XdgJointList.
+ *
+ * @note
+ * This function checks if a given \p "list"
+ * is equal to \c NULL and returns \c NULL if it is.
+ */
+const XdgJointList *xdg_joint_list_begin(const XdgJointList *list);
+
+/**
+ * Returns next element of a given list.
+ *
+ * @param list a \c "const pointer" to XdgJointList.
+ * @return a \c "const pointer" to next element of XdgJointList.
+ *
+ * @note
+ * This function does \a NOT check if a given \p "list"
+ * is equal to \c NULL.
+ */
+const XdgJointList *xdg_joint_list_next(const XdgJointList *list);
 
 #ifdef __cplusplus
 }
