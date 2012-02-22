@@ -137,7 +137,9 @@ const XdgList *xdg_known_apps_lookup(const char *mimeType);
  * @param size size of the icon.
  * @return a path to the icon if it was found or \c NULL otherwise.
  *
- * \note Result of this function must be freed by the caller!
+ * @note This function returns \c NULL if  \c THEMES_SPEC was not
+ * defined.
+ * @note Result of this function must be freed by the caller!
  */
 char *xdg_app_icon_lookup(const XdgApp *app, const char *theme, int size);
 

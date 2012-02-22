@@ -30,8 +30,12 @@
 #include "xdgapp_p.h"
 #include "xdgappcache_p.h"
 #include "xdgmimedefs.h"
-#include "../themes/xdgtheme.h"
 #include "../basedirectory/xdgbasedirectory.h"
+
+#ifdef THEMES_SPEC
+#	include "../themes/xdgtheme.h"
+#endif
+
 #include <sys/stat.h>
 #include <stdlib.h>
 #include <dirent.h>
@@ -868,6 +872,7 @@ const XdgList *xdg_known_apps_lookup(const char *mimeType)
 
 char *xdg_app_icon_lookup(const XdgApp *app, const char *themeName, int size)
 {
+#ifdef THEMES_SPEC
 	XdgAppGroup **group = (XdgAppGroup **)search_node(&app->groups, "Desktop Entry");
 
 	if (group)
@@ -877,6 +882,7 @@ char *xdg_app_icon_lookup(const XdgApp *app, const char *themeName, int size)
 		if (entry && (*entry)->values)
 			return xdg_icon_lookup((*entry)->values->value, size, Applications, themeName);
 	}
+#endif
 
 	return 0;
 }
