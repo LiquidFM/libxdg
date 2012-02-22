@@ -37,6 +37,9 @@
 #include <sys/stat.h>
 
 
+#define MIME_TYPE_NAME_BUFFER_SIZE 128
+
+
 static const char *contextes[] =
 {
 	"Actions",
