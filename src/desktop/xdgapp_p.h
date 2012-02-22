@@ -83,7 +83,7 @@ struct XdgApp
  */
 struct XdgMimeSubTypeValue
 {
-	XdgList list;
+	XdgJointList list;
 	XdgApp *app;
 	char name[1];
 };

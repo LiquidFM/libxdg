@@ -58,6 +58,7 @@ void _xdg_app_cache_close(XdgAppCahceFile *cache)
 		      munmap(cache->memory, cache->size);
 
 		close(cache->fd);
+		cache->fd = -1;
 	}
 }
 

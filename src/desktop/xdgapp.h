@@ -90,10 +90,10 @@ int xdg_app_reload_cache();
  * \a ".desktop" files.
  *
  * @param mimeType name of the mime type.
- * @return a \c "const pointer" to XdgList of XdgApp elements
+ * @return a \c "const pointer" to XdgJointList of XdgApp elements
  * or \c NULL if there is no corresponding \a ".desktop" files.
  */
-const XdgList *xdg_default_apps_lookup(const char *mimeType);
+const XdgJointList *xdg_default_apps_lookup(const char *mimeType);
 
 /**
  * Looks in \a "Added Associations" section of all \a ".list"
@@ -101,10 +101,10 @@ const XdgList *xdg_default_apps_lookup(const char *mimeType);
  * \a ".desktop" files.
  *
  * @param mimeType name of the mime type.
- * @return a \c "const pointer" to XdgList of XdgApp elements
+ * @return a \c "const pointer" to XdgJointList of XdgApp elements
  * or \c NULL if there is no corresponding \a ".desktop" files.
  */
-const XdgList *xdg_added_apps_lookup(const char *mimeType);
+const XdgJointList *xdg_added_apps_lookup(const char *mimeType);
 
 /**
  * Looks in \a "Removed Associations" section of all \a ".list"
@@ -112,20 +112,20 @@ const XdgList *xdg_added_apps_lookup(const char *mimeType);
  * \a ".desktop" files.
  *
  * @param mimeType name of the mime type.
- * @return a \c "const pointer" to XdgList of XdgApp elements
+ * @return a \c "const pointer" to XdgJointList of XdgApp elements
  * or \c NULL if there is no corresponding \a ".desktop" files.
  */
-const XdgList *xdg_removed_apps_lookup(const char *mimeType);
+const XdgJointList *xdg_removed_apps_lookup(const char *mimeType);
 
 /**
  * Looks in all \a ".desktop" files for association of
  * a given \p "mimeType" with \a ".desktop" files.
  *
  * @param mimeType name of the mime type.
- * @return a \c "const pointer" to XdgList of XdgApp elements
+ * @return a \c "const pointer" to XdgJointList of XdgApp elements
  * or \c NULL if there is no corresponding \a ".desktop" files.
  */
-const XdgList *xdg_known_apps_lookup(const char *mimeType);
+const XdgJointList *xdg_known_apps_lookup(const char *mimeType);
 
 /**
  * Takes an icon name from "Icon" entry of a given \p "app"
@@ -190,7 +190,7 @@ const XdgList *xdg_app_localized_entry_lookup(
 /**
  * Get XdgApp item from a given \p list item.
  *
- * @note This function works for XdgList returned by this functions:
+ * @note This function works for XdgJointList returned by this functions:
  * @li xdg_default_apps_lookup()
  * @li xdg_added_apps_lookup()
  * @li xdg_removed_apps_lookup()
@@ -199,7 +199,7 @@ const XdgList *xdg_app_localized_entry_lookup(
  * @param list current list item.
  * @return a \c "const pointer" to XdgApp.
  */
-const XdgApp *xdg_list_item_app(const XdgList *list);
+const XdgApp *xdg_list_item_app(const XdgJointList *list);
 
 /**
  * Get \c "const char *" value from current list item.
