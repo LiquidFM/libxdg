@@ -356,28 +356,16 @@ XdgMimeSubType *_xdg_mime_sub_type_add(AvlTree *map, const char *name)
 	return NULL;
 }
 
-static XdgMimeSubType *_xdg_mime_sub_type_item_search(const AvlTree *map, const char *name)
+static XdgMimeSubType *_xdg_mime_sub_type_item_search(const AvlTree *map, const char *type, const char *sub_type)
 {
-	char *sep;
+	XdgMimeType **mime_type = (XdgMimeType **)search_node(map, type);
 
-	if ((sep = strchr(name, '/')) != NULL)
+	if (mime_type)
 	{
-		*sep = 0;
-		XdgMimeType **type = (XdgMimeType **)search_node(map, name);
-		*sep = '/';
+		XdgMimeSubType **res = (XdgMimeSubType **)search_node(&(*mime_type)->sub_types, sub_type);
 
-		if (type)
-		{
-			char *start = (++sep);
-
-			if (*start && *start != '\n')
-			{
-				XdgMimeSubType **res = (XdgMimeSubType **)search_node(&(*type)->sub_types, start);
-
-				if (res)
-					return (*res);
-			}
-		}
+		if (res)
+			return (*res);
 	}
 
 	return NULL;
@@ -813,26 +801,35 @@ int xdg_app_reload_cache()
 static const XdgJointList *_xdg_apps_lookup(const char *mimeType, const char *group_name)
 {
 	assert(folders_list && "Library was not initialized!");
-	XdgMimeSubType *sub_type;
-	XdgMimeGroup **group;
-	XdgList *item = (XdgList *)folders_list->list.head;
+	char buffer[MIME_TYPE_NAME_BUFFER_SIZE];
 	XdgJointList *res = NULL;
+	char *sep;
 
-	do
+	if ((sep = strchr(mimeType, '/')) != NULL)
 	{
-		group = (XdgMimeGroup **)search_node(((XdgAppFolders *)item)->app.lst_files_map, group_name);
+		strncpy(buffer, mimeType, sep - mimeType);
+		buffer[sep - mimeType] = 0;
 
-		if (group)
+		XdgMimeSubType *sub_type;
+		XdgMimeGroup **group;
+		XdgList *item = (XdgList *)folders_list->list.head;
+
+		do
 		{
-			sub_type = _xdg_mime_sub_type_item_search(&(*group)->types, mimeType);
+			group = (XdgMimeGroup **)search_node(((XdgAppFolders *)item)->app.lst_files_map, group_name);
 
-			if (sub_type)
-				_xdg_joint_list_apped(&res, (XdgJointList *)sub_type->apps);
+			if (group)
+			{
+				sub_type = _xdg_mime_sub_type_item_search(&(*group)->types, buffer, ++sep);
+
+				if (sub_type)
+					_xdg_joint_list_apped(&res, (XdgJointList *)sub_type->apps);
+			}
+
+			item = item->next;
 		}
-
-		item = item->next;
+		while (item);
 	}
-	while (item);
 
 	return res;
 }
@@ -855,20 +852,29 @@ const XdgJointList *xdg_removed_apps_lookup(const char *mimeType)
 const XdgJointList *xdg_known_apps_lookup(const char *mimeType)
 {
 	assert(folders_list && "Library was not initialized!");
-	XdgMimeSubType *sub_type;
-	XdgList *item = (XdgList *)folders_list->list.head;
+	char buffer[MIME_TYPE_NAME_BUFFER_SIZE];
 	XdgJointList *res = NULL;
+	char *sep;
 
-	do
+	if ((sep = strchr(mimeType, '/')) != NULL)
 	{
-		sub_type = _xdg_mime_sub_type_item_search(((XdgAppFolders *)item)->app.asoc_map, mimeType);
+		strncpy(buffer, mimeType, sep - mimeType);
+		buffer[sep - mimeType] = 0;
 
-		if (sub_type)
-			_xdg_joint_list_apped(&res, (XdgJointList *)sub_type->apps);
+		XdgMimeSubType *sub_type;
+		XdgList *item = (XdgList *)folders_list->list.head;
 
-		item = item->next;
+		do
+		{
+			sub_type = _xdg_mime_sub_type_item_search(((XdgAppFolders *)item)->app.asoc_map, buffer, ++sep);
+
+			if (sub_type)
+				_xdg_joint_list_apped(&res, (XdgJointList *)sub_type->apps);
+
+			item = item->next;
+		}
+		while (item);
 	}
-	while (item);
 
 	return res;
 }
@@ -1020,7 +1026,7 @@ const XdgList *xdg_app_localized_entry_lookup(const XdgAppGroup *group, const ch
 	return 0;
 }
 
-const XdgApp *xdg_list_item_app(const XdgJointList *list)
+const XdgApp *xdg_joint_list_item_app(const XdgJointList *list)
 {
 	return ((XdgMimeSubTypeValue *)list)->app;
 }

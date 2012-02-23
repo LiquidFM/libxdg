@@ -199,7 +199,7 @@ const XdgList *xdg_app_localized_entry_lookup(
  * @param list current list item.
  * @return a \c "const pointer" to XdgApp.
  */
-const XdgApp *xdg_list_item_app(const XdgJointList *list);
+const XdgApp *xdg_joint_list_item_app(const XdgJointList *list);
 
 /**
  * Get \c "const char *" value from current list item.
