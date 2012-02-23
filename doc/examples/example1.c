@@ -2,17 +2,17 @@
 #include <stdio.h>
 
 
-int contains(const XdgList *list, const XdgApp *app)
+int contains(const XdgJointList *list, const XdgJointList *app)
 {
-	const XdgList *apps;
+	const XdgJointList *apps;
 
-	if (apps = xdg_list_begin(list))
+	if (apps = xdg_joint_list_begin(list))
 		do
 		{
-			if (xdg_list_item_app(apps) == app)
+			if (xdg_joint_list_item_app(apps) == app)
 				return 1;
 		}
-		while (apps = xdg_list_next(apps));
+		while (apps = xdg_joint_list_next(apps));
 
 	return 0;
 }
@@ -40,39 +40,39 @@ void print_app(const XdgApp *app)
 void print_applications(const char *mime)
 {
 	const XdgApp *app;
-	const XdgList *apps;
-	const XdgList *removed_apps = xdg_removed_apps_lookup(mime);
+	const XdgJointList *apps;
+	const XdgJointList *removed_apps = xdg_removed_apps_lookup(mime);
 
-	if (apps = xdg_list_begin(xdg_added_apps_lookup(mime)))
+	if (apps = xdg_joint_list_begin(xdg_added_apps_lookup(mime)))
 		do
 		{
-			app = xdg_list_item_app(apps);
+			app = xdg_joint_list_item_app(apps);
 
 			if (contains(removed_apps, app) == 0)
 				print_app(app);
 		}
-		while (apps = xdg_list_next(apps));
+		while (apps = xdg_joint_list_next(apps));
 
-	if (apps = xdg_list_begin(xdg_default_apps_lookup(mime)))
+	if (apps = xdg_joint_list_begin(xdg_default_apps_lookup(mime)))
 		do
 		{
-			app = xdg_list_item_app(apps);
+			app = xdg_joint_list_item_app(apps);
 
 			if (contains(removed_apps, app) == 0)
 				print_app(app);
 		}
-		while (apps = xdg_list_next(apps));
+		while (apps = xdg_joint_list_next(apps));
 
 
-	if (apps = xdg_list_begin(xdg_known_apps_lookup(mime)))
+	if (apps = xdg_joint_list_begin(xdg_known_apps_lookup(mime)))
 		do
 		{
-			app = xdg_list_item_app(apps);
+			app = xdg_joint_list_item_app(apps);
 
 			if (contains(removed_apps, app) == 0)
 				print_app(app);
 		}
-		while (apps = xdg_list_next(apps));
+		while (apps = xdg_joint_list_next(apps));
 }
 
 void main()
