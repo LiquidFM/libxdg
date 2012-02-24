@@ -35,8 +35,8 @@
  * @skip contains
  * @until }
  * @until }
- * @see xdg_list_begin()
- *      @n xdg_list_next()
+ * @see xdg_joint_list_begin()
+ *      @n xdg_joint_list_next()
  *
  * Function \c print_app() is needed for print information about given \p app:
  * @skip print_app
