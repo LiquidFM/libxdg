@@ -273,11 +273,11 @@ static void *read_mime_group_sub_type(void **memory, const AvlTree *app_files_ma
 		(*memory) += sizeof(XdgMimeSubTypeValue) + strlen(res->apps->name);
 
 		prev = (XdgMimeSubTypeValue *)res->apps;
-		res->apps->list.head = (XdgList *)res->apps;
+		res->apps->list.list.head = (XdgList *)res->apps;
 
 		while ((res->apps = (*memory))->list.head)
 		{
-			prev->list.next = (XdgList *)res->apps;
+			prev->list.list.next = (XdgList *)res->apps;
 			res->apps->list.head = prev->list.head;
 			prev = res->apps;
 
