@@ -1,6 +1,6 @@
 # Target - update-applications-cache
 add_executable (update-applications-cache main.c)
-target_link_libraries (update-applications-cache ${exdgmime_LIBS} xdg)
+target_link_libraries (update-applications-cache ${xdg_LIBS} xdg)
 
 # Install
 install (

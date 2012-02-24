@@ -33,8 +33,8 @@ endif ()
 
 
 # Target xdg
-add_library(xdg STATIC xdg.c ${exdgmime_SOURCES})
-target_link_libraries (xdg ${exdgmime_LIBS} xdg)
+add_library(xdg STATIC xdg.c ${xdg_SOURCES})
+target_link_libraries (xdg ${xdg_LIBS})
 
 # Install
 install (
