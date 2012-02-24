@@ -297,10 +297,10 @@ static void *read_mime_group_sub_type(void **memory, const AvlTree *app_files_ma
 		prev = (XdgMimeSubTypeValue *)res->apps;
 		res->apps->list.list.head = (XdgList *)res->apps;
 
-		while ((res->apps = (*memory))->list.head)
+		while ((res->apps = (*memory))->list.list.head)
 		{
 			prev->list.list.next = (XdgList *)res->apps;
-			res->apps->list.head = prev->list.head;
+			res->apps->list.list.head = prev->list.list.head;
 			prev = res->apps;
 
 			if (app = (XdgApp **)search_node(app_files_map, res->apps->name))

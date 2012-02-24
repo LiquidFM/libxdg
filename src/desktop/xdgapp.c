@@ -825,8 +825,6 @@ void xdg_app_rebuild_cache_in_each_data_dir(RebuildCacheResult *result)
 	RebuildDirectoryCacheArgs args = {buffer, result};
 
 	_xdg_for_each_data_dir((XdgDirectoryFunc)_rebuild_directory_cache, &args);
-
-	_xdg_list_free((XdgList *)folders_list, (XdgListItemFree)_xdg_app_folder_free);
 }
 
 int xdg_app_cache_is_valid()
