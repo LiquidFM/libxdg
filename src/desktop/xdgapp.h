@@ -44,30 +44,68 @@ typedef struct XdgApp      XdgApp;
 typedef struct XdgAppGroup XdgAppGroup;
 
 /**
- * Checks that cache file is valid and exist.
- * By default cache is located in
- * "/usr/share/applications/applications.cache".
+ * Represents result
+ * of xdg_app_rebuild_cache_in_each_data_dir() function call.
+ */
+struct RebuildCacheResult
+{
+	/**
+	 * Value of \c errno.
+	 */
+	int error;
+
+	/**
+	 * Absolute path to directory.
+	 */
+	char *directory;
+};
+typedef struct RebuildCacheResult RebuildCacheResult;
+
+/**
+ * Checks that cache file is valid (all data is up-to-date)
+ * and exist.
  *
+ * @param directory absolute path to directory which
+ * contains cache.
  * @return \c TRUE if cache is valid, \c FALSE otherwise.
  *
  * @note
  * Initialization of the library is not necessary
  * before call to this function.
  */
-int xdg_app_cache_file_is_valid();
+int xdg_app_cache_file_is_valid(const char *directory);
 
 /**
- * Rebuilds cache which contains information from all
- * \a ".desktop" and \a ".list" files. By default cache
- * is located in "/usr/share/applications/applications.cache".
+ * Rebuilds cache in the given \p directory. This cache
+ * contains information from all \a ".desktop" and \a ".list"
+ * files found in the given \p directory.
  *
+ * @param directory absolute path to directory which
+ * contains the cache.
  * @return a \c errno value if there was an error, otherwise 0.
  *
  * @note
  * Initialization of the library is not necessary
  * before call to this function.
  */
-int xdg_app_rebuild_cache_file();
+int xdg_app_rebuild_cache_file(const char *directory);
+
+/**
+ * Rebuilds cache in each directory from \a "XDG_DATA_DIRS"
+ * and \a "XDG_DATA_HOME". This cache contains information from
+ * all \a ".desktop" and \a ".list" files found in the given
+ * directories.
+ *
+ * @param result a \c pointer to RebuildCacheResult structure
+ * which contains result of this function call.
+ *
+ * @note
+ * Caller of this function is responsible for freeing resources
+ * of RebuildCacheResult structure.
+ * @n Initialization of the library is not necessary
+ * before call to this function.
+ */
+void xdg_app_rebuild_cache_in_each_data_dir(RebuildCacheResult *result);
 
 /**
  * Checks that loaded cache is valid.

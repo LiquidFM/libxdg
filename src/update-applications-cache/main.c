@@ -5,10 +5,19 @@
 
 int main(int argc, char *argv[])
 {
-	int res = xdg_app_rebuild_cache_file();
+	RebuildCacheResult result = {0, NULL};
 
-	if (res != 0)
-		fprintf(stderr, "%s", strerror(res));
+	xdg_app_rebuild_cache_in_each_data_dir(&result);
 
-	return res;
+	if (result.error != 0)
+	{
+		fprintf(stderr,
+				"Failed to rebuild the cache in directory:\n\t%s\nError:\n\t%s\n",
+				result.directory,
+				strerror(result.error));
+
+		free(result.directory);
+	}
+
+	return result.error;
 }

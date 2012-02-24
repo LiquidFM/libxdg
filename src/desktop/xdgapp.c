@@ -36,6 +36,7 @@
 #	include "../themes/xdgtheme.h"
 #endif
 
+#include <errno.h>
 #include <sys/stat.h>
 #include <stdlib.h>
 #include <dirent.h>
@@ -100,6 +101,28 @@ struct XdgAppFolders
 	XdgAppFolder app;
 };
 typedef struct XdgAppFolders XdgAppFolders;
+
+
+/**
+ * Just for passing arguments into _init_from_directory().
+ */
+struct InitFromDirectoryArgs
+{
+	char *buffer;
+	XdgAppFolders **list;
+};
+typedef struct InitFromDirectoryArgs InitFromDirectoryArgs;
+
+
+/**
+ * Just for passing arguments into _rebuild_directory_cache().
+ */
+struct RebuildDirectoryCacheArgs
+{
+	char *buffer;
+	RebuildCacheResult *result;
+};
+typedef struct RebuildDirectoryCacheArgs RebuildDirectoryCacheArgs;
 
 
 static XdgAppFolders *folders_list = NULL;
@@ -625,10 +648,10 @@ static void __xdg_app_read_from_directory(char *buffer, XdgAppData *data, const 
 	}
 }
 
-static void _xdg_app_read_from_directory(char *buffer, const char *directory_name, const char *preffix)
+static void _xdg_app_read_from_directory(InitFromDirectoryArgs *user_data, const char *directory_name, const char *preffix)
 {
 	char *file_name;
-	XdgAppFolders *folder = _xdg_app_folders_new((XdgList **)&folders_list);
+	XdgAppFolders *folder = _xdg_app_folders_new((XdgList **)user_data->list);
 
 	file_name = malloc(strlen(directory_name) + strlen(cache_file_name) + 2);
 	strcpy(file_name, directory_name); strcat(file_name, "/"); strcat(file_name, cache_file_name);
@@ -649,30 +672,52 @@ static void _xdg_app_read_from_directory(char *buffer, const char *directory_nam
 		else
 			_xdg_app_cache_close(&folder->app.cache.file);
 
-	__xdg_app_read_from_directory(buffer, &folder->app.data, directory_name, preffix);
+	__xdg_app_read_from_directory(user_data->buffer, &folder->app.data, directory_name, preffix);
 
 	folder->app.asoc_map = &folder->app.data.asoc_map;
 	folder->app.app_files_map = &folder->app.data.app_files_map;
 	folder->app.lst_files_map = &folder->app.data.lst_files_map;
 }
 
-static int _init_from_directory(const char *directory, char *buffer)
+static int _init_from_directory(const char *directory, InitFromDirectoryArgs *user_data)
 {
 	char *file_name;
 	assert(directory != NULL);
 
 	file_name = malloc (strlen (directory) + strlen ("/applications") + 1);
 	strcpy (file_name, directory); strcat (file_name, "/applications");
-	_xdg_app_read_from_directory(buffer, file_name, "");
+	_xdg_app_read_from_directory(user_data, file_name, "");
 	free (file_name);
 
+	return FALSE; /* Keep processing */
+}
+
+static int _rebuild_directory_cache(const char *directory, RebuildDirectoryCacheArgs *user_data)
+{
+	struct stat st;
+	char *file_name;
+	assert(directory != NULL);
+
+	file_name = malloc (strlen (directory) + strlen ("/applications") + 1);
+	strcpy (file_name, directory); strcat (file_name, "/applications");
+
+	if (stat(file_name, &st) == 0 || errno != ENOENT)
+		if ((user_data->result->error = xdg_app_rebuild_cache_file(file_name)) != 0)
+		{
+			user_data->result->directory = file_name;
+			return TRUE; /* Stop processing */
+		}
+
+	free (file_name);
 	return FALSE; /* Keep processing */
 }
 
 void _xdg_app_init()
 {
 	char buffer[READ_FROM_FILE_BUFFER_SIZE];
-	_xdg_for_each_data_dir((XdgDirectoryFunc)_init_from_directory, buffer);
+	InitFromDirectoryArgs args = {buffer, &folders_list};
+
+	_xdg_for_each_data_dir((XdgDirectoryFunc)_init_from_directory, &args);
 }
 
 void _xdg_app_shutdown()
@@ -706,58 +751,82 @@ static BOOL _xdg_check_time_stamp(const XdgFileWatcher *files)
 	return TRUE;
 }
 
-int xdg_app_cache_file_is_valid()
+int xdg_app_cache_file_is_valid(const char *directory)
 {
 	int res = FALSE;
-//	XdgAppCache cache;
-//
-//	_xdg_app_cache_init(&cache);
-//	_xdg_app_cache_new(&cache.file, APPLICATIONS_CACHE_FILE);
-//
-//	if (cache.file.error == 0)
-//	{
-//		void *memory = cache.file.memory;
-//
-//		if (read_version(&memory) == 1)
-//		{
-//			cache.files = read_file_watcher_list(&memory);
-//			res = _xdg_check_time_stamp(cache.files);
-//		}
-//
-//		_xdg_app_cache_close(&cache.file);
-//	}
+	char *file_name;
+	XdgAppCache cache;
+
+	_xdg_app_cache_init(&cache);
+
+	file_name = malloc(strlen(directory) + strlen(cache_file_name) + 2);
+	strcpy(file_name, directory); strcat(file_name, "/"); strcat(file_name, cache_file_name);
+
+	_xdg_app_cache_new(&cache.file, file_name);
+
+	free(file_name);
+
+	if (cache.file.error == 0)
+	{
+		void *memory = cache.file.memory;
+
+		if (read_version(&memory) == 1)
+		{
+			cache.files = read_file_watcher_list(&memory);
+			res = _xdg_check_time_stamp(cache.files);
+		}
+
+		_xdg_app_cache_close(&cache.file);
+	}
 
 	return res;
 }
 
-int xdg_app_rebuild_cache_file()
+int xdg_app_rebuild_cache_file(const char *directory)
 {
 	int res = 0;
-//	XdgAppCache cache;
-//
-//	_xdg_app_cache_init(&cache);
-//	_xdg_app_cache_new_empty(&cache.file, APPLICATIONS_CACHE_FILE);
-//
-//	if (cache.file.error == 0)
-//	{
-//		XdgAppData data;
-//		char buffer[READ_FROM_FILE_BUFFER_SIZE];
-//		InitFromDirectoryArgs args = {buffer, &data};
-//
-//		_xdg_app_data_init(&data);
-//
-//		_xdg_for_each_data_dir((XdgDirectoryFunc)_init_from_directory, &args);
-//
-//		_xdg_app_cache_write(&cache.file, &data);
-//
-//		_xdg_app_data_free(&data);
-//	}
-//	else
-//		res = cache.file.error;
-//
-//	_xdg_app_cache_free(&cache);
+	char *file_name;
+	XdgAppCache cache;
+
+	_xdg_app_cache_init(&cache);
+
+	file_name = malloc(strlen(directory) + strlen(cache_file_name) + 2);
+	strcpy(file_name, directory); strcat(file_name, "/"); strcat(file_name, cache_file_name);
+
+	_xdg_app_cache_new_empty(&cache.file, file_name);
+
+	free(file_name);
+
+	if (cache.file.error == 0)
+	{
+		XdgAppData data;
+		char buffer[READ_FROM_FILE_BUFFER_SIZE];
+
+		_xdg_app_data_init(&data);
+
+		__xdg_app_read_from_directory(buffer, &data, directory, "");
+
+		_xdg_app_cache_write(&cache.file, &data);
+
+		_xdg_app_data_free(&data);
+	}
+	else
+		res = cache.file.error;
+
+	_xdg_app_cache_free(&cache);
 
 	return res;
+}
+
+void xdg_app_rebuild_cache_in_each_data_dir(RebuildCacheResult *result)
+{
+	assert(result && "Argument \"result\" is NULL!");
+	char buffer[READ_FROM_FILE_BUFFER_SIZE];
+	RebuildDirectoryCacheArgs args = {buffer, result};
+
+	_xdg_for_each_data_dir((XdgDirectoryFunc)_rebuild_directory_cache, &args);
+
+	_xdg_list_free((XdgList *)folders_list, (XdgListItemFree)_xdg_app_folder_free);
 }
 
 int xdg_app_cache_is_valid()
