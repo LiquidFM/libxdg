@@ -34,12 +34,14 @@
 
 #include <time.h>
 #include "xdgapp.h"
+
+#include "../mime/xdgmimeint.h"
 #include "../containers/avltree.h"
 #include "../containers/xdglist_p.h"
 
 
 /**
- * Files which should be watched for modifications
+ * Files and directories which should be watched for modifications.
  */
 struct XdgFileWatcher
 {
@@ -109,14 +111,18 @@ typedef struct XdgMimeGroup XdgMimeGroup;
 
 
 /**
- * Initialization
+ * Initialization.
  */
 void _xdg_app_init();
+
+/**
+ * Finalization.
+ */
 void _xdg_app_shutdown();
 
 
 /**
- * Map of known associations of XdgApp with mime type
+ * Map of known associations of XdgApp with mime type.
  */
 XdgMimeSubType *_xdg_mime_sub_type_add(AvlTree *map, const char *mime);
 void _xdg_list_app_item_add(XdgList **list, const char *name, XdgApp *app);

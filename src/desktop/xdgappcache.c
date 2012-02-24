@@ -1,3 +1,30 @@
+/** @internal @file xdgappcache.c
+ *  @brief Private file.
+ *
+ * More info can be found at http://www.freedesktop.org/standards/
+ *
+ * @copyright
+ * Copyright (C) 2011,2012  Dmitriy Vilkov <dav.daemon@gmail.com>
+ * @n@n
+ * Licensed under the Academic Free License version 2.0
+ * Or under the following terms:
+ * @n@n
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ * @n@n
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the GNU
+ * Lesser General Public License for more details.
+ * @n@n
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the
+ * Free Software Foundation, Inc., 59 Temple Place - Suite 330,
+ * Boston, MA 02111-1307, USA.
+ */
+
 #include "xdgappcache_p.h"
 #include "xdgmimedefs.h"
 #include <errno.h>
@@ -62,16 +89,16 @@ void _xdg_app_cache_close(XdgAppCahceFile *cache)
 	}
 }
 
-void write_version(int fd, int version)
+void write_version(int fd, xdg_uint32_t version)
 {
-	write(fd, &version, sizeof(int));
+	write(fd, &version, sizeof(xdg_uint32_t));
 }
 
-int read_version(void **memory)
+xdg_uint32_t read_version(void **memory)
 {
-	int version = (*(int *)(*memory));
+	xdg_uint32_t version = (*(xdg_uint32_t *)(*memory));
 
-	(*memory) += sizeof(int);
+	(*memory) += sizeof(xdg_uint32_t);
 
 	return version;
 }
@@ -97,14 +124,12 @@ static void write_app_group_localized_entry(int fd, const XdgValue *value)
 
 	if (value)
 	{
-		XdgValue *next;
 		XdgValue *item = (XdgValue *)value->list.head;
 
 		while (item)
 		{
-			next = (XdgValue *)item->list.next;
 			write(fd, item, sizeof(XdgValue) + strlen(item->value));
-			item = next;
+			item = (XdgValue *)item->list.next;
 		}
 	}
 
@@ -117,7 +142,6 @@ static void write_app_group_entry(int fd, const XdgAppGroupEntryValue *value)
 
 	if (value->values)
 	{
-		XdgValue *next;
 		XdgValue *item = (XdgValue *)value->values->list.head;
 
 		XdgValue empty;
@@ -125,9 +149,8 @@ static void write_app_group_entry(int fd, const XdgAppGroupEntryValue *value)
 
 		while (item)
 		{
-			next = (XdgValue *)item->list.next;
 			write(fd, item, sizeof(XdgValue) + strlen(item->value));
-			item = next;
+			item = (XdgValue *)item->list.next;
 		}
 
 		write(fd, &empty, sizeof(XdgValue));
@@ -227,16 +250,15 @@ static void write_mime_group_sub_type(int fd, const XdgMimeSubType *value)
 
 	if (value->apps)
 	{
-		XdgMimeSubTypeValue *next;
-		XdgMimeSubTypeValue *item = (XdgMimeSubTypeValue *)value->apps->list.head;
+		XdgMimeSubTypeValue *item = (XdgMimeSubTypeValue *)value->apps->list.list.head;
+
 		XdgMimeSubTypeValue empty;
 		memset(&empty, 0, sizeof(XdgMimeSubTypeValue));
 
 		while (item)
 		{
-			next = (XdgMimeSubTypeValue *)item->list.next;
 			write(fd, item, sizeof(XdgMimeSubTypeValue) + strlen(item->name));
-			item = next;
+			item = (XdgMimeSubTypeValue *)item->list.list.next;
 		}
 
 		write(fd, &empty, sizeof(XdgMimeSubTypeValue));
@@ -322,14 +344,12 @@ void write_file_watcher_list(int fd, const XdgFileWatcher *list)
 
 	if (list)
 	{
-		XdgFileWatcher *next;
 		XdgFileWatcher *file = (XdgFileWatcher *)list->list.head;
 
 		while (file)
 		{
-			next = (XdgFileWatcher *)file->list.next;
 			write(fd, file, sizeof(XdgFileWatcher) + strlen(file->path));
-			file = next;
+			file = (XdgFileWatcher *)file->list.next;
 		}
 	}
 
