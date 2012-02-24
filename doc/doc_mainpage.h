@@ -4,7 +4,7 @@
  *
  * This library is a fork of the official freedesktop.org library xdgmime which is implementation of "Shared MIME-info Database" specification.
  *
- * In exdgmime I've added some missing features of the original version:
+ * In libxdg I've added some missing features of the original version:
  *
  * @li C-implementation of AVL trees;
  * @li indexed (by using of AVL trees) access to all ".desktop" files and its contents (implementation of "Desktop Entry Specification");
