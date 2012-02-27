@@ -99,6 +99,7 @@ struct XdgAppFolders
 {
 	XdgList list;
 	XdgAppFolder app;
+	char *directory;
 };
 typedef struct XdgAppFolders XdgAppFolders;
 
@@ -297,6 +298,7 @@ static void _xdg_app_cache_write(XdgAppCahceFile *file, XdgAppData *data)
 static void _xdg_app_cache_free(XdgAppCache *cache)
 {
 	_xdg_app_cache_close(&cache->file);
+	memset(cache, 0, sizeof(XdgAppCache));
 }
 
 static void _xdg_app_data_init(XdgAppData *data)
@@ -315,13 +317,14 @@ static void _xdg_app_data_free(XdgAppData *data)
 	_xdg_file_watcher_list_free(data->files);
 }
 
-static XdgAppFolders *_xdg_app_folders_new(XdgList **list)
+static XdgAppFolders *_xdg_app_folders_new(XdgList **list, const char *directory)
 {
 	XdgAppFolders *res = malloc(sizeof(XdgAppFolders));
 
 	_xdg_list_apped(list, (XdgList *)res);
 	_xdg_app_data_init(&res->app.data);
 	_xdg_app_cache_init(&res->app.cache);
+	res->directory = strdup(directory);
 
 	return res;
 }
@@ -330,6 +333,7 @@ static void _xdg_app_folder_free(XdgAppFolders *folder)
 {
 	_xdg_app_data_free(&folder->app.data);
 	_xdg_app_cache_free(&folder->app.cache);
+	free(folder->directory);
 	free(folder);
 }
 
@@ -651,7 +655,7 @@ static void __xdg_app_read_from_directory(char *buffer, XdgAppData *data, const 
 static void _xdg_app_read_from_directory(InitFromDirectoryArgs *user_data, const char *directory_name, const char *preffix)
 {
 	char *file_name;
-	XdgAppFolders *folder = _xdg_app_folders_new((XdgList **)user_data->list);
+	XdgAppFolders *folder = _xdg_app_folders_new((XdgList **)user_data->list, directory_name);
 
 	file_name = malloc(strlen(directory_name) + strlen(cache_file_name) + 2);
 	strcpy(file_name, directory_name); strcat(file_name, "/"); strcat(file_name, cache_file_name);
@@ -729,13 +733,10 @@ void _xdg_app_shutdown()
 static BOOL _xdg_check_time_stamp(const XdgFileWatcher *files)
 {
 	struct stat st;
-	XdgFileWatcher *next;
 	XdgFileWatcher *file = (XdgFileWatcher *)files->list.head;
 
 	while (file)
 	{
-		next = (XdgFileWatcher *)file->list.next;
-
 		if (stat(file->path, &st) == 0)
 		{
 			if (st.st_mtime != file->mtime)
@@ -745,7 +746,7 @@ static BOOL _xdg_check_time_stamp(const XdgFileWatcher *files)
 			if (file->mtime)
 				return FALSE;
 
-		file = next;
+		file = (XdgFileWatcher *)file->list.next;
 	}
 
 	return TRUE;
@@ -827,42 +828,69 @@ void xdg_app_rebuild_cache_in_each_data_dir(RebuildCacheResult *result)
 	_xdg_for_each_data_dir((XdgDirectoryFunc)_rebuild_directory_cache, &args);
 }
 
-int xdg_app_cache_is_valid()
+static BOOL _xdg_load_cache(XdgAppFolders *folder)
 {
-//	assert(folders_list);
-//
-//	if (folders_list->cache.files)
-//		return _xdg_check_time_stamp(folders_list->cache.files);
+	char *file_name;
+	XdgAppCache cache;
+
+	_xdg_app_cache_init(&cache);
+
+	file_name = malloc(strlen(folder->directory) + strlen(cache_file_name) + 2);
+	strcpy(file_name, folder->directory); strcat(file_name, "/"); strcat(file_name, cache_file_name);
+
+	_xdg_app_cache_new(&cache.file, file_name);
+
+	free(file_name);
+
+	if (cache.file.error == 0)
+		if (_xdg_app_cache_read(&cache))
+		{
+			_xdg_app_cache_free(&folder->app.cache);
+			memcpy(&folder->app.cache, &cache, sizeof(XdgAppCache));
+
+			folder->app.asoc_map = folder->app.cache.asoc_map;
+			folder->app.app_files_map = folder->app.cache.app_files_map;
+			folder->app.lst_files_map = folder->app.cache.lst_files_map;
+
+			return TRUE;
+		}
+		else
+			_xdg_app_cache_close(&cache.file);
 
 	return FALSE;
 }
 
-int xdg_app_reload_cache()
+void xdg_app_refresh(RebuildResult *result)
 {
-//	assert(folders_list);
-//
-//	if (folders_list->cache.files)
-//	{
-//		XdgAppCache cache;
-//
-//		_xdg_app_cache_init(&cache);
-//		_xdg_app_cache_new(&cache.file, APPLICATIONS_CACHE_FILE);
-//
-//		if (cache.file.error == 0)
-//		{
-//			_xdg_app_cache_read(&cache);
-//			_xdg_app_cache_close(&folders_list->cache.file);
-//			memcpy(&folders_list->cache, &cache, sizeof(XdgAppCache));
-//
-//			folders_list->asoc_map = folders_list->cache.asoc_map;
-//			folders_list->app_files_map = folders_list->cache.app_files_map;
-//			folders_list->lst_files_map = folders_list->cache.lst_files_map;
-//
-//			return TRUE;
-//		}
-//	}
+	assert(folders_list);
+	char buffer[READ_FROM_FILE_BUFFER_SIZE];
+	XdgAppFolders *folder = (XdgAppFolders *)folders_list->list.head;
 
-	return FALSE;
+	while (folder)
+	{
+		if (folder->app.data.files)
+		{
+			if (_xdg_check_time_stamp(folder->app.data.files) == FALSE)
+				if (_xdg_load_cache(folder) == FALSE)
+				{
+					_xdg_app_data_free(&folder->app.data);
+					_xdg_app_data_init(&folder->app.data);
+
+					__xdg_app_read_from_directory(buffer, &folder->app.data, folder->directory, "");
+				}
+		}
+		else
+			if (_xdg_check_time_stamp(folder->app.cache.files) == FALSE)
+				if (_xdg_load_cache(folder) == FALSE)
+				{
+					_xdg_app_data_free(&folder->app.data);
+					_xdg_app_data_init(&folder->app.data);
+
+					__xdg_app_read_from_directory(buffer, &folder->app.data, folder->directory, "");
+				}
+
+		folder = (XdgAppFolders *)folder->list.next;
+	}
 }
 
 static const XdgJointList *_xdg_apps_lookup(const char *mimeType, const char *group_name)

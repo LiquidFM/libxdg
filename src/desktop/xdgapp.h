@@ -62,6 +62,24 @@ struct RebuildCacheResult
 typedef struct RebuildCacheResult RebuildCacheResult;
 
 /**
+ * Represents result
+ * of xdg_app_refresh() function call.
+ */
+struct RebuildResult
+{
+	/**
+	 * Value of \c errno.
+	 */
+	int error;
+
+	/**
+	 * Absolute path to directory.
+	 */
+	const char *directory;
+};
+typedef struct RebuildResult RebuildResult;
+
+/**
  * Checks that cache file is valid (all data is up-to-date)
  * and exist.
  *
@@ -108,19 +126,12 @@ int xdg_app_rebuild_cache_file(const char *directory);
 void xdg_app_rebuild_cache_in_each_data_dir(RebuildCacheResult *result);
 
 /**
- * Checks that loaded cache is valid.
+ * Checks that dynamically loaded data and cache files are valid
+ * and reloads it if not.
  *
- * @return \c TRUE if cache is valid, \c FALSE otherwise.
+ * @note This function is not thread safe!
  */
-int xdg_app_cache_is_valid();
-
-/**
- * Reloads cache.
- *
- * @return \c TRUE if the library is using cache and that cache
- * was reloaded, \c FALSE otherwise.
- */
-int xdg_app_reload_cache();
+void xdg_app_refresh(RebuildResult *result);
 
 /**
  * Looks in \a "Default Applications" section of all \a ".list"
