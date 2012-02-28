@@ -84,7 +84,7 @@ typedef struct RebuildResult RebuildResult;
  * and exist.
  *
  * @param directory absolute path to directory which
- * contains cache.
+ * contains the cache.
  * @return \c TRUE if cache is valid, \c FALSE otherwise.
  *
  * @note
@@ -99,7 +99,7 @@ int xdg_app_cache_file_is_valid(const char *directory);
  * files found in the given \p directory.
  *
  * @param directory absolute path to directory which
- * contains the cache.
+ * contains \a ".desktop" and \a ".list" files.
  * @return a \c errno value if there was an error, otherwise 0.
  *
  * @note
