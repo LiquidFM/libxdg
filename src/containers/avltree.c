@@ -627,7 +627,7 @@ static void write_empty_node_to_file(int fd, AvlNode *stack_node)
 	write(fd, stack_node, sizeof(AvlNode));
 }
 
-static void write_node_to_file(int fd, AvlNode *stack_node, const AvlNode *source_node, WriteKey writeKey, WriteValue writeValue)
+static void write_node_to_file(int fd, AvlNode *stack_node, const AvlNode *source_node, WriteKey writeKey, WriteValue writeValue, void *user_data)
 {
 	memcpy(stack_node, source_node, sizeof(AvlNode));
 	stack_node->visit = ALL_IS_VISITED;
@@ -635,16 +635,16 @@ static void write_node_to_file(int fd, AvlNode *stack_node, const AvlNode *sourc
 	write(fd, stack_node, sizeof(AvlNode));
 
 	writeKey(fd, stack_node->key);
-	writeValue(fd, stack_node->value);
+	writeValue(fd, stack_node->value, user_data);
 }
 
-static void write_subtree_to_file(int fd, AvlNode *subtree_root, WriteKey writeKey, WriteValue writeValue)
+static void write_subtree_to_file(int fd, AvlNode *subtree_root, WriteKey writeKey, WriteValue writeValue, void *user_data)
 {
 	AvlNode stack_node;
 	AvlNode *this_node = subtree_root;
 	this_node->visit = NONE_IS_VISITED;
 
-	write_node_to_file(fd, &stack_node, this_node, writeKey, writeValue);
+	write_node_to_file(fd, &stack_node, this_node, writeKey, writeValue, user_data);
 
 	/* Depth-first search (DFS) algorithm */
 	while (TRUE)
@@ -662,7 +662,7 @@ static void write_subtree_to_file(int fd, AvlNode *subtree_root, WriteKey writeK
 
 				if (this_node->links.right)
 				{
-					write_node_to_file(fd, &stack_node, this_node->links.right, writeKey, writeValue);
+					write_node_to_file(fd, &stack_node, this_node->links.right, writeKey, writeValue, user_data);
 					this_node = this_node->links.right;
 					this_node->visit = NONE_IS_VISITED;
 				}
@@ -675,7 +675,7 @@ static void write_subtree_to_file(int fd, AvlNode *subtree_root, WriteKey writeK
 
 			if (this_node->links.left)
 			{
-				write_node_to_file(fd, &stack_node, this_node->links.left, writeKey, writeValue);
+				write_node_to_file(fd, &stack_node, this_node->links.left, writeKey, writeValue, user_data);
 				this_node = this_node->links.left;
 				this_node->visit = NONE_IS_VISITED;
 			}
@@ -765,14 +765,14 @@ const AvlTree *map_from_memory(void **memory, ReadKey readKey, ReadValue readVal
 	return res;
 }
 
-void write_to_file(int fd, const AvlTree *tree, WriteKey writeKey, WriteValue writeValue)
+void write_to_file(int fd, const AvlTree *tree, WriteKey writeKey, WriteValue writeValue, void *user_data)
 {
 	AvlTree saved_tree;
 	memset(&saved_tree, (unsigned int)-1, sizeof(AvlTree));
 	write(fd, &saved_tree, sizeof(AvlTree));
 
 	if (tree->tree_root)
-		write_subtree_to_file(fd, (AvlNode *)tree->tree_root, writeKey, writeValue);
+		write_subtree_to_file(fd, (AvlNode *)tree->tree_root, writeKey, writeValue, user_data);
 	else
 	{
 		AvlNode stack_node;

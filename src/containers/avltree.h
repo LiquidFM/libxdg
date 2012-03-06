@@ -50,7 +50,7 @@ typedef void (*DepthFirstSearch)(const KEY_TYPE key, const VALUE_TYPE value, voi
 typedef KEY_TYPE (*ReadKey)(void **memory, void *user_data);
 typedef VALUE_TYPE (*ReadValue)(void **memory, void *user_data);
 typedef void (*WriteKey)(int fd, const KEY_TYPE key);
-typedef void (*WriteValue)(int fd, const VALUE_TYPE value);
+typedef void (*WriteValue)(int fd, const VALUE_TYPE value, void *user_data);
 
 
 /**
@@ -88,7 +88,7 @@ VALUE_TYPE *search_node(const AvlTree *tree, const KEY_TYPE key);
 VALUE_TYPE delete_node(AvlTree *tree, const KEY_TYPE key);
 
 const AvlTree *map_from_memory(void **memory, ReadKey readKey, ReadValue readValue, CompareKeys compareKeys, void *user_data);
-void write_to_file(int fd, const AvlTree *tree, WriteKey writeKey, WriteValue writeValue);
+void write_to_file(int fd, const AvlTree *tree, WriteKey writeKey, WriteValue writeValue, void *user_data);
 
 #ifdef __cplusplus
 }
