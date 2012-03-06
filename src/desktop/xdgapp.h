@@ -40,8 +40,8 @@
 extern "C" {
 #endif
 
-typedef struct XdgApp      XdgApp;
-typedef struct XdgAppGroup XdgAppGroup;
+typedef struct XdgApp             XdgApp;
+typedef struct XdgAppGroupEntries XdgAppGroupEntries;
 
 /**
  * Represents result
@@ -197,27 +197,27 @@ char *xdg_app_icon_lookup(const XdgApp *app, const char *theme, int size);
  *
  * @param app a \c "const pointer" to XdgApp.
  * @param group name of the group.
- * @return a \c "const pointer" to XdgAppGroup or \c NULL if there is no
+ * @return a \c "const pointer" to XdgAppGroupEntries or \c NULL if there is no
  * corresponding \p "group".
  */
-const XdgAppGroup *xdg_app_group_lookup(const XdgApp *app, const char *group);
+const XdgAppGroupEntries *xdg_app_group_lookup(const XdgApp *app, const char *group);
 
 /**
  * Searches for an \p "entry" (for example \a "Icon") in a given \p "group"
  * (for example \a "Desktop Entry").
  *
- * @param group a \c "const pointer" to XdgAppGroup.
+ * @param group a \c "const pointer" to XdgAppGroupEntries.
  * @param entry name of the entry.
  * @return a \c "const pointer" to XdgList of default \p entry
  * \c "const char *" values or \c NULL if there is no corresponding \p "entry".
  */
-const XdgList *xdg_app_entry_lookup(const XdgAppGroup *group, const char *entry);
+const XdgList *xdg_app_entry_lookup(const XdgAppGroupEntries *group, const char *entry);
 
 /**
  * Searches for a localized \p "entry" (for example \a "Name[ru]") in a given \p "group"
  * (for example \a "Desktop Entry").
  *
- * @param group a \c "const pointer" to XdgAppGroup.
+ * @param group a \c "const pointer" to XdgAppGroupEntries.
  * @param entry name of the entry.
  * @param lang language of the localized value.
  * @param country country of the localized value.
@@ -230,7 +230,7 @@ const XdgList *xdg_app_entry_lookup(const XdgAppGroup *group, const char *entry)
  * \c "const pointer" to XdgList of \a default \c "const char *" values (if any).
  */
 const XdgList *xdg_app_localized_entry_lookup(
-		const XdgAppGroup *group,
+		const XdgAppGroupEntries *group,
 		const char *entry,
 		const char *lang,
 		const char *country,

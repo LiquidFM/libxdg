@@ -156,17 +156,28 @@ static void write_app_group_entry(int fd, const XdgAppGroupEntryValue *value)
 		write(fd, &empty, sizeof(XdgValue));
 	}
 
-	write_to_file(fd, &value->localized, write_app_key, (WriteValue)write_app_group_localized_entry);
+	write_to_file(fd, &value->localized, write_app_key, (WriteValue)write_app_group_localized_entry, NULL);
 }
 
-static void write_app_group(int fd, const XdgAppGroup *value)
+static void write_app_group(int fd, const XdgAppGroupEntries *value)
 {
-	write_to_file(fd, &value->entries, write_app_key, (WriteValue)write_app_group_entry);
+	write_to_file(fd, &value->entries, write_app_key, (WriteValue)write_app_group_entry, NULL);
 }
 
 void write_app(int fd, const XdgApp *value)
 {
-	write_to_file(fd, &value->groups, write_app_key, (WriteValue)write_app_group);
+	if (value->groups && value->groups->owner == value)
+	{
+		write(fd, value, sizeof(XdgApp));
+		write(fd, value->groups, sizeof(XdgAppGroups));
+		write_to_file(fd, &value->groups->tree, write_app_key, (WriteValue)write_app_group, NULL);
+	}
+	else
+	{
+		XdgApp empty;
+		memset(&empty, 0, sizeof(XdgApp));
+		write(fd, &empty, sizeof(XdgApp));
+	}
 }
 
 static void *read_app_group_localized_entry(void **memory)
@@ -228,7 +239,7 @@ static void *read_app_group_entry(void **memory)
 
 static void *read_app_group(void **memory)
 {
-	XdgAppGroup *value = (*memory);
+	XdgAppGroupEntries *value = (*memory);
 
 	map_from_memory(memory, (ReadKey)read_app_key, (ReadValue)read_app_group_entry, strcmp, NULL);
 
@@ -238,8 +249,16 @@ static void *read_app_group(void **memory)
 void *read_app(void **memory)
 {
 	XdgApp *value = (*memory);
+	(*memory) += sizeof(XdgApp);
 
-	map_from_memory(memory, (ReadKey)read_app_key, (ReadValue)read_app_group, strcmp, NULL);
+	if (value->groups)
+	{
+		value->groups = (*memory);
+		(*memory) += sizeof(XdgAppGroups);
+
+		value->groups->owner = value;
+		memcpy(&value->groups->tree, map_from_memory(memory, (ReadKey)read_app_key, (ReadValue)read_app_group, strcmp, NULL), sizeof(AvlTree));
+	}
 
 	return value;
 }
@@ -267,12 +286,12 @@ static void write_mime_group_sub_type(int fd, const XdgMimeSubType *value)
 
 void write_mime_group_type(int fd, const XdgMimeType *value)
 {
-	write_to_file(fd, &value->sub_types, write_app_key, (WriteValue)write_mime_group_sub_type);
+	write_to_file(fd, &value->sub_types, write_app_key, (WriteValue)write_mime_group_sub_type, NULL);
 }
 
 void write_mime_group(int fd, const XdgMimeGroup *value)
 {
-	write_to_file(fd, &value->types, write_app_key, (WriteValue)write_mime_group_type);
+	write_to_file(fd, &value->types, write_app_key, (WriteValue)write_mime_group_type, NULL);
 }
 
 static void *read_mime_group_sub_type(void **memory, const AvlTree *app_files_map)

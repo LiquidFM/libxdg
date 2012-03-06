@@ -69,14 +69,21 @@ struct XdgAppGroupEntryValue
 };
 typedef struct XdgAppGroupEntryValue XdgAppGroupEntryValue;
 
-struct XdgAppGroup
+struct XdgAppGroupEntries
 {
 	AvlTree entries;
 };
 
+struct XdgAppGroups
+{
+	const XdgApp *owner;
+	AvlTree tree;
+};
+typedef struct XdgAppGroups XdgAppGroups;
+
 struct XdgApp
 {
-	AvlTree groups;
+	XdgAppGroups *groups;
 };
 
 
