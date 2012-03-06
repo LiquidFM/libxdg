@@ -45,6 +45,7 @@ typedef KEY_TYPE (*DuplicateKey)(const KEY_TYPE key);
 typedef void (*DestroyKey)(KEY_TYPE key);
 typedef int (*CompareKeys)(const KEY_TYPE key1, const KEY_TYPE key2);
 typedef void (*DestroyValue)(VALUE_TYPE value);
+typedef void (*DepthFirstSearch)(const KEY_TYPE key, const VALUE_TYPE value, void *user_data);
 
 typedef KEY_TYPE (*ReadKey)(void **memory, void *user_data);
 typedef VALUE_TYPE (*ReadValue)(void **memory, void *user_data);
@@ -80,6 +81,8 @@ void init_avl_tree(AvlTree *tree, DuplicateKey duplicateKey, DestroyKey destroyK
 void clear_avl_tree(AvlTree *tree);
 void clear_avl_tree_and_values(AvlTree *tree, DestroyValue destroyValue);
 
+int is_empty_tree(const AvlTree *tree);
+void depth_first_search(const AvlTree *tree, DepthFirstSearch callback, void *user_data);
 VALUE_TYPE *search_or_create_node(AvlTree *tree, const KEY_TYPE key);
 VALUE_TYPE *search_node(const AvlTree *tree, const KEY_TYPE key);
 VALUE_TYPE delete_node(AvlTree *tree, const KEY_TYPE key);

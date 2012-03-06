@@ -484,6 +484,11 @@ static AvlNode **search_routine(const KEY_TYPE value_to_search, AvlNode **root, 
 	return this_node_pointer;
 }
 
+AvlNode *depth_first_search_begin(AvlTree *tree)
+{
+	return tree->tree_root;
+}
+
 AvlTree *create_avl_tree(DuplicateKey duplicateKey, DestroyKey destroyKey, CompareKeys compareKeys)
 {
 	AvlTree *res = malloc(sizeof(AvlTree));
@@ -521,6 +526,54 @@ void clear_avl_tree(AvlTree *tree)
 void clear_avl_tree_and_values(AvlTree *tree, DestroyValue destroyValue)
 {
 	destroy_subtree_and_values(tree, &tree->tree_root, destroyValue);
+}
+
+int is_empty_tree(const AvlTree *tree)
+{
+	return tree->tree_root == NULL;
+}
+
+void depth_first_search(const AvlTree *tree, DepthFirstSearch callback, void *user_data)
+{
+	AvlNode *this_node = tree->tree_root;
+
+	if (this_node)
+	{
+		this_node->visit = NONE_IS_VISITED;
+
+		/* Depth-first search (DFS) algorithm */
+		while (TRUE)
+			if (this_node->visit & LEFT_IS_VISITED)
+				if (this_node->visit & RIGHT_IS_VISITED)
+				{
+					this_node = this_node->links.parent;
+
+					if (this_node == 0)
+						break;
+				}
+				else
+				{
+					this_node->visit |= RIGHT_IS_VISITED;
+
+					if (this_node->links.right)
+					{
+						callback(this_node->links.right->key, this_node->links.right->value, user_data);
+						this_node = this_node->links.right;
+						this_node->visit = NONE_IS_VISITED;
+					}
+				}
+			else
+			{
+				this_node->visit |= LEFT_IS_VISITED;
+
+				if (this_node->links.left)
+				{
+					callback(this_node->links.left->key, this_node->links.left->value, user_data);
+					this_node = this_node->links.left;
+					this_node->visit = NONE_IS_VISITED;
+				}
+			}
+	}
 }
 
 VALUE_TYPE *search_or_create_node(AvlTree *tree, const KEY_TYPE key)
