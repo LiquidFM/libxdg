@@ -251,6 +251,22 @@ const XdgList *xdg_app_localized_entry_lookup(
 const XdgApp *xdg_joint_list_item_app(const XdgJointList *list);
 
 /**
+ * Checks that \p list returned by one of the methods:
+ *
+ * @li xdg_default_apps_lookup()
+ * @li xdg_added_apps_lookup()
+ * @li xdg_removed_apps_lookup()
+ * @li xdg_known_apps_lookup()
+ *
+ * contains an \p item.
+ *
+ * @param list current list item.
+ * @param item an item which should or shouldn't be in the \p list.
+ * @return \c TRUE if \p item was found in the \p list, \c FALSE otherwise.
+ */
+int xdg_joint_list_contains_app(const XdgJointList *list, const XdgApp *item);
+
+/**
  * Get \c "const char *" value from current list item.
  *
  * @note This function works for XdgList returned by

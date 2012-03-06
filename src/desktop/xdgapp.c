@@ -1219,6 +1219,24 @@ const XdgApp *xdg_joint_list_item_app(const XdgJointList *list)
 	return ((XdgMimeSubTypeValue *)list)->app;
 }
 
+int xdg_joint_list_contains_app(const XdgJointList *list, const XdgApp *item)
+{
+	assert(item);
+
+	if (item->groups)
+	{
+		const XdgJointList *current;
+
+		if (current = xdg_joint_list_begin(list))
+			do
+				if (((XdgMimeSubTypeValue *)current)->app->groups == item->groups)
+					return TRUE;
+			while (current = xdg_joint_list_next(current));
+	}
+
+	return FALSE;
+}
+
 const char *xdg_list_item_app_group_entry_value(const XdgList *list)
 {
 	return ((XdgValue *)list)->value;
