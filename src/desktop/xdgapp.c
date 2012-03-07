@@ -994,24 +994,25 @@ static const XdgJointList *_xdg_apps_lookup(const char *mimeType, const char *gr
 	{
 		strncpy(buffer, mimeType, sep - mimeType);
 		buffer[sep - mimeType] = 0;
+		++sep;
 
 		XdgMimeSubType *sub_type;
 		XdgMimeGroup **group;
-		XdgList *item = (XdgList *)folders_list->list.head;
+		XdgAppFolders *item = (XdgAppFolders *)folders_list->list.head;
 
 		do
 		{
-			group = (XdgMimeGroup **)search_node(((XdgAppFolders *)item)->app.lst_files_map, group_name);
+			group = (XdgMimeGroup **)search_node(item->app.lst_files_map, group_name);
 
 			if (group)
 			{
-				sub_type = _xdg_mime_sub_type_item_search(&(*group)->types, buffer, ++sep);
+				sub_type = _xdg_mime_sub_type_item_search(&(*group)->types, buffer, sep);
 
 				if (sub_type)
 					_xdg_joint_list_apped(&res, (XdgJointList *)sub_type->apps);
 			}
 
-			item = item->next;
+			item = (XdgAppFolders *)item->list.next;
 		}
 		while (item);
 	}
@@ -1045,18 +1046,19 @@ const XdgJointList *xdg_known_apps_lookup(const char *mimeType)
 	{
 		strncpy(buffer, mimeType, sep - mimeType);
 		buffer[sep - mimeType] = 0;
+		++sep;
 
 		XdgMimeSubType *sub_type;
-		XdgList *item = (XdgList *)folders_list->list.head;
+		XdgAppFolders *item = (XdgAppFolders *)folders_list->list.head;
 
 		do
 		{
-			sub_type = _xdg_mime_sub_type_item_search(((XdgAppFolders *)item)->app.asoc_map, buffer, ++sep);
+			sub_type = _xdg_mime_sub_type_item_search(item->app.asoc_map, buffer, sep);
 
 			if (sub_type)
 				_xdg_joint_list_apped(&res, (XdgJointList *)sub_type->apps);
 
-			item = item->next;
+			item = (XdgAppFolders *)item->list.next;
 		}
 		while (item);
 	}
