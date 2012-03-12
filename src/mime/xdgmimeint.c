@@ -31,6 +31,7 @@
 #include "xdgmimeint.h"
 #include <ctype.h>
 #include <string.h>
+#include <stdlib.h>
 
 #ifndef	FALSE
 #define	FALSE	(0)
