@@ -2,21 +2,6 @@
 #include <stdio.h>
 
 
-int contains(const XdgJointList *list, const XdgJointList *app)
-{
-	const XdgJointList *apps;
-
-	if (apps = xdg_joint_list_begin(list))
-		do
-		{
-			if (xdg_joint_list_item_app(apps) == app)
-				return 1;
-		}
-		while (apps = xdg_joint_list_next(apps));
-
-	return 0;
-}
-
 void print_app(const XdgApp *app)
 {
 	const XdgList *values;
@@ -48,7 +33,7 @@ void print_applications(const char *mime)
 		{
 			app = xdg_joint_list_item_app(apps);
 
-			if (contains(removed_apps, app) == 0)
+			if (xdg_joint_list_contains_app(removed_apps, app) == 0)
 				print_app(app);
 		}
 		while (apps = xdg_joint_list_next(apps));
@@ -58,7 +43,7 @@ void print_applications(const char *mime)
 		{
 			app = xdg_joint_list_item_app(apps);
 
-			if (contains(removed_apps, app) == 0)
+			if (xdg_joint_list_contains_app(removed_apps, app) == 0)
 				print_app(app);
 		}
 		while (apps = xdg_joint_list_next(apps));
@@ -69,7 +54,7 @@ void print_applications(const char *mime)
 		{
 			app = xdg_joint_list_item_app(apps);
 
-			if (contains(removed_apps, app) == 0)
+			if (xdg_joint_list_contains_app(removed_apps, app) == 0)
 				print_app(app);
 		}
 		while (apps = xdg_joint_list_next(apps));

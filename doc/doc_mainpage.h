@@ -31,13 +31,6 @@
  * And \c "stdio.h" header for \c printf() function:
  * @line #include
  *
- * Function \c contains() is needed for scanning XdgList for a given \p app argument:
- * @skip contains
- * @until }
- * @until }
- * @see xdg_joint_list_begin()
- *      @n xdg_joint_list_next()
- *
  * Function \c print_app() is needed for print information about given \p app:
  * @skip print_app
  * @until }
@@ -53,27 +46,27 @@
  * @skip print_applications
  * @until *apps;
  *
- * \c "removed_apps" variable stores a pointer to XdgList of removed (by user) applications which could handle given \p mime type:
+ * \c "removed_apps" variable stores a pointer to XdgJointList of removed (by user) applications which could handle given \p mime type:
  * @skipline removed_apps
  * @see xdg_removed_apps_lookup()
  *
  * Print information about \a all \a user defined applications able to handle given \p mime type:
  * @skip xdg_added_apps_lookup
  * @until }
- * @see xdg_list_item_app
+ * @see xdg_joint_list_item_app
  *      @n xdg_added_apps_lookup()
  *
  * Print information about \a all \a default applications able to handle given \p mime type:
  * @skip xdg_default_apps_lookup
  * @until }
- * @see xdg_list_item_app
+ * @see xdg_joint_list_item_app
  *      @n xdg_default_apps_lookup()
  *
  * Print information about \a all \a registered applications able to handle given \p mime type:
  * @skip xdg_known_apps_lookup
  * @until }
  * @until }
- * @see xdg_list_item_app
+ * @see xdg_joint_list_item_app
  *      @n xdg_known_apps_lookup()
  *
  *
