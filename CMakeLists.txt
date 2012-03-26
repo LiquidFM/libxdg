@@ -71,7 +71,7 @@ find_package (Doxygen 1.7.5)
 if (DOXYGEN_FOUND)
     # Config file variables
     set (DOXY_PROJECT_NAME   ${PROJECT_NAME})
-    set (DOXY_PROJECT_NUMBER "0.1")
+    set (DOXY_PROJECT_NUMBER "0.1.4")
     set (DOXY_PROJECT_BRIEF  "\"This library is a fork of the official freedesktop.org library xdgmime.\"")
     set (DOXY_EXAMPLE_PATH   ${CMAKE_SOURCE_DIR}/doc)
     set (DOXY_INPUT          "${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/doc/doc_mainpage.h")

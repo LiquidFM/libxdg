@@ -4,7 +4,7 @@
  *
  * This library is a fork of the official freedesktop.org library xdgmime which is implementation of "Shared MIME-info Database" specification.
  *
- * In libxdg I've added some missing features of the original version:
+ * In libxdg were added some missing features of the original version:
  *
  * @li C-implementation of AVL trees;
  * @li indexed (by using of AVL trees) access to all ".desktop" files and its contents (implementation of "Desktop Entry Specification");
@@ -12,15 +12,18 @@
  * @li indexed (by using of AVL trees) access to icon themes and its contents (implemetation of "Icon Theme Specification" and "Icon Naming Specification");
  * @li implementation of "MIME actions specification".
  *
- * All this code is licensed under GNU-LGPL and AFL v2.0.
+ * Library is licensed under GNU-LGPL and AFL v2.0.
  *
+ **************************************************************************************
+ * @n@section cache_file_formats_sec Cache file formats
+ * Description of binary file format of @subpage desktop_cache_format_page
  *
- * @n @section example_sec Examples
+ **************************************************************************************
+ * @n@section example_sec Examples
  *
  * This sections describes a number of examples which should provide you with necessary information
  * to start using this library.
  *
- **************************************************************************************
  * @subsection example1 Example1. List all applications able to handle given mime type.
  *
  * @dontinclude examples/example1.c
@@ -92,4 +95,18 @@
  * @page example1_src Example1
  * List all applications able to handle given mime type:
  * @include examples/example1.c
+ */
+
+
+/** @page desktop_cache_format_page Desktop Entry Specification cache
+ * The specification itself could be found <a href="http://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html">here</a>.
+ *
+ * This specification describes directory layout and format of ".desktop" and ".list" files.
+ * Purpose of the binary is to provide fastest possible access to contents of this files.
+ * This goal is achieved by using of AVL trees. They were chosen because AVL trees are more
+ * rigidly balanced than red-black trees, leading to slower insertion and removal but faster retrieval.
+ *
+ * Format of binary cache which contains data from ".desktop" and ".list" files.
+ *
+ *
  */
