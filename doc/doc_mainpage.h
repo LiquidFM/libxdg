@@ -16,7 +16,7 @@
  *
  **************************************************************************************
  * @n@section cache_file_formats_sec Cache file formats
- * Description of binary file format of @subpage desktop_cache_format_page
+ * Description of format of @subpage desktop_cache_format_page.
  *
  **************************************************************************************
  * @n@section example_sec Examples
@@ -98,15 +98,36 @@
  */
 
 
-/** @page desktop_cache_format_page Desktop Entry Specification cache
- * The specification itself could be found <a href="http://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html">here</a>.
+/** @page desktop_cache_format_page Desktop Entry Specification binary cache
+ * The specification could be found <a href="http://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html">here</a>.
  *
  * This specification describes directory layout and format of ".desktop" and ".list" files.
- * Purpose of the binary is to provide fastest possible access to contents of this files.
+ * Purpose of the library is to provide fastest possible access to contents of this files.
  * This goal is achieved by using of AVL trees. They were chosen because AVL trees are more
  * rigidly balanced than red-black trees, leading to slower insertion and removal but faster retrieval.
  *
- * Format of binary cache which contains data from ".desktop" and ".list" files.
+ * Format of binary cache which contains data from \a ".desktop" and \a ".list" files is:
+ *	- 4 \c bytes for version of a cache file.
  *
+ *  - List of XdgFileWatcher structures (at least one zeroed structure).
+ *
+ *  - AVL tree of all \a ".desktop" files located in the same directory as cache file.
+ *	@n Each key of this tree is a name of \a ".desktop" file (e.g. \a kde4-kate.desktop).
+ *	@n Each value of this tree is an AVL tree of groups, which in turns is an AVL tree of
+ *	entries.
+ *
+ *  - AVL tree of associations of mime type with \a ".desktop" files.
+ *	@n Each key of this tree is a name of a mime type (e.g. \a text).
+ *	@n Each value of this tree is an AVL tree of sub types (e.g. \a html), which contains a
+ *	list of pointers to XdgApp structures.
+ *	@note Global version of this tree is used to resolve \a ".desktop" files according to
+ *	the given mime type.
+ *
+ *  - AVL tree of all \a ".list" files located in the same directory as cache file.
+ *	@n Each key of this tree is a name of \a ".list" file (e.g. \a defaults.list).
+ *	@n Each value of this tree is an AVL tree of groups, which in turns is an AVL tree of
+ *	{mime type, \a ".desktop" files} pairs in the format: \a "text/plain=kde4-kate.desktop;diffuse.desktop;".
+ *	@note Global version of this tree is used to resolve \a ".desktop" files according to
+ *	the given mime type.
  *
  */

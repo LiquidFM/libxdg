@@ -41,7 +41,7 @@
 
 
 /**
- * Files and directories which should be watched for modifications.
+ * A list of files and directories which should be watched for modifications.
  */
 struct XdgFileWatcher
 {
@@ -81,6 +81,9 @@ struct XdgAppGroups
 };
 typedef struct XdgAppGroups XdgAppGroups;
 
+/**
+ * Represents contents of \a ".desktop" file.
+ */
 struct XdgApp
 {
 	XdgAppGroups *groups;
