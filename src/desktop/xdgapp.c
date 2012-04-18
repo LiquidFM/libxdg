@@ -186,13 +186,13 @@ static void _xdg_mime_type_map_item_free(XdgMimeType *type)
 	free(type);
 }
 
-static XdgAppGroupEntryValue *_xdg_app_group_entry_map_item_add(AvlTree *map, const char *name)
+static XdgAppGroupEntry *_xdg_app_group_entry_map_item_add(AvlTree *map, const char *name)
 {
-	XdgAppGroupEntryValue **res = (XdgAppGroupEntryValue **)search_or_create_node(map, name);
+	XdgAppGroupEntry **res = (XdgAppGroupEntry **)search_or_create_node(map, name);
 
 	if ((*res) == NULL)
 	{
-		(*res) = malloc(sizeof(XdgAppGroupEntryValue));
+		(*res) = malloc(sizeof(XdgAppGroupEntry));
 		memset(&(*res)->values, 0, sizeof(XdgList));
 		init_avl_tree(&(*res)->localized, strdup, (DestroyKey)free, strcmp);
 	}
@@ -200,27 +200,27 @@ static XdgAppGroupEntryValue *_xdg_app_group_entry_map_item_add(AvlTree *map, co
 	return (*res);
 }
 
-static void _xdg_app_group_entry_map_item_free(XdgAppGroupEntryValue *item)
+static void _xdg_app_group_entry_map_item_free(XdgAppGroupEntry *item)
 {
 	_xdg_list_value_item_free(item->values);
 	clear_avl_tree_and_values(&item->localized, (DestroyValue)_xdg_list_value_item_free);
 	free(item);
 }
 
-static XdgAppGroupEntries *_xdg_app_group_map_item_add(AvlTree *map, const char *name)
+static XdgAppGroup *_xdg_app_group_map_item_add(AvlTree *map, const char *name)
 {
-	XdgAppGroupEntries **res = (XdgAppGroupEntries **)search_or_create_node(map, name);
+	XdgAppGroup **res = (XdgAppGroup **)search_or_create_node(map, name);
 
 	if ((*res) == NULL)
 	{
-		(*res) = malloc(sizeof(XdgAppGroupEntries));
+		(*res) = malloc(sizeof(XdgAppGroup));
 		init_avl_tree(&(*res)->entries, strdup, (DestroyKey)free, strcmp);
 	}
 
 	return (*res);
 }
 
-static void _xdg_app_group_map_item_free(XdgAppGroupEntries *item)
+static void _xdg_app_group_map_item_free(XdgAppGroup *item)
 {
 	clear_avl_tree_and_values(&item->entries, (DestroyValue)_xdg_app_group_entry_map_item_free);
 	free(item);
@@ -460,7 +460,7 @@ static void _xdg_app_group_read_mime_type_entry_value(XdgList **list, XdgApp *ap
 	}
 }
 
-static void _xdg_app_group_read_entry(XdgAppGroupEntries *group, XdgApp *app, const char *app_name, AvlTree *asoc_map, const char *line)
+static void _xdg_app_group_read_entry(XdgAppGroup *group, XdgApp *app, const char *app_name, AvlTree *asoc_map, const char *line)
 {
 	char *sep;
 
@@ -475,7 +475,7 @@ static void _xdg_app_group_read_entry(XdgAppGroupEntries *group, XdgApp *app, co
 		{
 			*sep = 0;
 			char *locale = sep + 1;
-			XdgAppGroupEntryValue *entry = _xdg_app_group_entry_map_item_add(&group->entries, line);
+			XdgAppGroupEntry *entry = _xdg_app_group_entry_map_item_add(&group->entries, line);
 
 			if ((sep = strchr(locale, ']')) != NULL)
 			{
@@ -504,7 +504,7 @@ static void _xdg_app_group_read_entry(XdgAppGroupEntries *group, XdgApp *app, co
 		}
 		else
 		{
-			XdgAppGroupEntryValue *entry = _xdg_app_group_entry_map_item_add(&group->entries, line);
+			XdgAppGroupEntry *entry = _xdg_app_group_entry_map_item_add(&group->entries, line);
 
 			if (strcmp(line, "MimeType") == 0)
 				_xdg_app_group_read_mime_type_entry_value((XdgList **)&entry->values, app, app_name, asoc_map, start);
@@ -548,7 +548,7 @@ static void _xdg_app_read_desktop_file(char *buffer, XdgAppData *data, FILE *fil
 {
 	char *sep;
 	XdgApp *app;
-	XdgAppGroupEntries *group = NULL;
+	XdgAppGroup *group = NULL;
 
 	app = _xdg_app_map_item_add(&data->app_files_map, name);
 
@@ -1069,11 +1069,11 @@ const XdgJointList *xdg_known_apps_lookup(const char *mimeType)
 char *xdg_app_icon_lookup(const XdgApp *app, const char *themeName, int size)
 {
 #ifdef THEMES_SPEC
-	XdgAppGroupEntries **group = (XdgAppGroupEntries **)search_node(&app->groups->tree, "Desktop Entry");
+	XdgAppGroup **group = (XdgAppGroup **)search_node(&app->groups->tree, "Desktop Entry");
 
 	if (group)
 	{
-		XdgAppGroupEntryValue **entry = (XdgAppGroupEntryValue **)search_node(&(*group)->entries, "Icon");
+		XdgAppGroupEntry **entry = (XdgAppGroupEntry **)search_node(&(*group)->entries, "Icon");
 
 		if (entry && (*entry)->values)
 			return xdg_icon_lookup((*entry)->values->value, size, Applications, themeName);
@@ -1083,11 +1083,11 @@ char *xdg_app_icon_lookup(const XdgApp *app, const char *themeName, int size)
 	return 0;
 }
 
-const XdgAppGroupEntries *xdg_app_group_lookup(const XdgApp *app, const char *group)
+const XdgAppGroup *xdg_app_group_lookup(const XdgApp *app, const char *group)
 {
 	if (app->groups)
 	{
-		XdgAppGroupEntries **res = (XdgAppGroupEntries **)search_node(&app->groups->tree, group);
+		XdgAppGroup **res = (XdgAppGroup **)search_node(&app->groups->tree, group);
 
 		if (res)
 			return (*res);
@@ -1096,9 +1096,9 @@ const XdgAppGroupEntries *xdg_app_group_lookup(const XdgApp *app, const char *gr
 	return 0;
 }
 
-const XdgList *xdg_app_entry_lookup(const XdgAppGroupEntries *group, const char *entry)
+const XdgList *xdg_app_entry_lookup(const XdgAppGroup *group, const char *entry)
 {
-	XdgAppGroupEntryValue **res = (XdgAppGroupEntryValue **)search_node(&group->entries, entry);
+	XdgAppGroupEntry **res = (XdgAppGroupEntry **)search_node(&group->entries, entry);
 
 	if (res)
 		return (XdgList *)&(*res)->values;
@@ -1106,9 +1106,9 @@ const XdgList *xdg_app_entry_lookup(const XdgAppGroupEntries *group, const char 
 		return 0;
 }
 
-const XdgList *xdg_app_localized_entry_lookup(const XdgAppGroupEntries *group, const char *entry, const char *lang, const char *country, const char *modifier)
+const XdgList *xdg_app_localized_entry_lookup(const XdgAppGroup *group, const char *entry, const char *lang, const char *country, const char *modifier)
 {
-	XdgAppGroupEntryValue **value = (XdgAppGroupEntryValue **)search_node(&group->entries, entry);
+	XdgAppGroupEntry **value = (XdgAppGroupEntry **)search_node(&group->entries, entry);
 
 	if (value && *value)
 	{

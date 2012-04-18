@@ -40,8 +40,8 @@
 extern "C" {
 #endif
 
-typedef struct XdgApp             XdgApp;
-typedef struct XdgAppGroupEntries XdgAppGroupEntries;
+typedef struct XdgApp      XdgApp;
+typedef struct XdgAppGroup XdgAppGroup;
 
 /**
  * Represents result
@@ -200,7 +200,7 @@ char *xdg_app_icon_lookup(const XdgApp *app, const char *theme, int size);
  * @return a \c "const pointer" to XdgAppGroupEntries or \c NULL if there is no
  * corresponding \p "group".
  */
-const XdgAppGroupEntries *xdg_app_group_lookup(const XdgApp *app, const char *group);
+const XdgAppGroup *xdg_app_group_lookup(const XdgApp *app, const char *group);
 
 /**
  * Searches for an \p "entry" (for example \a "Icon") in a given \p "group"
@@ -211,7 +211,7 @@ const XdgAppGroupEntries *xdg_app_group_lookup(const XdgApp *app, const char *gr
  * @return a \c "const pointer" to XdgList of default \p entry
  * \c "const char *" values or \c NULL if there is no corresponding \p "entry".
  */
-const XdgList *xdg_app_entry_lookup(const XdgAppGroupEntries *group, const char *entry);
+const XdgList *xdg_app_entry_lookup(const XdgAppGroup *group, const char *entry);
 
 /**
  * Searches for a localized \p "entry" (for example \a "Name[ru]") in a given \p "group"
@@ -230,7 +230,7 @@ const XdgList *xdg_app_entry_lookup(const XdgAppGroupEntries *group, const char 
  * \c "const pointer" to XdgList of \a default \c "const char *" values (if any).
  */
 const XdgList *xdg_app_localized_entry_lookup(
-		const XdgAppGroupEntries *group,
+		const XdgAppGroup *group,
 		const char *entry,
 		const char *lang,
 		const char *country,

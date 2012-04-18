@@ -53,7 +53,7 @@ typedef struct XdgFileWatcher XdgFileWatcher;
 
 
 /**
- * ".desktop" files data
+ * A list of XdgAppGroupEntry values.
  */
 struct XdgValue
 {
@@ -62,18 +62,33 @@ struct XdgValue
 };
 typedef struct XdgValue XdgValue;
 
-struct XdgAppGroupEntryValue
+/**
+ * Represents a \a ".desktop" file entry.
+ */
+struct XdgAppGroupEntry
 {
+	/**
+	 * A list of \a default values.
+	 */
 	XdgValue *values;
+	/**
+	 * A tree of \a localized values.
+	 */
 	AvlTree localized;
 };
-typedef struct XdgAppGroupEntryValue XdgAppGroupEntryValue;
+typedef struct XdgAppGroupEntry XdgAppGroupEntry;
 
-struct XdgAppGroupEntries
+/**
+ * Represents a \a ".desktop" file group.
+ */
+struct XdgAppGroup
 {
 	AvlTree entries;
 };
 
+/**
+ * Contains a \a ".desktop" file groups of a XdgApp.
+ */
 struct XdgAppGroups
 {
 	const XdgApp *owner;
@@ -91,7 +106,7 @@ struct XdgApp
 
 
 /**
- * ".list" files data
+ * A list (XdgJointList) of pointers to XdgApp.
  */
 struct XdgMimeSubTypeValue
 {
@@ -101,18 +116,27 @@ struct XdgMimeSubTypeValue
 };
 typedef struct XdgMimeSubTypeValue XdgMimeSubTypeValue;
 
+/**
+ * Represents a \a sub \a type of mime type pair.
+ */
 struct XdgMimeSubType
 {
 	XdgMimeSubTypeValue *apps;
 };
 typedef struct XdgMimeSubType XdgMimeSubType;
 
+/**
+ * Represents a \a type of mime type pair.
+ */
 struct XdgMimeType
 {
 	AvlTree sub_types;
 };
 typedef struct XdgMimeType XdgMimeType;
 
+/**
+ * Represents a \a ".list" file group.
+ */
 struct XdgMimeGroup
 {
 	AvlTree types;

@@ -136,9 +136,9 @@ static void write_app_group_localized_entry(int fd, const XdgValue *value)
 	write(fd, &empty, sizeof(XdgValue));
 }
 
-static void write_app_group_entry(int fd, const XdgAppGroupEntryValue *value)
+static void write_app_group_entry(int fd, const XdgAppGroupEntry *value)
 {
-	write(fd, value, sizeof(XdgAppGroupEntryValue));
+	write(fd, value, sizeof(XdgAppGroupEntry));
 
 	if (value->values)
 	{
@@ -159,7 +159,7 @@ static void write_app_group_entry(int fd, const XdgAppGroupEntryValue *value)
 	write_to_file(fd, &value->localized, write_app_key, (WriteValue)write_app_group_localized_entry, NULL);
 }
 
-static void write_app_group(int fd, const XdgAppGroupEntries *value)
+static void write_app_group(int fd, const XdgAppGroup *value)
 {
 	write_to_file(fd, &value->entries, write_app_key, (WriteValue)write_app_group_entry, NULL);
 }
@@ -209,8 +209,8 @@ static void *read_app_group_localized_entry(void **memory)
 
 static void *read_app_group_entry(void **memory)
 {
-	XdgAppGroupEntryValue *res = (*memory);
-	(*memory) += sizeof(XdgAppGroupEntryValue);
+	XdgAppGroupEntry *res = (*memory);
+	(*memory) += sizeof(XdgAppGroupEntry);
 
 	if (res->values)
 	{
@@ -239,7 +239,7 @@ static void *read_app_group_entry(void **memory)
 
 static void *read_app_group(void **memory)
 {
-	XdgAppGroupEntries *value = (*memory);
+	XdgAppGroup *value = (*memory);
 
 	map_from_memory(memory, (ReadKey)read_app_key, (ReadValue)read_app_group_entry, strcmp, NULL);
 

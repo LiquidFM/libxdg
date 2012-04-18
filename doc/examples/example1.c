@@ -5,7 +5,7 @@
 void print_app(const XdgApp *app)
 {
 	const XdgList *values;
-	const XdgAppGroupEntries *group = xdg_app_group_lookup(app, "Desktop Entry");
+	const XdgAppGroup *group = xdg_app_group_lookup(app, "Desktop Entry");
 
 	if (values = xdg_list_begin(xdg_app_localized_entry_lookup(group, "Name", "ru", "RU", NULL)))
 		do
