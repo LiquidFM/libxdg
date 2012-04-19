@@ -1009,7 +1009,7 @@ static const XdgJointList *_xdg_apps_lookup(const char *mimeType, const char *gr
 				sub_type = _xdg_mime_sub_type_item_search(&(*group)->types, buffer, sep);
 
 				if (sub_type)
-					_xdg_joint_list_apped(&res, (XdgJointList *)sub_type->apps);
+					_xdg_joint_list_apped(&res, (XdgJointList *)sub_type->apps->list.list.head);
 			}
 
 			item = (XdgAppFolders *)item->list.next;
@@ -1056,7 +1056,7 @@ const XdgJointList *xdg_known_apps_lookup(const char *mimeType)
 			sub_type = _xdg_mime_sub_type_item_search(item->app.asoc_map, buffer, sep);
 
 			if (sub_type)
-				_xdg_joint_list_apped(&res, (XdgJointList *)sub_type->apps);
+				_xdg_joint_list_apped(&res, (XdgJointList *)sub_type->apps->list.list.head);
 
 			item = (XdgAppFolders *)item->list.next;
 		}
