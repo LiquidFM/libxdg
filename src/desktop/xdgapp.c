@@ -1076,7 +1076,7 @@ char *xdg_app_icon_lookup(const XdgApp *app, const char *themeName, int size)
 		XdgAppGroupEntry **entry = (XdgAppGroupEntry **)search_node(&(*group)->entries, "Icon");
 
 		if (entry && (*entry)->values)
-			return xdg_icon_lookup((*entry)->values->value, size, Applications, themeName);
+			return xdg_icon_lookup((*entry)->values->value, size, XdgThemeApplications, themeName);
 	}
 #endif
 

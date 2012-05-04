@@ -678,7 +678,7 @@ char *xdg_mime_type_icon_lookup(const char *mime, int size, const char *themeNam
 			if ((sep = strchr(mimeTypeCopy, '/')) != NULL)
 				(*sep) = '-';
 
-			return _xdg_mime_find_icon(mimeTypeCopy, size, MimeTypes, *theme, *hicolor);
+			return _xdg_mime_find_icon(mimeTypeCopy, size, XdgThemeMimeTypes, *theme, *hicolor);
 		}
 	}
 

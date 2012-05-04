@@ -39,19 +39,19 @@ typedef struct XdgThemeGroup XdgThemeGroup;
 typedef struct XdgTheme      XdgTheme;
 typedef enum
 {
-	Actions,
-	Animations,
-	Applications,
-	Categories,
-	Devices,
-	Emblems,
-	Emotes,
-	FileSystems,
-	International,
-	MimeTypes,
-	Places,
-	Status,
-	Stock
+	XdgThemeActions,
+	XdgThemeAnimations,
+	XdgThemeApplications,
+	XdgThemeCategories,
+	XdgThemeDevices,
+	XdgThemeEmblems,
+	XdgThemeEmotes,
+	XdgThemeFileSystems,
+	XdgThemeInternational,
+	XdgThemeMimeTypes,
+	XdgThemePlaces,
+	XdgThemeStatus,
+	XdgThemeStock
 } Context;
 
 char *xdg_mime_type_icon_lookup(const char *mime, int size, const char *theme);
