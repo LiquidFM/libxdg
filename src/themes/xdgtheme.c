@@ -643,12 +643,12 @@ static char *_xdg_mime_find_icon_helper(const char *icon, int size, Context cont
 			if (theme != hicolor)
 				return _xdg_mime_find_icon_helper(icon, size, context, hicolor, hicolor);
 
-	return 0;
+	return NULL;
 }
 
 static char *_xdg_mime_lookup_fallback_icon(const char *icon, int size, XdgTheme *theme)
 {
-	return 0;
+	return NULL;
 }
 
 static char *_xdg_mime_find_icon(const char *icon, int size, Context context, XdgTheme *theme, XdgTheme *hicolor)
@@ -682,7 +682,7 @@ char *xdg_mime_type_icon_lookup(const char *mime, int size, const char *themeNam
 		}
 	}
 
-	return 0;
+	return NULL;
 }
 
 char *xdg_icon_lookup(const char *icon, int size, Context context, const char *themeName)
@@ -697,5 +697,5 @@ char *xdg_icon_lookup(const char *icon, int size, Context context, const char *t
 			return _xdg_mime_find_icon(icon, size, context, *theme, *hicolor);
 	}
 
-	return 0;
+	return NULL;
 }
