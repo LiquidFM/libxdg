@@ -2,7 +2,7 @@
  *
  * @section intro_sec Introduction
  *
- * This library is a fork of the official freedesktop.org library xdgmime which is implementation of "Shared MIME-info Database" specification.
+ * This library is a fork of the official freedesktop.org xdgmime library which is implementation of "Shared MIME-info Database" specification.
  *
  * In libxdg were added some missing features of the original version:
  *
@@ -15,16 +15,26 @@
  * Library is licensed under GNU-LGPL and AFL v2.0.
  *
  **************************************************************************************
- * @n@section cache_file_formats_sec Cache file formats
- * Description of format of @subpage desktop_cache_format_page.
+ * @n@section cache_formats_sec Cache formats
+ *
+ * @subpage avl_tree_cache_format_page
+ *
+ * @subpage desktop_cache_format_page
  *
  **************************************************************************************
- * @n@section example_sec Examples
+ * @n@section examples_sec Examples
  *
  * This sections describes a number of examples which should provide you with necessary information
  * to start using this library.
  *
- * @subsection example1 Example1. List all applications able to handle given mime type.
+ * @subpage example1_page
+ *
+ */
+
+
+/** @page example1_page Example1. List all applications able to handle given mime type.
+ *
+ * @subpage example1_src
  *
  * @dontinclude examples/example1.c
  *
@@ -55,13 +65,13 @@
  *
  * Print information about \a all \a user defined applications able to handle given \p mime type:
  * @skip xdg_added_apps_lookup
- * @until }
+ * @until ));
  * @see xdg_joint_list_item_app
  *      @n xdg_added_apps_lookup()
  *
  * Print information about \a all \a default applications able to handle given \p mime type:
  * @skip xdg_default_apps_lookup
- * @until }
+ * @until ));
  * @see xdg_joint_list_item_app
  *      @n xdg_default_apps_lookup()
  *
@@ -90,15 +100,23 @@
  * @until }
  * @see xdg_shutdown()
  *
- * @n Source code of \ref example1_src.
- *
- * @page example1_src Example1
+ */
+
+/** @page example1_src Source code of Example1.
  * List all applications able to handle given mime type:
  * @include examples/example1.c
  */
 
 
-/** @page desktop_cache_format_page Desktop Entry Specification binary cache
+/** @page avl_tree_cache_format_page Format of AVL tree cache.
+ * Here is described binary format in which AVL trees are stored on disk.
+ * Comprehensive theoretical information about AVL trees can be found
+ * <a href="http://en.wikipedia.org/wiki/AVL_tree">here</a>.
+ *
+ */
+
+
+/** @page desktop_cache_format_page Binary cache of Desktop Entry Specification.
  * The specification could be found
  * <a href="http://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html">here</a>.
  *
@@ -110,7 +128,7 @@
  * Format of binary cache which contains data from \a ".desktop" and \a ".list" files is:
  *	- 4 \c bytes for version of a cache file.
  *
- *  - List of XdgFileWatcher structures (at least one zeroed structure).
+ *  - List of XdgFileWatcher structures (at least one zeroed structure, i.e NULL-terminated C list).
  *
  *  - AVL tree of all \a ".desktop" files located in the same directory as cache file.
  *	@n Each key of this tree is a name of \a ".desktop" file (e.g. \a kde4-kate.desktop).
