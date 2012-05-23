@@ -126,28 +126,52 @@
  * rigidly balanced than red-black trees, leading to slower insertion and removal but faster retrieval.
  *
  * Format of binary cache which contains data from \a ".desktop" and \a ".list" files is:
- *	- 4 \c bytes for version of a cache file.
+ * <ul>
+ * <li> 4 \c bytes for version of a cache file.
  *
- *  - List of XdgFileWatcher structures (at least one zeroed structure, i.e NULL-terminated C list).
+ * <li> List of XdgFileWatcher structures (at least one zeroed structure, i.e NULL-terminated C list).
+ *   @n This list is used during loading of cache to determine validity of cache.
+ *   @see xdg_app_cache_file_is_valid()
+ *        @n xdg_app_refresh()
  *
- *  - AVL tree of all \a ".desktop" files located in the same directory as cache file.
- *	@n Each key of this tree is a name of \a ".desktop" file (e.g. \a kde4-kate.desktop).
- *	@n Each value of this tree is an AVL tree of XdgApp, which in turns is an AVL tree of
- *	XdgAppGroup, which is an AVL tree of XdgAppGroupEntry.
- *	@note This tree serves as container of \a ".desktop" files for other two major trees in cache.
+ * <li> AVL tree of all \a ".desktop" files located in the same directory (and subdirectories) as cache file.
+ *   @n Each key of this tree is a name of \a ".desktop" file (e.g. \a kde4-kate.desktop).
+ *   @n Each value of this tree is an AVL tree of XdgApp items, which in turns is an AVL tree of
+ *   XdgAppGroup items, which is an AVL tree of XdgAppGroupEntry items.
+ *   @note This tree serves as container of \a ".desktop" files for other two major trees in cache.
  *
- *  - AVL tree of associations of mime type with \a ".desktop" files.
- *	@n Each key of this tree is a name of a mime type (e.g. \a text).
- *	@n Each value of this tree is an AVL tree of sub types (e.g. \a html), which contains a
- *	list of pointers to XdgApp structures.
- *	@note Global version of this tree is used to resolve \a ".desktop" files according to
- *	the given mime type.
+ * <li> AVL tree of associations of mime type with \a ".desktop" files.
+ *   @n Each key of this tree is a name of a first part of mime type (e.g. \a text).
+ *   @n Each value of this tree is an AVL tree of a second part of mime type (e.g. \a html), which contains a
+ *   list of pointers to XdgApp items.
+ *   @note Global version of this tree is used to resolve \a ".desktop" files according to
+ *   the given mime type.
+ *   @see xdg_known_apps_lookup()
  *
- *  - AVL tree of all \a ".list" files located in the same directory as cache file.
- *	@n Each key of this tree is a name of a group from \a ".list" file (e.g. \a Default \a Applications).
- *	@n Each value of this tree is an AVL tree of entries, which in turns is an AVL tree of
- *	{mime type, \a ".desktop" files} pairs in the format: \a "text/plain=kde4-kate.desktop;diffuse.desktop;".
- *	@note Global version of this tree is used to resolve \a ".desktop" files according to
- *	the given mime type.
+ * <li> AVL tree of all \a ".list" files located in the same directory (and subdirectories) as cache file.
+ *   @n Each key of this tree is a name of a group from \a ".list" file (e.g. \a Default \a Applications).
+ *   @n Each value of this tree is an AVL tree of entries, which in turns is an AVL tree of
+ *   {mime type, \a ".desktop" files} pairs in the format: @n\a "text/plain=kde4-kate.desktop;diffuse.desktop;".
+ *   @note Global version of this tree is used to resolve \a ".desktop" files according to
+ *   the given mime type.
+ *   @see xdg_default_apps_lookup()
+ *        @n xdg_added_apps_lookup()
+ *        @n xdg_removed_apps_lookup()
+ * </ul>
+ *
+ * @n What are the Global AVL trees mentioned above? Well the thing is, or even the problem is that we have
+ * several directories with data (\a ".desktop" and \a ".list" files) and separate cache file for each directory.
+ * This means that we could have reference to \a ".desktop" file which is located in a different directory.
+ * More of that, this \a ".desktop" file could be in a valid cache file of that directory...
+ * @n Despite this we would like to have a global picture of the registered applications in the system. That's why we
+ * need the Global versions of this trees, which contains references to \a ".desktop" files in appropriate directory.
+ * Also this approach gives as a possibility to rebuild the cache only in one data directory.
+ *
+ * @note Actually, this problem is solved a bit different way. There is no Global AVL trees, there is a list of
+ * directories with their data. When data loaded for each directory we are fixing references between data of this
+ * directories.
+ * @n That's why XdgJointList appeared - to dynamically group (create references) data from different folders without
+ * memory allocations.
+ * @n Also, this is the root of thread unsafety.
  *
  */
