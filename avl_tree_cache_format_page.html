@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
-<title>xdg: XdgAppGroupEntries Struct Reference</title>
+<title>xdg: Format of AVL tree cache.</title>
 
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
@@ -28,9 +28,9 @@
   
   <td style="padding-left: 0.5em;">
    <div id="projectname">xdg
-   &#160;<span id="projectnumber">0.1.4</span>
+   &#160;<span id="projectnumber">0.2</span>
    </div>
-   <div id="projectbrief">This library is a fork of the official freedesktop.org library xdgmime.</div>
+   <div id="projectbrief">This library is a fork of the official freedesktop.org xdgmime library.</div>
   </td>
   
   
@@ -47,8 +47,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
-      <li><a href="pages.html"><span>Related&#160;Pages</span></a></li>
-      <li class="current"><a href="annotated.html"><span>Data&#160;Structures</span></a></li>
+      <li><a href="annotated.html"><span>Data&#160;Structures</span></a></li>
       <li><a href="files.html"><span>Files</span></a></li>
       <li>
         <div id="MSearchBox" class="MSearchBoxInactive">
@@ -68,13 +67,6 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
       </li>
     </ul>
   </div>
-  <div id="navrow2" class="tabs2">
-    <ul class="tablist">
-      <li><a href="annotated.html"><span>Data&#160;Structures</span></a></li>
-      <li><a href="classes.html"><span>Data&#160;Structure&#160;Index</span></a></li>
-      <li><a href="functions.html"><span>Data&#160;Fields</span></a></li>
-    </ul>
-  </div>
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -89,28 +81,23 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </iframe>
 </div>
 
+  <div id="nav-path" class="navpath">
+    <ul>
+      <li class="navelem"><a class="el" href="index.html">index</a>      </li>
+    </ul>
+  </div>
 </div>
 <div class="header">
-  <div class="summary">
-<a href="#pub-attribs">Data Fields</a>  </div>
   <div class="headertitle">
-<div class="title">XdgAppGroupEntries Struct Reference</div>  </div>
+<div class="title">Format of AVL tree cache. </div>  </div>
 </div><!--header-->
 <div class="contents">
-<table class="memberdecls">
-<tr><td colspan="2"><h2><a name="pub-attribs"></a>
-Data Fields</h2></td></tr>
-<tr class="memitem:ae4d4f814b4bc2b5d32dda3a604cfa1a2"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ae4d4f814b4bc2b5d32dda3a604cfa1a2"></a>
-<a class="el" href="structAvlTree.html">AvlTree</a>&#160;</td><td class="memItemRight" valign="bottom"><b>entries</b></td></tr>
-</table>
-<hr/>The documentation for this struct was generated from the following file:<ul>
-<li>/home/dav/WORK/workspace/executables/xdg/src/desktop/<a class="el" href="xdgapp__p_8h_source.html">xdgapp_p.h</a></li>
-</ul>
-</div><!-- contents -->
+<div class="textblock"><p>Here is described binary format in which AVL trees are stored on disk. Comprehensive theoretical information about AVL trees can be found <a href="http://en.wikipedia.org/wiki/AVL_tree">here</a>. </p>
+</div></div><!-- contents -->
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Apr 7 2012 17:56:32 for xdg by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Wed May 23 2012 16:59:38 for xdg by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.0
 </small></address>

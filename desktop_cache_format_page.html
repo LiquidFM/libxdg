@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
-<title>xdg: Desktop Entry Specification binary cache</title>
+<title>xdg: Binary cache of Desktop Entry Specification.</title>
 
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
@@ -28,9 +28,9 @@
   
   <td style="padding-left: 0.5em;">
    <div id="projectname">xdg
-   &#160;<span id="projectnumber">0.1.4</span>
+   &#160;<span id="projectnumber">0.2</span>
    </div>
-   <div id="projectbrief">This library is a fork of the official freedesktop.org library xdgmime.</div>
+   <div id="projectbrief">This library is a fork of the official freedesktop.org xdgmime library.</div>
   </td>
   
   
@@ -47,7 +47,6 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
   <div id="navrow1" class="tabs">
     <ul class="tablist">
       <li><a href="index.html"><span>Main&#160;Page</span></a></li>
-      <li class="current"><a href="pages.html"><span>Related&#160;Pages</span></a></li>
       <li><a href="annotated.html"><span>Data&#160;Structures</span></a></li>
       <li><a href="files.html"><span>Files</span></a></li>
       <li>
@@ -90,38 +89,54 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div>
 <div class="header">
   <div class="headertitle">
-<div class="title">Desktop Entry Specification binary cache </div>  </div>
+<div class="title">Binary cache of Desktop Entry Specification. </div>  </div>
 </div><!--header-->
 <div class="contents">
 <div class="textblock"><p>The specification could be found <a href="http://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html">here</a>.</p>
 <p>This specification describes directory layout and format of ".desktop" and ".list" files. Purpose of the library is to provide fastest possible access to contents of this files. This goal is achieved by using of AVL trees. They were chosen because AVL trees are more rigidly balanced than red-black trees, leading to slower insertion and removal but faster retrieval.</p>
-<p>Format of binary cache which contains data from <em>".desktop"</em> and <em>".list"</em> files is:</p>
+<p>Format of binary cache which contains data from <em>".desktop"</em> and <em>".list"</em> files is: </p>
 <ul>
-<li>4 <code>bytes</code> for version of a cache file.</li>
-</ul>
-<ul>
-<li>List of <a class="el" href="structXdgFileWatcher.html">XdgFileWatcher</a> structures (at least one zeroed structure).</li>
-</ul>
-<ul>
-<li>AVL tree of all <em>".desktop"</em> files located in the same directory as cache file. <br/>
+<li>
+<p class="startli">4 <code>bytes</code> for version of a cache file.</p>
+<p class="endli"></p>
+</li>
+<li>
+List of <a class="el" href="structXdgFileWatcher.html">XdgFileWatcher</a> structures (at least one zeroed structure, i.e NULL-terminated C list). <br/>
+ This list is used during loading of cache to determine validity of cache. <dl class="section see"><dt>See also:</dt><dd><a class="el" href="xdgapp_8h.html#a67692057236662507eae121b43659156">xdg_app_cache_file_is_valid()</a> <br/>
+ <a class="el" href="xdgapp_8h.html#acf70d45bb83b91e72a93c5d07318857f">xdg_app_refresh()</a></dd></dl>
+</li>
+<li>
+AVL tree of all <em>".desktop"</em> files located in the same directory (and subdirectories) as cache file. <br/>
  Each key of this tree is a name of <em>".desktop"</em> file (e.g. <em>kde4-kate.desktop</em>). <br/>
- Each value of this tree is an AVL tree of groups, which in turns is an AVL tree of entries.</li>
-</ul>
-<ul>
-<li>AVL tree of associations of mime type with <em>".desktop"</em> files. <br/>
- Each key of this tree is a name of a mime type (e.g. <em>text</em>). <br/>
- Each value of this tree is an AVL tree of sub types (e.g. <em>html</em>), which contains a list of pointers to <a class="el" href="structXdgApp.html">XdgApp</a> structures. <dl class="section note"><dt>Note:</dt><dd>Global version of this tree is used to resolve <em>".desktop"</em> files according to the given mime type.</dd></dl>
+ Each value of this tree is an AVL tree of <a class="el" href="structXdgApp.html">XdgApp</a> items, which in turns is an AVL tree of <a class="el" href="structXdgAppGroup.html">XdgAppGroup</a> items, which is an AVL tree of <a class="el" href="structXdgAppGroupEntry.html">XdgAppGroupEntry</a> items. <dl class="section note"><dt>Note:</dt><dd>This tree serves as container of <em>".desktop"</em> files for other two major trees in cache.</dd></dl>
 </li>
-<li>AVL tree of all <em>".list"</em> files located in the same directory as cache file. <br/>
- Each key of this tree is a name of <em>".list"</em> file (e.g. <em>defaults.list</em>). <br/>
- Each value of this tree is an AVL tree of groups, which in turns is an AVL tree of {mime type, <em>".desktop"</em> files} pairs in the format: <em>"text/plain=kde4-kate.desktop;diffuse.desktop;"</em>. <dl class="section note"><dt>Note:</dt><dd>Global version of this tree is used to resolve <em>".desktop"</em> files according to the given mime type. </dd></dl>
+<li>
+AVL tree of associations of mime type with <em>".desktop"</em> files. <br/>
+ Each key of this tree is a name of a first part of mime type (e.g. <em>text</em>). <br/>
+ Each value of this tree is an AVL tree of a second part of mime type (e.g. <em>html</em>), which contains a list of pointers to <a class="el" href="structXdgApp.html">XdgApp</a> items. <dl class="section note"><dt>Note:</dt><dd>Global version of this tree is used to resolve <em>".desktop"</em> files according to the given mime type. </dd></dl>
+<dl class="section see"><dt>See also:</dt><dd><a class="el" href="xdgapp_8h.html#af74b63e575298b2ce9a8e57fbacd4855">xdg_known_apps_lookup()</a></dd></dl>
+</li>
+<li>
+AVL tree of all <em>".list"</em> files located in the same directory (and subdirectories) as cache file. <br/>
+ Each key of this tree is a name of a group from <em>".list"</em> file (e.g. <em>Default</em> <em>Applications</em>). <br/>
+ Each value of this tree is an AVL tree of entries, which in turns is an AVL tree of {mime type, <em>".desktop"</em> files} pairs in the format: <br/>
+<em>"text/plain=kde4-kate.desktop;diffuse.desktop;"</em>. <dl class="section note"><dt>Note:</dt><dd>Global version of this tree is used to resolve <em>".desktop"</em> files according to the given mime type. </dd></dl>
+<dl class="section see"><dt>See also:</dt><dd><a class="el" href="xdgapp_8h.html#aaad229dea73735dc7ec2ef7e693da92a">xdg_default_apps_lookup()</a> <br/>
+ <a class="el" href="xdgapp_8h.html#a5d96b1573dce1803112daf648655e6bf">xdg_added_apps_lookup()</a> <br/>
+ <a class="el" href="xdgapp_8h.html#a83884641cb8729a6eb35c19b4414cb56">xdg_removed_apps_lookup()</a> </dd></dl>
 </li>
 </ul>
+<p><br/>
+ What are the Global AVL trees mentioned above? Well the thing is, or even the problem is that we have several directories with data (<em>".desktop"</em> and <em>".list"</em> files) and separate cache file for each directory. This means that we could have reference to <em>".desktop"</em> file which is located in a different directory. More of that, this <em>".desktop"</em> file could be in a valid cache file of that directory... <br/>
+ Despite this we would like to have a global picture of the registered applications in the system. That's why we need the Global versions of this trees, which contains references to <em>".desktop"</em> files in appropriate directory. Also this approach gives as a possibility to rebuild the cache only in one data directory.</p>
+<dl class="section note"><dt>Note:</dt><dd>Actually, this problem is solved a bit different way. There is no Global AVL trees, there is a list of directories with their data. When data loaded for each directory we are fixing references between data of this directories. <br/>
+ That's why <a class="el" href="structXdgJointList.html">XdgJointList</a> appeared - to dynamically group (create references) data from different folders without memory allocations. <br/>
+ Also, this is the root of thread unsafety. </dd></dl>
 </div></div><!-- contents -->
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Sat Apr 7 2012 17:56:32 for xdg by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Wed May 23 2012 16:59:38 for xdg by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.0
 </small></address>
