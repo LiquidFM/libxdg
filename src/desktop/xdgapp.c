@@ -1080,7 +1080,7 @@ char *xdg_app_icon_lookup(const XdgApp *app, const char *themeName, int size)
 	}
 #endif
 
-	return 0;
+	return NULL;
 }
 
 const XdgAppGroup *xdg_app_group_lookup(const XdgApp *app, const char *group)
@@ -1093,7 +1093,7 @@ const XdgAppGroup *xdg_app_group_lookup(const XdgApp *app, const char *group)
 			return (*res);
 	}
 
-	return 0;
+	return NULL;
 }
 
 const XdgList *xdg_app_entry_lookup(const XdgAppGroup *group, const char *entry)
@@ -1103,7 +1103,7 @@ const XdgList *xdg_app_entry_lookup(const XdgAppGroup *group, const char *entry)
 	if (res)
 		return (XdgList *)&(*res)->values;
 	else
-		return 0;
+		return NULL;
 }
 
 const XdgList *xdg_app_localized_entry_lookup(const XdgAppGroup *group, const char *entry, const char *lang, const char *country, const char *modifier)
@@ -1213,7 +1213,7 @@ const XdgList *xdg_app_localized_entry_lookup(const XdgAppGroup *group, const ch
 		return (XdgList *)(*value)->values;
 	}
 
-	return 0;
+	return NULL;
 }
 
 const XdgApp *xdg_joint_list_item_app(const XdgJointList *list)
