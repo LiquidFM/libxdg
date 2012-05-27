@@ -2,17 +2,23 @@
  *
  * @section intro_sec Introduction
  *
- * This library is a fork of the official freedesktop.org xdgmime library which is implementation of "Shared MIME-info Database" specification.
+ * This library is implementation of several freedesktop.org specifications such as
  *
- * In libxdg were added some missing features of the original version:
+ * <ul>
+ * <li><a href="http://www.freedesktop.org/wiki/Specifications/shared-mime-info-spec">"Shared MIME-info Database"</a>;
+ * <li><a href="http://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html">"Desktop Entry Specification"</a>;
+ * <li><a href="http://standards.freedesktop.org/icon-theme-spec/icon-theme-spec-latest.html">"Icon Theme Specification"</a>;
+ * <li><a href="http://www.freedesktop.org/wiki/Specifications/mime-actions-spec">"MIME actions specification"</a>.
+ * </ul>
  *
- * @li C-implementation of AVL trees;
- * @li indexed (by using of AVL trees) access to all ".desktop" files and its contents (implementation of "Desktop Entry Specification");
- * @li cache all (include indexes) gathered information from all ".desktop" and ".list" files ("Desktop Entry Specification") into one single binary file which then can be mmap'ed without a single allocation of memory (just updates pointers in mmap'ed memory);
- * @li indexed (by using of AVL trees) access to icon themes and its contents (implemetation of "Icon Theme Specification" and "Icon Naming Specification");
- * @li implementation of "MIME actions specification".
- *
- * Library is licensed under GNU-LGPL and AFL v2.0.
+ * Features:
+ * <ul>
+ * <li>Straight C-implementation of serializable AVL trees;
+ * <li>Access to <a href="http://www.freedesktop.org/wiki/Specifications/shared-mime-info-spec">"Shared MIME-info Database"</a> by using of freedesktop.org <a href="http://cgit.freedesktop.org/xdg/xdgmime">xdgmime</a> library;
+ * <li>Indexed (by using of AVL trees) access to all ".desktop" files and its contents (implementation of <a href="http://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html">"Desktop Entry Specification"</a>);
+ * <li>Cache all (include indexes) gathered information from all ".desktop" and ".list" files (<a href="http://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html">"Desktop Entry Specification"</a>) into one single binary file which then can be mmap'ed without a single allocation of memory (just updates pointers in mmap'ed memory);
+ * <li>Indexed (by using of AVL trees) access to icon themes and its contents (implemetation of <a href="http://standards.freedesktop.org/icon-theme-spec/icon-theme-spec-latest.html">"Icon Theme Specification"</a> and <a href="http://standards.freedesktop.org/icon-naming-spec/icon-naming-spec-latest.html">"Icon Naming Specification"</a>).
+ * </ul>
  *
  **************************************************************************************
  * @n@section cache_formats_sec Cache formats
@@ -29,6 +35,10 @@
  *
  * @subpage example1_page
  *
+ **************************************************************************************
+ * @n@section license_sec License
+ *
+ * The library is licensed under GNU-LGPL and AFL v2.0.
  */
 
 
@@ -99,7 +109,6 @@
  * @skip xdg_shutdown
  * @until }
  * @see xdg_shutdown()
- *
  */
 
 /** @page example1_src Source code of Example1.
@@ -113,6 +122,28 @@
  * Comprehensive theoretical information about AVL trees can be found
  * <a href="http://en.wikipedia.org/wiki/AVL_tree">here</a>.
  *
+ * <ul>
+ * <li> AvlTree structure
+ * <li> \c If tree is empty
+ *   <ul><li>zeroed AvlNode structure</ul>
+ * <li> \c Else
+ *   <ul>
+ *   <li>root node (AvlNode structure)
+ *   <li> ... Depth-first search (DFS) algorithm starting from the left child node ...
+ *   @n If node does not have left child then empty node will be written (empty AvlNode structure)
+ *   @n If node does not have right child then empty node will be written (empty AvlNode structure)
+ *   @n If previous two points were true then take parent node and check his right child
+ *   @n If right child exists then write it and repeat algorithm for this child from the beginning,
+ *   otherwise take parent node and check his right child
+ *   @n Algorithm will stop if there is no parent node
+ *   </ul>
+ * </ul>
+ *
+ * @note
+ * Each node is written or read by ::WriteKey, ::WriteValue and ::ReadKey, ::ReadValue functions.
+ *
+ * @see write_to_file()
+ *      @n map_from_memory()
  */
 
 
@@ -173,5 +204,4 @@
  * @n That's why XdgJointList appeared - to dynamically group (create references) data from different folders without
  * memory allocations.
  * @n Also, this is the root of thread unsafety.
- *
  */

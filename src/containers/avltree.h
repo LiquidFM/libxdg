@@ -132,6 +132,8 @@ void free_avl_tree(AvlTree *tree);
  *
  * @param tree pointer to an AVL tree.
  * @param destroyValue pointer to function which will be used for destruction of values.
+ *
+ * @note This method is not thread safe.
  */
 void free_avl_tree_and_values(AvlTree *tree, DestroyValue destroyValue);
 
@@ -139,15 +141,19 @@ void free_avl_tree_and_values(AvlTree *tree, DestroyValue destroyValue);
  * Checks if an AVL is empty.
  *
  * @return \c TRUE if tree is empty, \c FALSE otherwise.
+ *
+ * @note This method is not thread safe.
  */
 int is_empty_tree(const AvlTree *tree);
 
 /**
- * Depth first search algorithm to traverse an AVL tree.
+ * Depth-first search (DFS) algorithm to traverse an AVL tree.
  *
  * @param tree pointer to an AVL tree.
  * @param callback pointer to function which will be called for each key/value pair.
  * @param user_data pointer to user data.
+ *
+ * @note This method is not thread safe.
  */
 void depth_first_search(const AvlTree *tree, DepthFirstSearch callback, void *user_data);
 
@@ -158,6 +164,8 @@ void depth_first_search(const AvlTree *tree, DepthFirstSearch callback, void *us
  * @param key pointer to a key value.
  *
  * @return pointer to \c VALUE_TYPE.
+ *
+ * @note This method is not thread safe.
  */
 VALUE_TYPE *search_or_create_node(AvlTree *tree, const KEY_TYPE key);
 
@@ -178,6 +186,8 @@ VALUE_TYPE *search_node(const AvlTree *tree, const KEY_TYPE key);
  * @param key pointer to a key value.
  *
  * @return \c VALUE_TYPE of removed node.
+ *
+ * @note This method is not thread safe.
  */
 VALUE_TYPE delete_node(AvlTree *tree, const KEY_TYPE key);
 
