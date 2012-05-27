@@ -4,8 +4,21 @@ include ("collect_sources")
 
 # Sources
 set (SOURCES_PATH ${CMAKE_CURRENT_SOURCE_DIR})
- 
-add_subdirectory ("containers")
+
+if (BUILD_THEMES_SPEC OR (BUILD_DESKTOP_SPEC OR BUILD_UPDATE_APPLICATIONS_CACHE))
+    add_subdirectory ("containers")
+
+    # Install include files
+    install (
+        FILES 
+            ${CMAKE_CURRENT_SOURCE_DIR}/containers/avltree.h
+            ${CMAKE_CURRENT_SOURCE_DIR}/containers/xdglist.h
+            
+        DESTINATION
+            include/xdg/containers
+    )
+endif ()
+
 add_subdirectory ("basedirectory")
 
 
@@ -21,7 +34,6 @@ if (BUILD_DESKTOP_SPEC OR BUILD_UPDATE_APPLICATIONS_CACHE)
 
     # Install include files
     install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/desktop/xdgapp.h DESTINATION include/xdg/desktop)
-    install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/containers/xdglist.h DESTINATION include/xdg/containers)
 endif ()
 
 if (BUILD_THEMES_SPEC)

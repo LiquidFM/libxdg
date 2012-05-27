@@ -1,7 +1,7 @@
 /** @file xdglist.h
  *  @brief Public file.
  *
- * Data structures for storing a linked lists.
+ * Data structures for storing linked lists.
  *
  * @copyright
  * Copyright (C) 2011,2012  Dmitriy Vilkov <dav.daemon@gmail.com>

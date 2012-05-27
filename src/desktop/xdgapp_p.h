@@ -36,7 +36,7 @@
 #include "xdgapp.h"
 
 #include "../mime/xdgmimeint.h"
-#include "../containers/avltree.h"
+#include "../containers/avltree_p.h"
 #include "../containers/xdglist_p.h"
 
 

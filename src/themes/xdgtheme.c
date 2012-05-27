@@ -25,8 +25,8 @@
 
 #include "xdgtheme_p.h"
 #include "../desktop/xdgmimedefs.h"
+#include "../containers/avltree_p.h"
 #include "../containers/xdglist_p.h"
-#include "../containers/avltree.h"
 #include "../basedirectory/xdgbasedirectory.h"
 #include <stdlib.h>
 #include <dirent.h>
