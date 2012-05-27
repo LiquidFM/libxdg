@@ -3,7 +3,7 @@
 <head>
 <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
 <meta http-equiv="X-UA-Compatible" content="IE=9"/>
-<title>xdg: /media/WORKSPACE/SVN/executables/xdgmime/src/containers/avltree.h Source File</title>
+<title>xdg: /home/dav/WORK/workspace/executables/xdg/src/containers/avltree.h Source File</title>
 
 <link href="tabs.css" rel="stylesheet" type="text/css"/>
 <link href="doxygen.css" rel="stylesheet" type="text/css" />
@@ -30,7 +30,7 @@
    <div id="projectname">xdg
    &#160;<span id="projectnumber">0.2</span>
    </div>
-   <div id="projectbrief">This library is a fork of the official freedesktop.org xdgmime library.</div>
+   <div id="projectbrief">This library is implementation of several freedesktop.org specifications.</div>
   </td>
   
   
@@ -79,7 +79,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Data Structures</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Data Structures</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Typedefs</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Defines</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -90,95 +90,79 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 
 <div class="header">
   <div class="headertitle">
-<div class="title">/media/WORKSPACE/SVN/executables/xdgmime/src/containers/avltree.h</div>  </div>
+<div class="title">/home/dav/WORK/workspace/executables/xdg/src/containers/avltree.h</div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/* avltree.h: Private file. Declaration of AVL trees.</span>
-<a name="l00002"></a>00002 <span class="comment"> *</span>
-<a name="l00003"></a>00003 <span class="comment"> * Copyright (C) 2011,2012  Dmitriy Vilkov &lt;dav.daemon@gmail.com&gt;</span>
-<a name="l00004"></a>00004 <span class="comment"> *</span>
-<a name="l00005"></a>00005 <span class="comment"> * Licensed under the Academic Free License version 2.0</span>
-<a name="l00006"></a>00006 <span class="comment"> * Or under the following terms:</span>
-<a name="l00007"></a>00007 <span class="comment"> *</span>
-<a name="l00008"></a>00008 <span class="comment"> * This library is free software; you can redistribute it and/or</span>
-<a name="l00009"></a>00009 <span class="comment"> * modify it under the terms of the GNU Lesser General Public</span>
-<a name="l00010"></a>00010 <span class="comment"> * License as published by the Free Software Foundation; either</span>
-<a name="l00011"></a>00011 <span class="comment"> * version 2 of the License, or (at your option) any later version.</span>
-<a name="l00012"></a>00012 <span class="comment"> *</span>
-<a name="l00013"></a>00013 <span class="comment"> * This library is distributed in the hope that it will be useful,</span>
-<a name="l00014"></a>00014 <span class="comment"> * but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
-<a name="l00015"></a>00015 <span class="comment"> * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU</span>
-<a name="l00016"></a>00016 <span class="comment"> * Lesser General Public License for more details.</span>
-<a name="l00017"></a>00017 <span class="comment"> *</span>
-<a name="l00018"></a>00018 <span class="comment"> * You should have received a copy of the GNU Lesser General Public</span>
-<a name="l00019"></a>00019 <span class="comment"> * License along with this library; if not, write to the</span>
-<a name="l00020"></a>00020 <span class="comment"> * Free Software Foundation, Inc., 59 Temple Place - Suite 330,</span>
-<a name="l00021"></a>00021 <span class="comment"> * Boston, MA 02111-1307, USA.</span>
-<a name="l00022"></a>00022 <span class="comment"> */</span>
-<a name="l00023"></a>00023 
-<a name="l00024"></a>00024 <span class="preprocessor">#ifndef AVLTREE_H_</span>
-<a name="l00025"></a>00025 <span class="preprocessor"></span><span class="preprocessor">#define AVLTREE_H_</span>
-<a name="l00026"></a>00026 <span class="preprocessor"></span>
-<a name="l00027"></a>00027 
-<a name="l00028"></a>00028 <span class="preprocessor">#ifdef __cplusplus</span>
-<a name="l00029"></a>00029 <span class="preprocessor"></span><span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span> {
-<a name="l00030"></a>00030 <span class="preprocessor">#endif</span>
-<a name="l00031"></a>00031 <span class="preprocessor"></span>
-<a name="l00036"></a>00036 <span class="preprocessor">#define KEY_TYPE   char *</span>
-<a name="l00037"></a>00037 <span class="preprocessor"></span><span class="preprocessor">#define VALUE_TYPE void *</span>
-<a name="l00038"></a>00038 <span class="preprocessor"></span>
-<a name="l00039"></a>00039 
-<a name="l00044"></a>00044 <span class="keyword">typedef</span> KEY_TYPE (*DuplicateKey)(<span class="keyword">const</span> KEY_TYPE key);
-<a name="l00045"></a>00045 <span class="keyword">typedef</span> void (*DestroyKey)(KEY_TYPE key);
-<a name="l00046"></a>00046 <span class="keyword">typedef</span> int (*CompareKeys)(<span class="keyword">const</span> KEY_TYPE key1, <span class="keyword">const</span> KEY_TYPE key2);
-<a name="l00047"></a>00047 <span class="keyword">typedef</span> void (*DestroyValue)(VALUE_TYPE value);
-<a name="l00048"></a>00048 <span class="keyword">typedef</span> void (*DepthFirstSearch)(<span class="keyword">const</span> KEY_TYPE key, <span class="keyword">const</span> VALUE_TYPE value, <span class="keywordtype">void</span> *user_data);
-<a name="l00049"></a>00049 
-<a name="l00050"></a>00050 <span class="keyword">typedef</span> KEY_TYPE (*ReadKey)(<span class="keywordtype">void</span> **memory, <span class="keywordtype">void</span> *user_data);
-<a name="l00051"></a>00051 <span class="keyword">typedef</span> VALUE_TYPE (*ReadValue)(<span class="keywordtype">void</span> **memory, <span class="keywordtype">void</span> *user_data);
-<a name="l00052"></a>00052 <span class="keyword">typedef</span> void (*WriteKey)(<span class="keywordtype">int</span> fd, <span class="keyword">const</span> KEY_TYPE key);
-<a name="l00053"></a>00053 <span class="keyword">typedef</span> void (*WriteValue)(<span class="keywordtype">int</span> fd, <span class="keyword">const</span> VALUE_TYPE value, <span class="keywordtype">void</span> *user_data);
-<a name="l00054"></a>00054 
-<a name="l00055"></a>00055 
-<a name="l00060"></a>00060 <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structAvlNode.html">AvlNode</a> <a class="code" href="structAvlNode.html">AvlNode</a>;
-<a name="l00061"></a>00061 
-<a name="l00062"></a><a class="code" href="structAvlTree.html">00062</a> <span class="keyword">struct </span><a class="code" href="structAvlTree.html">AvlTree</a>
-<a name="l00063"></a>00063 {
-<a name="l00064"></a>00064     <a class="code" href="structAvlNode.html">AvlNode</a> *tree_root;
-<a name="l00065"></a>00065     DuplicateKey duplicateKey;
-<a name="l00066"></a>00066     DestroyKey destroyKey;
-<a name="l00067"></a>00067     CompareKeys compareKeys;
-<a name="l00068"></a>00068 };
-<a name="l00069"></a>00069 <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structAvlTree.html">AvlTree</a> <a class="code" href="structAvlTree.html">AvlTree</a>;
+<a href="avltree_8h.html">Go to the documentation of this file.</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 
+<a name="l00028"></a>00028 <span class="preprocessor">#ifndef AVLTREE_H_</span>
+<a name="l00029"></a>00029 <span class="preprocessor"></span><span class="preprocessor">#define AVLTREE_H_</span>
+<a name="l00030"></a>00030 <span class="preprocessor"></span>
+<a name="l00031"></a>00031 
+<a name="l00032"></a>00032 <span class="preprocessor">#ifdef __cplusplus</span>
+<a name="l00033"></a>00033 <span class="preprocessor"></span><span class="keyword">extern</span> <span class="stringliteral">&quot;C&quot;</span> {
+<a name="l00034"></a>00034 <span class="preprocessor">#endif</span>
+<a name="l00035"></a>00035 <span class="preprocessor"></span>
+<a name="l00039"></a><a class="code" href="avltree_8h.html#ae35c40bc2f912c11f0e36ac66cba4489">00039</a> <span class="preprocessor">#define KEY_TYPE   char *</span>
+<a name="l00040"></a>00040 <span class="preprocessor"></span>
+<a name="l00044"></a><a class="code" href="avltree_8h.html#ae17cb099b4c9aee7835032339b5a9e0d">00044</a> <span class="preprocessor">#define VALUE_TYPE void *</span>
+<a name="l00045"></a>00045 <span class="preprocessor"></span>
+<a name="l00046"></a>00046 
+<a name="l00051"></a><a class="code" href="avltree_8h.html#a8ff3e76331374feb377d6ad8678b06c3">00051</a> <span class="keyword">typedef</span> <a class="code" href="avltree_8h.html#ae35c40bc2f912c11f0e36ac66cba4489">KEY_TYPE</a> (*<a class="code" href="avltree_8h.html#a8ff3e76331374feb377d6ad8678b06c3">DuplicateKey</a>)(<span class="keyword">const</span> <a class="code" href="avltree_8h.html#ae35c40bc2f912c11f0e36ac66cba4489">KEY_TYPE</a> key);
+<a name="l00052"></a>00052 
+<a name="l00057"></a><a class="code" href="avltree_8h.html#a70f4aa62c788038f2be70b68235f30ce">00057</a> <span class="keyword">typedef</span> void (*<a class="code" href="avltree_8h.html#a70f4aa62c788038f2be70b68235f30ce">DestroyKey</a>)(<a class="code" href="avltree_8h.html#ae35c40bc2f912c11f0e36ac66cba4489">KEY_TYPE</a> key);
+<a name="l00058"></a>00058 
+<a name="l00063"></a><a class="code" href="avltree_8h.html#a6215bff7c83a888b1d0613c8370fef43">00063</a> <span class="keyword">typedef</span> int (*<a class="code" href="avltree_8h.html#a6215bff7c83a888b1d0613c8370fef43">CompareKeys</a>)(<span class="keyword">const</span> <a class="code" href="avltree_8h.html#ae35c40bc2f912c11f0e36ac66cba4489">KEY_TYPE</a> key1, <span class="keyword">const</span> <a class="code" href="avltree_8h.html#ae35c40bc2f912c11f0e36ac66cba4489">KEY_TYPE</a> key2);
+<a name="l00064"></a>00064 
+<a name="l00069"></a><a class="code" href="avltree_8h.html#a098cf5aae31f500ed7d611ed665697e6">00069</a> <span class="keyword">typedef</span> void (*<a class="code" href="avltree_8h.html#a098cf5aae31f500ed7d611ed665697e6">DestroyValue</a>)(<a class="code" href="avltree_8h.html#ae17cb099b4c9aee7835032339b5a9e0d">VALUE_TYPE</a> value);
 <a name="l00070"></a>00070 
-<a name="l00071"></a>00071 
-<a name="l00076"></a>00076 <a class="code" href="structAvlTree.html">AvlTree</a> *create_avl_tree(DuplicateKey duplicateKey, DestroyKey destroyKey, CompareKeys compareKeys);
-<a name="l00077"></a>00077 <span class="keywordtype">void</span> free_avl_tree(<a class="code" href="structAvlTree.html">AvlTree</a> *tree);
-<a name="l00078"></a>00078 <span class="keywordtype">void</span> free_avl_tree_and_values(<a class="code" href="structAvlTree.html">AvlTree</a> *tree, DestroyValue destroyValue);
-<a name="l00079"></a>00079 
-<a name="l00080"></a>00080 <span class="keywordtype">void</span> init_avl_tree(<a class="code" href="structAvlTree.html">AvlTree</a> *tree, DuplicateKey duplicateKey, DestroyKey destroyKey, CompareKeys compareKeys);
-<a name="l00081"></a>00081 <span class="keywordtype">void</span> clear_avl_tree(<a class="code" href="structAvlTree.html">AvlTree</a> *tree);
-<a name="l00082"></a>00082 <span class="keywordtype">void</span> clear_avl_tree_and_values(<a class="code" href="structAvlTree.html">AvlTree</a> *tree, DestroyValue destroyValue);
+<a name="l00075"></a><a class="code" href="avltree_8h.html#a1163d67bae674a2d768d697db0303a89">00075</a> <span class="keyword">typedef</span> void (*<a class="code" href="avltree_8h.html#a1163d67bae674a2d768d697db0303a89">DepthFirstSearch</a>)(<span class="keyword">const</span> <a class="code" href="avltree_8h.html#ae35c40bc2f912c11f0e36ac66cba4489">KEY_TYPE</a> key, <span class="keyword">const</span> <a class="code" href="avltree_8h.html#ae17cb099b4c9aee7835032339b5a9e0d">VALUE_TYPE</a> value, <span class="keywordtype">void</span> *user_data);
+<a name="l00076"></a>00076 
+<a name="l00077"></a>00077 
+<a name="l00082"></a><a class="code" href="avltree_8h.html#acd5b10f91fe7044f83bc4358a53d47b8">00082</a> <span class="keyword">typedef</span> <a class="code" href="avltree_8h.html#ae35c40bc2f912c11f0e36ac66cba4489">KEY_TYPE</a> (*<a class="code" href="avltree_8h.html#acd5b10f91fe7044f83bc4358a53d47b8">ReadKey</a>)(<span class="keywordtype">void</span> **memory, <span class="keywordtype">void</span> *user_data);
 <a name="l00083"></a>00083 
-<a name="l00084"></a>00084 <span class="keywordtype">int</span> is_empty_tree(<span class="keyword">const</span> <a class="code" href="structAvlTree.html">AvlTree</a> *tree);
-<a name="l00085"></a>00085 <span class="keywordtype">void</span> depth_first_search(<span class="keyword">const</span> <a class="code" href="structAvlTree.html">AvlTree</a> *tree, DepthFirstSearch callback, <span class="keywordtype">void</span> *user_data);
-<a name="l00086"></a>00086 VALUE_TYPE *search_or_create_node(<a class="code" href="structAvlTree.html">AvlTree</a> *tree, <span class="keyword">const</span> KEY_TYPE key);
-<a name="l00087"></a>00087 VALUE_TYPE *search_node(<span class="keyword">const</span> <a class="code" href="structAvlTree.html">AvlTree</a> *tree, <span class="keyword">const</span> KEY_TYPE key);
-<a name="l00088"></a>00088 VALUE_TYPE delete_node(<a class="code" href="structAvlTree.html">AvlTree</a> *tree, <span class="keyword">const</span> KEY_TYPE key);
+<a name="l00088"></a><a class="code" href="avltree_8h.html#a17974bd961bf57209c1735cbc1063795">00088</a> <span class="keyword">typedef</span> <a class="code" href="avltree_8h.html#ae17cb099b4c9aee7835032339b5a9e0d">VALUE_TYPE</a> (*<a class="code" href="avltree_8h.html#a17974bd961bf57209c1735cbc1063795">ReadValue</a>)(<span class="keywordtype">void</span> **memory, <span class="keywordtype">void</span> *user_data);
 <a name="l00089"></a>00089 
-<a name="l00090"></a>00090 <span class="keyword">const</span> <a class="code" href="structAvlTree.html">AvlTree</a> *map_from_memory(<span class="keywordtype">void</span> **memory, ReadKey readKey, ReadValue readValue, CompareKeys compareKeys, <span class="keywordtype">void</span> *user_data);
-<a name="l00091"></a>00091 <span class="keywordtype">void</span> write_to_file(<span class="keywordtype">int</span> fd, <span class="keyword">const</span> <a class="code" href="structAvlTree.html">AvlTree</a> *tree, WriteKey writeKey, WriteValue writeValue, <span class="keywordtype">void</span> *user_data);
-<a name="l00092"></a>00092 
-<a name="l00093"></a>00093 <span class="preprocessor">#ifdef __cplusplus</span>
-<a name="l00094"></a>00094 <span class="preprocessor"></span>}
-<a name="l00095"></a>00095 <span class="preprocessor">#endif</span>
-<a name="l00096"></a>00096 <span class="preprocessor"></span>
-<a name="l00097"></a>00097 <span class="preprocessor">#endif </span><span class="comment">/* AVLTREE_H_ */</span>
+<a name="l00094"></a><a class="code" href="avltree_8h.html#ab41b04cc61744d4783ac9c9b739fe6e7">00094</a> <span class="keyword">typedef</span> void (*<a class="code" href="avltree_8h.html#ab41b04cc61744d4783ac9c9b739fe6e7">WriteKey</a>)(<span class="keywordtype">int</span> fd, <span class="keyword">const</span> <a class="code" href="avltree_8h.html#ae35c40bc2f912c11f0e36ac66cba4489">KEY_TYPE</a> key);
+<a name="l00095"></a>00095 
+<a name="l00100"></a><a class="code" href="avltree_8h.html#a40e1d68534a2b334eeba7553e94b4a15">00100</a> <span class="keyword">typedef</span> void (*<a class="code" href="avltree_8h.html#a40e1d68534a2b334eeba7553e94b4a15">WriteValue</a>)(<span class="keywordtype">int</span> fd, <span class="keyword">const</span> <a class="code" href="avltree_8h.html#ae17cb099b4c9aee7835032339b5a9e0d">VALUE_TYPE</a> value, <span class="keywordtype">void</span> *user_data);
+<a name="l00101"></a>00101 
+<a name="l00102"></a>00102 
+<a name="l00106"></a>00106 <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structAvlNode.html">AvlNode</a> <a class="code" href="structAvlNode.html">AvlNode</a>;
+<a name="l00107"></a>00107 
+<a name="l00111"></a>00111 <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structAvlTree.html">AvlTree</a> <a class="code" href="structAvlTree.html">AvlTree</a>;
+<a name="l00112"></a>00112 
+<a name="l00113"></a>00113 
+<a name="l00123"></a>00123 <a class="code" href="structAvlTree.html">AvlTree</a> *create_avl_tree(<a class="code" href="avltree_8h.html#a8ff3e76331374feb377d6ad8678b06c3">DuplicateKey</a> duplicateKey, <a class="code" href="avltree_8h.html#a70f4aa62c788038f2be70b68235f30ce">DestroyKey</a> destroyKey, <a class="code" href="avltree_8h.html#a6215bff7c83a888b1d0613c8370fef43">CompareKeys</a> compareKeys);
+<a name="l00124"></a>00124 
+<a name="l00128"></a>00128 <span class="keywordtype">void</span> free_avl_tree(<a class="code" href="structAvlTree.html">AvlTree</a> *tree);
+<a name="l00129"></a>00129 
+<a name="l00138"></a>00138 <span class="keywordtype">void</span> free_avl_tree_and_values(<a class="code" href="structAvlTree.html">AvlTree</a> *tree, <a class="code" href="avltree_8h.html#a098cf5aae31f500ed7d611ed665697e6">DestroyValue</a> destroyValue);
+<a name="l00139"></a>00139 
+<a name="l00147"></a>00147 <span class="keywordtype">int</span> is_empty_tree(<span class="keyword">const</span> <a class="code" href="structAvlTree.html">AvlTree</a> *tree);
+<a name="l00148"></a>00148 
+<a name="l00158"></a>00158 <span class="keywordtype">void</span> depth_first_search(<span class="keyword">const</span> <a class="code" href="structAvlTree.html">AvlTree</a> *tree, <a class="code" href="avltree_8h.html#a1163d67bae674a2d768d697db0303a89">DepthFirstSearch</a> callback, <span class="keywordtype">void</span> *user_data);
+<a name="l00159"></a>00159 
+<a name="l00170"></a>00170 <a class="code" href="avltree_8h.html#ae17cb099b4c9aee7835032339b5a9e0d">VALUE_TYPE</a> *search_or_create_node(<a class="code" href="structAvlTree.html">AvlTree</a> *tree, <span class="keyword">const</span> <a class="code" href="avltree_8h.html#ae35c40bc2f912c11f0e36ac66cba4489">KEY_TYPE</a> key);
+<a name="l00171"></a>00171 
+<a name="l00180"></a>00180 <a class="code" href="avltree_8h.html#ae17cb099b4c9aee7835032339b5a9e0d">VALUE_TYPE</a> *search_node(<span class="keyword">const</span> <a class="code" href="structAvlTree.html">AvlTree</a> *tree, <span class="keyword">const</span> <a class="code" href="avltree_8h.html#ae35c40bc2f912c11f0e36ac66cba4489">KEY_TYPE</a> key);
+<a name="l00181"></a>00181 
+<a name="l00192"></a>00192 <a class="code" href="avltree_8h.html#ae17cb099b4c9aee7835032339b5a9e0d">VALUE_TYPE</a> delete_node(<a class="code" href="structAvlTree.html">AvlTree</a> *tree, <span class="keyword">const</span> <a class="code" href="avltree_8h.html#ae35c40bc2f912c11f0e36ac66cba4489">KEY_TYPE</a> key);
+<a name="l00193"></a>00193 
+<a name="l00194"></a>00194 
+<a name="l00206"></a>00206 <span class="keyword">const</span> <a class="code" href="structAvlTree.html">AvlTree</a> *map_from_memory(<span class="keywordtype">void</span> **memory, <a class="code" href="avltree_8h.html#acd5b10f91fe7044f83bc4358a53d47b8">ReadKey</a> readKey, <a class="code" href="avltree_8h.html#a17974bd961bf57209c1735cbc1063795">ReadValue</a> readValue, <a class="code" href="avltree_8h.html#a6215bff7c83a888b1d0613c8370fef43">CompareKeys</a> compareKeys, <span class="keywordtype">void</span> *user_data);
+<a name="l00207"></a>00207 
+<a name="l00219"></a>00219 <span class="keywordtype">void</span> write_to_file(<span class="keywordtype">int</span> fd, <span class="keyword">const</span> <a class="code" href="structAvlTree.html">AvlTree</a> *tree, <a class="code" href="avltree_8h.html#ab41b04cc61744d4783ac9c9b739fe6e7">WriteKey</a> writeKey, <a class="code" href="avltree_8h.html#a40e1d68534a2b334eeba7553e94b4a15">WriteValue</a> writeValue, <span class="keywordtype">void</span> *user_data);
+<a name="l00220"></a>00220 
+<a name="l00221"></a>00221 <span class="preprocessor">#ifdef __cplusplus</span>
+<a name="l00222"></a>00222 <span class="preprocessor"></span>}
+<a name="l00223"></a>00223 <span class="preprocessor">#endif</span>
+<a name="l00224"></a>00224 <span class="preprocessor"></span>
+<a name="l00225"></a>00225 <span class="preprocessor">#endif </span><span class="comment">/* AVLTREE_H_ */</span>
 </pre></div></div><!-- contents -->
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed May 23 2012 16:59:38 for xdg by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun May 27 2012 21:06:03 for xdg by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.0
 </small></address>

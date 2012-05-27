@@ -30,7 +30,7 @@
    <div id="projectname">xdg
    &#160;<span id="projectnumber">0.2</span>
    </div>
-   <div id="projectbrief">This library is a fork of the official freedesktop.org xdgmime library.</div>
+   <div id="projectbrief">This library is implementation of several freedesktop.org specifications.</div>
   </td>
   
   
@@ -72,7 +72,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Data Structures</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Data Structures</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Typedefs</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Defines</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -92,12 +92,38 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="title">Format of AVL tree cache. </div>  </div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p>Here is described binary format in which AVL trees are stored on disk. Comprehensive theoretical information about AVL trees can be found <a href="http://en.wikipedia.org/wiki/AVL_tree">here</a>. </p>
+<div class="textblock"><p>Here is described binary format in which AVL trees are stored on disk. Comprehensive theoretical information about AVL trees can be found <a href="http://en.wikipedia.org/wiki/AVL_tree">here</a>.</p>
+<ul>
+<li>
+<a class="el" href="structAvlTree.html">AvlTree</a> structure </li>
+<li>
+<code>If</code> tree is empty <ul>
+<li>
+zeroed <a class="el" href="structAvlNode.html">AvlNode</a> structure</li>
+</ul>
+</li>
+<li>
+<code>Else</code> <ul>
+<li>
+root node (<a class="el" href="structAvlNode.html">AvlNode</a> structure) </li>
+<li>
+... Depth-first search (DFS) algorithm starting from the left child node ... <br/>
+ If node does not have left child then empty node will be written (empty <a class="el" href="structAvlNode.html">AvlNode</a> structure) <br/>
+ If node does not have right child then empty node will be written (empty <a class="el" href="structAvlNode.html">AvlNode</a> structure) <br/>
+ If previous two points were true then take parent node and check his right child <br/>
+ If right child exists then write it and repeat algorithm for this child from the beginning, otherwise take parent node and check his right child <br/>
+ Algorithm will stop if there is no parent node </li>
+</ul>
+</li>
+</ul>
+<dl class="section note"><dt>Note:</dt><dd>Each node is written or read by <a class="el" href="avltree_8h.html#ab41b04cc61744d4783ac9c9b739fe6e7">WriteKey</a>, <a class="el" href="avltree_8h.html#a40e1d68534a2b334eeba7553e94b4a15">WriteValue</a> and <a class="el" href="avltree_8h.html#acd5b10f91fe7044f83bc4358a53d47b8">ReadKey</a>, <a class="el" href="avltree_8h.html#a17974bd961bf57209c1735cbc1063795">ReadValue</a> functions.</dd></dl>
+<dl class="section see"><dt>See also:</dt><dd><a class="el" href="avltree_8h.html#ab03013482047be251c9735e3314cf90f">write_to_file()</a> <br/>
+ <a class="el" href="avltree_8h.html#afda1e2eddd66ae4631ff1e76f56978ec">map_from_memory()</a> </dd></dl>
 </div></div><!-- contents -->
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed May 23 2012 16:59:38 for xdg by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun May 27 2012 21:06:03 for xdg by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.0
 </small></address>

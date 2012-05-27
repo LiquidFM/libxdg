@@ -30,7 +30,7 @@
    <div id="projectname">xdg
    &#160;<span id="projectnumber">0.2</span>
    </div>
-   <div id="projectbrief">This library is a fork of the official freedesktop.org xdgmime library.</div>
+   <div id="projectbrief">This library is implementation of several freedesktop.org specifications.</div>
   </td>
   
   
@@ -73,7 +73,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
      onmouseover="return searchBox.OnSearchSelectShow()"
      onmouseout="return searchBox.OnSearchSelectHide()"
      onkeydown="return searchBox.OnSearchSelectKey(event)">
-<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Data Structures</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a></div>
+<a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(0)"><span class="SelectionMark">&#160;</span>All</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(1)"><span class="SelectionMark">&#160;</span>Data Structures</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(2)"><span class="SelectionMark">&#160;</span>Files</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(3)"><span class="SelectionMark">&#160;</span>Functions</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(4)"><span class="SelectionMark">&#160;</span>Variables</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(5)"><span class="SelectionMark">&#160;</span>Typedefs</a><a class="SelectItem" href="javascript:void(0)" onclick="searchBox.OnSelectItem(6)"><span class="SelectionMark">&#160;</span>Defines</a></div>
 
 <!-- iframe showing the search results (closed by default) -->
 <div id="MSearchResultsWindow">
@@ -89,16 +89,30 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="contents">
 <div class="textblock"><h2><a class="anchor" id="intro_sec"></a>
 Introduction</h2>
-<p>This library is a fork of the official freedesktop.org xdgmime library which is implementation of "Shared MIME-info Database" specification.</p>
-<p>In libxdg were added some missing features of the original version:</p>
+<p>This library is implementation of several freedesktop.org specifications such as</p>
 <ul>
-<li>C-implementation of AVL trees; </li>
-<li>indexed (by using of AVL trees) access to all ".desktop" files and its contents (implementation of "Desktop Entry Specification"); </li>
-<li>cache all (include indexes) gathered information from all ".desktop" and ".list" files ("Desktop Entry Specification") into one single binary file which then can be mmap'ed without a single allocation of memory (just updates pointers in mmap'ed memory); </li>
-<li>indexed (by using of AVL trees) access to icon themes and its contents (implemetation of "Icon Theme Specification" and "Icon Naming Specification"); </li>
-<li>implementation of "MIME actions specification".</li>
+<li>
+<a href="http://www.freedesktop.org/wiki/Specifications/shared-mime-info-spec">"Shared MIME-info Database"</a>; </li>
+<li>
+<a href="http://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html">"Desktop Entry Specification"</a>; </li>
+<li>
+<a href="http://standards.freedesktop.org/icon-theme-spec/icon-theme-spec-latest.html">"Icon Theme Specification"</a>; </li>
+<li>
+<a href="http://www.freedesktop.org/wiki/Specifications/mime-actions-spec">"MIME actions specification"</a>. </li>
 </ul>
-<p>Library is licensed under GNU-LGPL and AFL v2.0.</p>
+<p>Features: </p>
+<ul>
+<li>
+Straight C-implementation of serializable AVL trees; </li>
+<li>
+Access to <a href="http://www.freedesktop.org/wiki/Specifications/shared-mime-info-spec">"Shared MIME-info Database"</a> by using of freedesktop.org <a href="http://cgit.freedesktop.org/xdg/xdgmime">xdgmime</a> library; </li>
+<li>
+Indexed (by using of AVL trees) access to all ".desktop" files and its contents (implementation of <a href="http://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html">"Desktop Entry Specification"</a>); </li>
+<li>
+Cache all (include indexes) gathered information from all ".desktop" and ".list" files (<a href="http://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html">"Desktop Entry Specification"</a>) into one single binary file which then can be mmap'ed without a single allocation of memory (just updates pointers in mmap'ed memory); </li>
+<li>
+Indexed (by using of AVL trees) access to icon themes and its contents (implemetation of <a href="http://standards.freedesktop.org/icon-theme-spec/icon-theme-spec-latest.html">"Icon Theme Specification"</a> and <a href="http://standards.freedesktop.org/icon-naming-spec/icon-naming-spec-latest.html">"Icon Naming Specification"</a>). </li>
+</ul>
 <p><br/>
  </p>
 <h2><a class="anchor" id="cache_formats_sec"></a>
@@ -110,12 +124,17 @@ Cache formats</h2>
 <h2><a class="anchor" id="examples_sec"></a>
 Examples</h2>
 <p>This sections describes a number of examples which should provide you with necessary information to start using this library.</p>
-<p><a class="el" href="example1_page.html">Example1. List all applications able to handle given mime type.</a> </p>
+<p><a class="el" href="example1_page.html">Example1. List all applications able to handle given mime type.</a></p>
+<p><br/>
+ </p>
+<h2><a class="anchor" id="license_sec"></a>
+License</h2>
+<p>The library is licensed under GNU-LGPL and AFL v2.0. </p>
 </div></div><!-- contents -->
 
 
 <hr class="footer"/><address class="footer"><small>
-Generated on Wed May 23 2012 16:59:38 for xdg by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun May 27 2012 21:06:03 for xdg by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.0
 </small></address>
