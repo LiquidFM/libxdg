@@ -7,19 +7,19 @@
 # implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 # See the License for more information.
 
+
+# CMake tools
+include ("collect_files")
+
+
 function (collect_sources THIS_HEADERS THIS_SOURCES RELATIVE_DIR)
     # "THIS_HEADERS", "THIS_SOURCES" and "RELATIVE_DIR" contains names of the actual variables passed into here.
     
-    if (NOT RELATIVE_DIR)
-        set (RELATIVE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
-    endif()
-    
     # Headers
-    file (GLOB_RECURSE src_HEADERS_0 RELATIVE ${RELATIVE_DIR} FOLLOW_SYMLINKS "*.h")
-    set (src_HEADERS ${src_HEADERS} ${src_HEADERS_0})
-    
-    file (GLOB_RECURSE src_HEADERS_0 RELATIVE ${RELATIVE_DIR} FOLLOW_SYMLINKS "*.hpp")
-    set (src_HEADERS ${src_HEADERS} ${src_HEADERS_0})
+    collect_files (src_HEADERS "*.h"   ${RELATIVE_DIR})
+    collect_files (src_HEADERS "*.hh"  ${RELATIVE_DIR})
+    collect_files (src_HEADERS "*.hpp" ${RELATIVE_DIR})
+    collect_files (src_HEADERS "*.hxx" ${RELATIVE_DIR})
     
     if (WIN32)
         set (tmp_src_HEADERS "")
@@ -44,14 +44,9 @@ function (collect_sources THIS_HEADERS THIS_SOURCES RELATIVE_DIR)
     
     
     # Sources
-    file (GLOB_RECURSE src_SOURCES_0 RELATIVE ${RELATIVE_DIR} FOLLOW_SYMLINKS "*.cpp")
-    set (src_SOURCES ${src_SOURCES} ${src_SOURCES_0})
-
-    file (GLOB_RECURSE src_SOURCES_0 RELATIVE ${RELATIVE_DIR} FOLLOW_SYMLINKS "*.cxx")
-    set (src_SOURCES ${src_SOURCES} ${src_SOURCES_0})
-
-    file (GLOB_RECURSE src_SOURCES_0 RELATIVE ${RELATIVE_DIR} FOLLOW_SYMLINKS "*.c")
-    set (src_SOURCES ${src_SOURCES} ${src_SOURCES_0})
+    collect_files (src_SOURCES "*.c"   ${RELATIVE_DIR})
+    collect_files (src_SOURCES "*.cpp" ${RELATIVE_DIR})
+    collect_files (src_SOURCES "*.cxx" ${RELATIVE_DIR})
 
     if (WIN32)
         set (tmp_src_SOURCES "")
