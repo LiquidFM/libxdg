@@ -1,5 +1,5 @@
-#ifndef CONFIG_H
-#define CONFIG_H
+#ifndef XDG_CONFIG_H
+#define XDG_CONFIG_H
 
 #define HAVE_MMAP
 
@@ -18,4 +18,4 @@
  */
 @CONFIG_THEMES_SPEC@
 
-#endif /* CONFIG_H */
+#endif /* XDG_CONFIG_H */
