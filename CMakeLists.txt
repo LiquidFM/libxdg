@@ -54,6 +54,7 @@ set (BUILD_UPDATE_APPLICATIONS_CACHE YES CACHE BOOL "Build executable for rebuil
 
 # Custom modules
 set (CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake")
+install (FILES ${CMAKE_SOURCE_DIR}/cmake/FindXDG.cmake DESTINATION share/cmake/Modules)
 
 
 # Fix path delimeters
