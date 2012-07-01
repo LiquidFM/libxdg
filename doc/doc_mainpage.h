@@ -8,7 +8,8 @@
  * <li><a href="http://www.freedesktop.org/wiki/Specifications/shared-mime-info-spec">"Shared MIME-info Database"</a>;
  * <li><a href="http://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html">"Desktop Entry Specification"</a>;
  * <li><a href="http://standards.freedesktop.org/icon-theme-spec/icon-theme-spec-latest.html">"Icon Theme Specification"</a>;
- * <li><a href="http://www.freedesktop.org/wiki/Specifications/mime-actions-spec">"MIME actions specification"</a>.
+ * <li><a href="http://www.freedesktop.org/wiki/Specifications/mime-actions-spec">"MIME actions specification"</a>;
+ * <li><a href="http://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html">"Base Directory Specification"</a>.
  * </ul>
  *
  * Features:
@@ -148,15 +149,28 @@
 
 
 /** @page desktop_cache_format_page Binary cache of Desktop Entry Specification.
- * The specification could be found
+ * The specification can be found
  * <a href="http://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html">here</a>.
  *
- * This specification describes directory layout and format of ".desktop" and ".list" files.
+ * This specification describes format of \a ".desktop" and \a ".list" files.
  * Purpose of the library is to provide fastest possible access to contents of this files.
  * This goal is achieved by using of AVL trees. They were chosen because AVL trees are more
  * rigidly balanced than red-black trees, leading to slower insertion and removal but faster retrieval.
  *
- * Format of binary cache which contains data from \a ".desktop" and \a ".list" files is:
+ * Files with data (\a ".desktop" and \a ".list" files) are stored in several different directories.
+ * Usually, according to the
+ * <a href="http://standards.freedesktop.org/basedir-spec/basedir-spec-latest.html">"Base Directory Specification"</a>
+ * there are, at least, two directories: one for user defined settings and one for system defined settings.
+ * In this regard, the library supports generation of binary cache files for each separate directory.
+ * Besides, during initialization, the library integrates information from different directories regardless
+ * the directory contains binary cache or not. This integration is very symbolic, because it's just placing
+ * pointers to the relevant AVL trees. At the same time, reading from the binary cache file doesn't use
+ * such functions as malloc and free, only mmap. In other words, the binary cache consists of constructed AVL trees
+ * and data stored in their nodes.
+ *
+ *
+ *
+ * The file format of a binary cache looks as follows:
  * <ul>
  * <li> 4 \c bytes for version of a cache file.
  *
@@ -169,39 +183,23 @@
  *   @n Each key of this tree is a name of \a ".desktop" file (e.g. \a kde4-kate.desktop).
  *   @n Each value of this tree is an AVL tree of XdgApp items, which in turns is an AVL tree of
  *   XdgAppGroup items, which is an AVL tree of XdgAppGroupEntry items.
- *   @note This tree serves as container of \a ".desktop" files for other two major trees in cache.
+ *   @note This tree serves as a container of \a ".desktop" files for the two other trees in cache.
  *
  * <li> AVL tree of associations of mime type with \a ".desktop" files.
- *   @n Each key of this tree is a name of a first part of mime type (e.g. \a text).
+ *   @n Each key of this tree is a name of the first part of mime type (e.g. \a text).
  *   @n Each value of this tree is an AVL tree of a second part of mime type (e.g. \a html), which contains a
  *   list of pointers to XdgApp items.
- *   @note Global version of this tree is used to resolve \a ".desktop" files according to
- *   the given mime type.
+ *   @note This tree stores connections between a certain \a ".desktop" file and mime types.
  *   @see xdg_known_apps_lookup()
  *
  * <li> AVL tree of all \a ".list" files located in the same directory (and subdirectories) as cache file.
  *   @n Each key of this tree is a name of a group from \a ".list" file (e.g. \a Default \a Applications).
- *   @n Each value of this tree is an AVL tree of entries, which in turns is an AVL tree of
+ *   @n Each value of this tree is an AVL tree of entries, which in it's turn is an AVL tree of
  *   {mime type, \a ".desktop" files} pairs in the format: @n\a "text/plain=kde4-kate.desktop;diffuse.desktop;".
- *   @note Global version of this tree is used to resolve \a ".desktop" files according to
- *   the given mime type.
+ *   @note This tree stores connections (known from \a ".list" files) between a certain \a ".desktop" file and
+ *   mime types.
  *   @see xdg_default_apps_lookup()
  *        @n xdg_added_apps_lookup()
  *        @n xdg_removed_apps_lookup()
  * </ul>
- *
- * @n What are the Global AVL trees mentioned above? Well the thing is, or even the problem is that we have
- * several directories with data (\a ".desktop" and \a ".list" files) and separate cache file for each directory.
- * This means that we could have reference to \a ".desktop" file which is located in a different directory.
- * More of that, this \a ".desktop" file could be in a valid cache file of that directory...
- * @n Despite this we would like to have a global picture of the registered applications in the system. That's why we
- * need the Global versions of this trees, which contains references to \a ".desktop" files in appropriate directory.
- * Also this approach gives as a possibility to rebuild the cache only in one data directory.
- *
- * @note Actually, this problem is solved a bit different way. There is no Global AVL trees, there is a list of
- * directories with their data. When data loaded for each directory we are fixing references between data of this
- * directories.
- * @n That's why XdgJointList appeared - to dynamically group (create references) data from different folders without
- * memory allocations.
- * @n Also, this is the root of thread unsafety.
  */
