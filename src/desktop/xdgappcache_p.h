@@ -70,9 +70,6 @@ void *read_app(void **memory);
 void write_mime_group_type(int fd, const XdgMimeType *value);
 void *read_mime_group_type(void **memory, const AvlTree *app_files_map);
 
-void write_mime_group(int fd, const XdgMimeGroup *value);
-void *read_mime_group(void **memory, const AvlTree *app_files_map);
-
 void write_file_watcher_list(int fd, const XdgFileWatcher *list);
 const XdgFileWatcher *read_file_watcher_list(void **memory);
 

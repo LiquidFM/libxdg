@@ -289,11 +289,6 @@ void write_mime_group_type(int fd, const XdgMimeType *value)
 	write_to_file(fd, &value->sub_types, write_app_key, (WriteValue)write_mime_group_sub_type, NULL);
 }
 
-void write_mime_group(int fd, const XdgMimeGroup *value)
-{
-	write_to_file(fd, &value->types, write_app_key, (WriteValue)write_mime_group_type, NULL);
-}
-
 static void *read_mime_group_sub_type(void **memory, const AvlTree *app_files_map)
 {
 	XdgMimeSubType *res = (*memory);
@@ -343,15 +338,6 @@ void *read_mime_group_type(void **memory, const AvlTree *app_files_map)
 	XdgMimeType *value = (*memory);
 
 	map_from_memory(memory, (ReadKey)read_app_key, (ReadValue)read_mime_group_sub_type, strcmp, (void *)app_files_map);
-
-	return value;
-}
-
-void *read_mime_group(void **memory, const AvlTree *app_files_map)
-{
-	XdgMimeGroup *value = (*memory);
-
-	map_from_memory(memory, (ReadKey)read_app_key, (ReadValue)read_mime_group_type, strcmp, (void *)app_files_map);
 
 	return value;
 }

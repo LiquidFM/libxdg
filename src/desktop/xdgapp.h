@@ -134,37 +134,14 @@ void xdg_app_rebuild_cache_in_each_data_dir(RebuildCacheResult *result);
 void xdg_app_refresh(RebuildResult *result);
 
 /**
- * Looks in \a "Default Applications" section of all \a ".list"
- * files for association of a given \p "mimeType" with
- * \a ".desktop" files.
+ * Looks for applications able to handle given mime type,
+ * according to the information from the merged \a ".list" files.
  *
  * @param mimeType name of the mime type.
  * @return a \c "const pointer" to XdgJointList of XdgApp elements
  * or \c NULL if there is no corresponding \a ".desktop" files.
  */
-const XdgJointList *xdg_default_apps_lookup(const char *mimeType);
-
-/**
- * Looks in \a "Added Associations" section of all \a ".list"
- * files for association of a given \p "mimeType" with
- * \a ".desktop" files.
- *
- * @param mimeType name of the mime type.
- * @return a \c "const pointer" to XdgJointList of XdgApp elements
- * or \c NULL if there is no corresponding \a ".desktop" files.
- */
-const XdgJointList *xdg_added_apps_lookup(const char *mimeType);
-
-/**
- * Looks in \a "Removed Associations" section of all \a ".list"
- * files for association of a given \p "mimeType" with
- * \a ".desktop" files.
- *
- * @param mimeType name of the mime type.
- * @return a \c "const pointer" to XdgJointList of XdgApp elements
- * or \c NULL if there is no corresponding \a ".desktop" files.
- */
-const XdgJointList *xdg_removed_apps_lookup(const char *mimeType);
+const XdgJointList *xdg_apps_lookup(const char *mimeType);
 
 /**
  * Looks in all \a ".desktop" files for association of
@@ -249,22 +226,6 @@ const XdgList *xdg_app_localized_entry_lookup(
  * @return a \c "const pointer" to XdgApp.
  */
 const XdgApp *xdg_joint_list_item_app(const XdgJointList *list);
-
-/**
- * Checks that \p list returned by one of the methods:
- *
- * @li xdg_default_apps_lookup()
- * @li xdg_added_apps_lookup()
- * @li xdg_removed_apps_lookup()
- * @li xdg_known_apps_lookup()
- *
- * contains an \p item.
- *
- * @param list current list item.
- * @param item an item which should or shouldn't be in the \p list.
- * @return \c TRUE if \p item was found in the \p list, \c FALSE otherwise.
- */
-int xdg_joint_list_contains_app(const XdgJointList *list, const XdgApp *item);
 
 /**
  * Get \c "const char *" value from current list item.
