@@ -32,6 +32,7 @@
 
 
 typedef void (*XdgListItemFree)(void *item);
+typedef int (*XdgListItemMatch)(void *item, void *user_data);
 
 
 struct XdgList
@@ -48,7 +49,9 @@ struct XdgJointList
 };
 
 
+void _xdg_list_prepend(XdgList **list, XdgList *value);
 void _xdg_list_apped(XdgList **list, XdgList *value);
+void _xdg_list_remove_if(XdgList **list, XdgListItemMatch match, void *user_data, XdgListItemFree list_item_free);
 void _xdg_list_free(XdgList *list, XdgListItemFree list_item_free);
 void _xdg_joint_list_apped(XdgJointList **list, XdgJointList *value);
 

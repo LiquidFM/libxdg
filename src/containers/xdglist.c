@@ -34,6 +34,27 @@
 #endif
 
 
+void _xdg_list_prepend(XdgList **list, XdgList *value)
+{
+	if ((*list) == NULL)
+	{
+		(*list) = value;
+		value->head = value;
+		value->next = NULL;
+	}
+	else
+	{
+		XdgList *item = (*list)->head;
+
+		value->head = value;
+		value->next = item;
+
+		do
+			item->head = value;
+		while (item = item->next);
+	}
+}
+
 void _xdg_list_apped(XdgList **list, XdgList *value)
 {
 	if ((*list) == NULL)
@@ -51,6 +72,60 @@ void _xdg_list_apped(XdgList **list, XdgList *value)
 	}
 }
 
+void _xdg_list_remove_if(XdgList **list, XdgListItemMatch match, void *user_data, XdgListItemFree list_item_free)
+{
+	if ((*list) != NULL)
+	{
+		XdgList *prev = NULL;
+		XdgList *item = (*list)->head;
+
+		do
+			if (match(item, user_data))
+				if (prev)
+				{
+					prev->next = item->next;
+					list_item_free(item);
+
+					if (prev->next)
+					{
+						item = prev->next;
+						continue;
+					}
+					else
+					{
+						(*list) = prev;
+						break;
+					}
+				}
+				else
+				{
+					prev = item->next;
+					list_item_free(item);
+
+					if (prev)
+					{
+						item = prev;
+
+						do
+							item->head = prev;
+						while (item = item->next);
+
+						item = prev;
+						prev = NULL;
+						continue;
+					}
+					else
+					{
+						(*list) = NULL;
+						break;
+					}
+				}
+			else
+				item = (prev = item)->next;
+		while (item);
+	}
+}
+
 void _xdg_list_free(XdgList *list, XdgListItemFree list_item_free)
 {
 	if (list)
@@ -58,12 +133,13 @@ void _xdg_list_free(XdgList *list, XdgListItemFree list_item_free)
 		XdgList *next;
 		XdgList *item = list->head;
 
-		while (item)
+		do
 		{
 			next = item->next;
 			list_item_free(item);
 			item = next;
 		}
+		while (item);
 	}
 }
 
