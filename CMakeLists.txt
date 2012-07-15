@@ -72,7 +72,7 @@ find_package (Doxygen 1.7.5)
 if (DOXYGEN_FOUND)
     # Config file variables
     set (DOXY_PROJECT_NAME   ${PROJECT_NAME})
-    set (DOXY_PROJECT_NUMBER "0.2")
+    set (DOXY_PROJECT_NUMBER "0.2.1")
     set (DOXY_PROJECT_BRIEF  "\"This library is implementation of several freedesktop.org specifications.\"")
     set (DOXY_EXAMPLE_PATH   ${CMAKE_SOURCE_DIR}/doc)
     set (DOXY_INPUT          "${CMAKE_SOURCE_DIR}/src ${CMAKE_SOURCE_DIR}/doc/doc_mainpage.h")

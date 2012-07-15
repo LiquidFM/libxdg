@@ -18,7 +18,9 @@
  * <li>Access to <a href="http://www.freedesktop.org/wiki/Specifications/shared-mime-info-spec">"Shared MIME-info Database"</a> by using of freedesktop.org <a href="http://cgit.freedesktop.org/xdg/xdgmime">xdgmime</a> library;
  * <li>Indexed (by using of AVL trees) access to all ".desktop" files and its contents (implementation of <a href="http://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html">"Desktop Entry Specification"</a>);
  * <li>Cache all (include indexes) gathered information from all ".desktop" and ".list" files (<a href="http://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html">"Desktop Entry Specification"</a>) into one single binary file which then can be mmap'ed without a single allocation of memory (just updates pointers in mmap'ed memory);
- * <li>Indexed (by using of AVL trees) access to icon themes and its contents (implemetation of <a href="http://standards.freedesktop.org/icon-theme-spec/icon-theme-spec-latest.html">"Icon Theme Specification"</a> and <a href="http://standards.freedesktop.org/icon-naming-spec/icon-naming-spec-latest.html">"Icon Naming Specification"</a>).
+ * <li>Indexed (by using of AVL trees) access to icon themes and its contents (implemetation of <a href="http://standards.freedesktop.org/icon-theme-spec/icon-theme-spec-latest.html">"Icon Theme Specification"</a> and <a href="http://standards.freedesktop.org/icon-naming-spec/icon-naming-spec-latest.html">"Icon Naming Specification"</a>);
+ * <li>Editable set of implemented specifications (at build time);
+ * <li>No dependencies.
  * </ul>
  *
  **************************************************************************************
@@ -55,10 +57,8 @@
  * And \c "stdio.h" header for \c printf() function:
  * @line #include
  *
- * Function \c print_app() is needed for print information about given \p app:
+ * Function \c print_app() is needed for print information about the given \p application:
  * @skip print_app
- * @until }
- * @until }
  * @until }
  * @see xdg_list_begin()
  *      @n xdg_list_next()
@@ -70,25 +70,14 @@
  * @skip print_applications
  * @until *apps;
  *
- * \c "removed_apps" variable stores a pointer to XdgJointList of removed (by user) applications which could handle given \p mime type:
- * @skipline removed_apps
- * @see xdg_removed_apps_lookup()
- *
  * Print information about \a all \a user defined applications able to handle given \p mime type:
- * @skip xdg_added_apps_lookup
- * @until ));
+ * @skip xdg_apps_lookup
+ * @until while
  * @see xdg_joint_list_item_app
- *      @n xdg_added_apps_lookup()
- *
- * Print information about \a all \a default applications able to handle given \p mime type:
- * @skip xdg_default_apps_lookup
- * @until ));
- * @see xdg_joint_list_item_app
- *      @n xdg_default_apps_lookup()
+ *      @n xdg_apps_lookup()
  *
  * Print information about \a all \a registered applications able to handle given \p mime type:
  * @skip xdg_known_apps_lookup
- * @until }
  * @until }
  * @see xdg_joint_list_item_app
  *      @n xdg_known_apps_lookup()
@@ -106,7 +95,7 @@
  * Then we print information about \a all applications able to handle \c "text/plain" mime type:
  * @skipline print_applications
  *
- * Shutdown the library and exit from \c main function:
+ * Shutdown the library and exit from the \c main function:
  * @skip xdg_shutdown
  * @until }
  * @see xdg_shutdown()
@@ -192,14 +181,12 @@
  *   @note This tree stores connections between a certain \a ".desktop" file and mime types.
  *   @see xdg_known_apps_lookup()
  *
- * <li> AVL tree of all \a ".list" files located in the same directory (and subdirectories) as cache file.
+ * <li> AVL tree of merged contents of all \a ".list" files located in the same directory (and subdirectories) as cache file.
  *   @n Each key of this tree is a name of a group from \a ".list" file (e.g. \a Default \a Applications).
  *   @n Each value of this tree is an AVL tree of entries, which in it's turn is an AVL tree of
  *   {mime type, \a ".desktop" files} pairs in the format: @n\a "text/plain=kde4-kate.desktop;diffuse.desktop;".
  *   @note This tree stores connections (known from \a ".list" files) between a certain \a ".desktop" file and
  *   mime types.
- *   @see xdg_default_apps_lookup()
- *        @n xdg_added_apps_lookup()
- *        @n xdg_removed_apps_lookup()
+ *   @see xdg_apps_lookup()
  * </ul>
  */
