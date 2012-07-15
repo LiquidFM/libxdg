@@ -170,21 +170,21 @@
  *
  * <li> AVL tree of all \a ".desktop" files located in the same directory (and subdirectories) as cache file.
  *   @n Each key of this tree is a name of \a ".desktop" file (e.g. \a kde4-kate.desktop).
- *   @n Each value of this tree is an AVL tree of XdgApp items, which in turns is an AVL tree of
- *   XdgAppGroup items, which is an AVL tree of XdgAppGroupEntry items.
+ *   @n Each value of this tree is AVL tree of XdgApp items, which in turns is AVL tree of
+ *   XdgAppGroup items, which is AVL tree of XdgAppGroupEntry items.
  *   @note This tree serves as a container of \a ".desktop" files for the two other trees in cache.
  *
  * <li> AVL tree of associations of mime type with \a ".desktop" files.
- *   @n Each key of this tree is a name of the first part of mime type (e.g. \a text).
- *   @n Each value of this tree is an AVL tree of a second part of mime type (e.g. \a html), which contains a
+ *   @n Each key of this tree is a name of the first part of the mime type (e.g. \a text).
+ *   @n Each value of this tree is AVL tree of the second part of the mime type (e.g. \a html), which contains a
  *   list of pointers to XdgApp items.
  *   @note This tree stores connections between a certain \a ".desktop" file and mime types.
  *   @see xdg_known_apps_lookup()
  *
  * <li> AVL tree of merged contents of all \a ".list" files located in the same directory (and subdirectories) as cache file.
- *   @n Each key of this tree is a name of a group from \a ".list" file (e.g. \a Default \a Applications).
- *   @n Each value of this tree is an AVL tree of entries, which in it's turn is an AVL tree of
- *   {mime type, \a ".desktop" files} pairs in the format: @n\a "text/plain=kde4-kate.desktop;diffuse.desktop;".
+ *   @n Each key of this tree is a name of the first part of the mime type (e.g. \a text).
+ *   @n Each value of this tree is AVL tree of the second part of the mime type (e.g. \a html), which contains a
+ *   list of pointers to XdgApp items.
  *   @note This tree stores connections (known from \a ".list" files) between a certain \a ".desktop" file and
  *   mime types.
  *   @see xdg_apps_lookup()
