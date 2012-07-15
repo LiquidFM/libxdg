@@ -22,7 +22,6 @@ var searchData=
   ['xdgiconsearchfuncargs',['XdgIconSearchFuncArgs',['../structXdgIconSearchFuncArgs.html',1,'']]],
   ['xdgjointlist',['XdgJointList',['../structXdgJointList.html',1,'']]],
   ['xdglist',['XdgList',['../structXdgList.html',1,'']]],
-  ['xdgmimegroup',['XdgMimeGroup',['../structXdgMimeGroup.html',1,'']]],
   ['xdgmimemagic',['XdgMimeMagic',['../structXdgMimeMagic.html',1,'']]],
   ['xdgmimemagicmatch',['XdgMimeMagicMatch',['../structXdgMimeMagicMatch.html',1,'']]],
   ['xdgmimemagicmatchlet',['XdgMimeMagicMatchlet',['../structXdgMimeMagicMatchlet.html',1,'']]],

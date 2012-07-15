@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">xdg
-   &#160;<span id="projectnumber">0.2</span>
+   &#160;<span id="projectnumber">0.2.1</span>
    </div>
    <div id="projectbrief">This library is implementation of several freedesktop.org specifications.</div>
   </td>
@@ -88,23 +88,19 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!-- fragment --></p>
 <p>And <code>"stdio.h"</code> header for <code>printf()</code> function: <div class="fragment"><div class="line"><span class="preprocessor">#include &lt;stdio.h&gt;</span></div>
 </div><!-- fragment --></p>
-<p>Function <code>print_app()</code> is needed for print information about given <code>app:</code> <div class="fragment"><div class="line"><span class="keywordtype">void</span> print_app(<span class="keyword">const</span> <a class="code" href="structXdgApp.html">XdgApp</a> *app)</div>
+<p>Function <code>print_app()</code> is needed for print information about the given <code>application:</code> <div class="fragment"><div class="line"><span class="keywordtype">void</span> print_app(<span class="keyword">const</span> <a class="code" href="structXdgApp.html">XdgApp</a> *app)</div>
 <div class="line">{</div>
 <div class="line">    <span class="keyword">const</span> <a class="code" href="structXdgList.html">XdgList</a> *values;</div>
 <div class="line">    <span class="keyword">const</span> <a class="code" href="structXdgAppGroup.html">XdgAppGroup</a> *group = xdg_app_group_lookup(app, <span class="stringliteral">&quot;Desktop Entry&quot;</span>);</div>
 <div class="line"></div>
 <div class="line">    <span class="keywordflow">if</span> (values = xdg_list_begin(xdg_app_localized_entry_lookup(group, <span class="stringliteral">&quot;Name&quot;</span>, <span class="stringliteral">&quot;ru&quot;</span>, <span class="stringliteral">&quot;RU&quot;</span>, NULL)))</div>
 <div class="line">        <span class="keywordflow">do</span></div>
-<div class="line">        {</div>
 <div class="line">            printf(<span class="stringliteral">&quot;Name = %s&quot;</span>, xdg_list_item_app_group_entry_value(values));</div>
-<div class="line">        }</div>
 <div class="line">        <span class="keywordflow">while</span> (values = xdg_list_next(values));</div>
 <div class="line"></div>
 <div class="line">    <span class="keywordflow">if</span> (values = xdg_list_begin(xdg_app_localized_entry_lookup(group, <span class="stringliteral">&quot;GenericName&quot;</span>, <span class="stringliteral">&quot;ru&quot;</span>, <span class="stringliteral">&quot;RU&quot;</span>, NULL)))</div>
 <div class="line">        <span class="keywordflow">do</span></div>
-<div class="line">        {</div>
 <div class="line">            printf(<span class="stringliteral">&quot;GenericName = %s&quot;</span>, xdg_list_item_app_group_entry_value(values));</div>
-<div class="line">        }</div>
 <div class="line">        <span class="keywordflow">while</span> (values = xdg_list_next(values));</div>
 <div class="line">}</div>
 </div><!-- fragment --> </p>
@@ -115,44 +111,18 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
  <a class="el" href="xdgapp_8h.html#a0b66de85862dc88e261453ec923dbf3c">xdg_list_item_app_group_entry_value()</a></dd></dl>
 <p>Function <code>print_applications()</code> prints information about all applications able to handle given <code>mime</code> type: <div class="fragment"><div class="line"><span class="keywordtype">void</span> print_applications(<span class="keyword">const</span> <span class="keywordtype">char</span> *mime)</div>
 <div class="line">{</div>
-<div class="line">    <span class="keyword">const</span> <a class="code" href="structXdgApp.html">XdgApp</a> *app;</div>
 <div class="line">    <span class="keyword">const</span> <a class="code" href="structXdgJointList.html">XdgJointList</a> *apps;</div>
 </div><!-- fragment --></p>
-<p><code>"removed_apps"</code> variable stores a pointer to <a class="el" href="structXdgJointList.html">XdgJointList</a> of removed (by user) applications which could handle given <code>mime</code> type: <div class="fragment"><div class="line">    <span class="keyword">const</span> <a class="code" href="structXdgJointList.html">XdgJointList</a> *removed_apps = xdg_removed_apps_lookup(mime);</div>
-</div><!-- fragment --> </p>
-<dl class="section see"><dt>See also:</dt><dd><a class="el" href="xdgapp_8h.html#a83884641cb8729a6eb35c19b4414cb56">xdg_removed_apps_lookup()</a></dd></dl>
-<p>Print information about <em>all</em> <em>user</em> defined applications able to handle given <code>mime</code> type: <div class="fragment"><div class="line">    <span class="keywordflow">if</span> (apps = xdg_joint_list_begin(xdg_added_apps_lookup(mime)))</div>
+<p>Print information about <em>all</em> <em>user</em> defined applications able to handle given <code>mime</code> type: <div class="fragment"><div class="line">    <span class="keywordflow">if</span> (apps = xdg_joint_list_begin(xdg_apps_lookup(mime)))</div>
 <div class="line">        <span class="keywordflow">do</span></div>
-<div class="line">        {</div>
-<div class="line">            app = xdg_joint_list_item_app(apps);</div>
-<div class="line"></div>
-<div class="line">            <span class="keywordflow">if</span> (xdg_joint_list_contains_app(removed_apps, app) == 0)</div>
-<div class="line">                print_app(app);</div>
-<div class="line">        }</div>
+<div class="line">            print_app(xdg_joint_list_item_app(apps));</div>
 <div class="line">        <span class="keywordflow">while</span> (apps = xdg_joint_list_next(apps));</div>
 </div><!-- fragment --> </p>
 <dl class="section see"><dt>See also:</dt><dd><a class="el" href="xdgapp_8h.html#a4d9870cc8cae751fd1a78756a98f81ec">xdg_joint_list_item_app</a> <br/>
- <a class="el" href="xdgapp_8h.html#a5d96b1573dce1803112daf648655e6bf">xdg_added_apps_lookup()</a></dd></dl>
-<p>Print information about <em>all</em> <em>default</em> applications able to handle given <code>mime</code> type: <div class="fragment"><div class="line">    <span class="keywordflow">if</span> (apps = xdg_joint_list_begin(xdg_default_apps_lookup(mime)))</div>
-<div class="line">        <span class="keywordflow">do</span></div>
-<div class="line">        {</div>
-<div class="line">            app = xdg_joint_list_item_app(apps);</div>
-<div class="line"></div>
-<div class="line">            <span class="keywordflow">if</span> (xdg_joint_list_contains_app(removed_apps, app) == 0)</div>
-<div class="line">                print_app(app);</div>
-<div class="line">        }</div>
-<div class="line">        <span class="keywordflow">while</span> (apps = xdg_joint_list_next(apps));</div>
-</div><!-- fragment --> </p>
-<dl class="section see"><dt>See also:</dt><dd><a class="el" href="xdgapp_8h.html#a4d9870cc8cae751fd1a78756a98f81ec">xdg_joint_list_item_app</a> <br/>
- <a class="el" href="xdgapp_8h.html#aaad229dea73735dc7ec2ef7e693da92a">xdg_default_apps_lookup()</a></dd></dl>
+ <a class="el" href="xdgapp_8h.html#a8182c617e6404c31a83828bb21515c1c">xdg_apps_lookup()</a></dd></dl>
 <p>Print information about <em>all</em> <em>registered</em> applications able to handle given <code>mime</code> type: <div class="fragment"><div class="line">    <span class="keywordflow">if</span> (apps = xdg_joint_list_begin(xdg_known_apps_lookup(mime)))</div>
 <div class="line">        <span class="keywordflow">do</span></div>
-<div class="line">        {</div>
-<div class="line">            app = xdg_joint_list_item_app(apps);</div>
-<div class="line"></div>
-<div class="line">            <span class="keywordflow">if</span> (xdg_joint_list_contains_app(removed_apps, app) == 0)</div>
-<div class="line">                print_app(app);</div>
-<div class="line">        }</div>
+<div class="line">            print_app(xdg_joint_list_item_app(apps));</div>
 <div class="line">        <span class="keywordflow">while</span> (apps = xdg_joint_list_next(apps));</div>
 <div class="line">}</div>
 </div><!-- fragment --> </p>
@@ -167,14 +137,14 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <dl class="section see"><dt>See also:</dt><dd><a class="el" href="xdg_8h.html#a08a92c3de0625c618149597e4afa922a">xdg_init()</a></dd></dl>
 <p>Then we print information about <em>all</em> applications able to handle <code>"text/plain"</code> mime type: <div class="fragment"><div class="line">    print_applications(<span class="stringliteral">&quot;text/plain&quot;</span>);</div>
 </div><!-- fragment --></p>
-<p>Shutdown the library and exit from <code>main</code> function: <div class="fragment"><div class="line">    xdg_shutdown();</div>
+<p>Shutdown the library and exit from the <code>main</code> function: <div class="fragment"><div class="line">    xdg_shutdown();</div>
 <div class="line">}</div>
 </div><!-- fragment --> </p>
 <dl class="section see"><dt>See also:</dt><dd><a class="el" href="xdg_8h.html#a85a060bbe447516aee399fe7e3ef9511">xdg_shutdown()</a> </dd></dl>
 </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Jul 1 2012 23:52:51 for xdg by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun Jul 15 2012 21:29:45 for xdg by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.1
 </small></address>

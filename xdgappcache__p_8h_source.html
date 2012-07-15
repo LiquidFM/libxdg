@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">xdg
-   &#160;<span id="projectnumber">0.2</span>
+   &#160;<span id="projectnumber">0.2.1</span>
    </div>
    <div id="projectbrief">This library is implementation of several freedesktop.org specifications.</div>
   </td>
@@ -129,17 +129,14 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"><a name="l00070"></a><span class="lineno">   70</span>&#160;<span class="keywordtype">void</span> write_mime_group_type(<span class="keywordtype">int</span> fd, <span class="keyword">const</span> <a class="code" href="structXdgMimeType.html">XdgMimeType</a> *value);</div>
 <div class="line"><a name="l00071"></a><span class="lineno">   71</span>&#160;<span class="keywordtype">void</span> *read_mime_group_type(<span class="keywordtype">void</span> **memory, <span class="keyword">const</span> <a class="code" href="structAvlTree.html">AvlTree</a> *app_files_map);</div>
 <div class="line"><a name="l00072"></a><span class="lineno">   72</span>&#160;</div>
-<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;<span class="keywordtype">void</span> write_mime_group(<span class="keywordtype">int</span> fd, <span class="keyword">const</span> <a class="code" href="structXdgMimeGroup.html">XdgMimeGroup</a> *value);</div>
-<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;<span class="keywordtype">void</span> *read_mime_group(<span class="keywordtype">void</span> **memory, <span class="keyword">const</span> <a class="code" href="structAvlTree.html">AvlTree</a> *app_files_map);</div>
+<div class="line"><a name="l00073"></a><span class="lineno">   73</span>&#160;<span class="keywordtype">void</span> write_file_watcher_list(<span class="keywordtype">int</span> fd, <span class="keyword">const</span> <a class="code" href="structXdgFileWatcher.html">XdgFileWatcher</a> *list);</div>
+<div class="line"><a name="l00074"></a><span class="lineno">   74</span>&#160;<span class="keyword">const</span> <a class="code" href="structXdgFileWatcher.html">XdgFileWatcher</a> *read_file_watcher_list(<span class="keywordtype">void</span> **memory);</div>
 <div class="line"><a name="l00075"></a><span class="lineno">   75</span>&#160;</div>
-<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;<span class="keywordtype">void</span> write_file_watcher_list(<span class="keywordtype">int</span> fd, <span class="keyword">const</span> <a class="code" href="structXdgFileWatcher.html">XdgFileWatcher</a> *list);</div>
-<div class="line"><a name="l00077"></a><span class="lineno">   77</span>&#160;<span class="keyword">const</span> <a class="code" href="structXdgFileWatcher.html">XdgFileWatcher</a> *read_file_watcher_list(<span class="keywordtype">void</span> **memory);</div>
-<div class="line"><a name="l00078"></a><span class="lineno">   78</span>&#160;</div>
-<div class="line"><a name="l00079"></a><span class="lineno">   79</span>&#160;<span class="preprocessor">#endif </span><span class="comment">/* XDGAPPCACHE_P_H_ */</span><span class="preprocessor"></span></div>
+<div class="line"><a name="l00076"></a><span class="lineno">   76</span>&#160;<span class="preprocessor">#endif </span><span class="comment">/* XDGAPPCACHE_P_H_ */</span><span class="preprocessor"></span></div>
 </div><!-- fragment --></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Jul 1 2012 23:52:51 for xdg by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun Jul 15 2012 21:29:45 for xdg by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.1
 </small></address>

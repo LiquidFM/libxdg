@@ -1,6 +1,5 @@
 var searchData=
 [
-  ['xdg_5fadded_5fapps_5flookup',['xdg_added_apps_lookup',['../xdgapp_8h.html#a5d96b1573dce1803112daf648655e6bf',1,'xdgapp.c']]],
   ['xdg_5fapp_5fcache_5ffile_5fis_5fvalid',['xdg_app_cache_file_is_valid',['../xdgapp_8h.html#a67692057236662507eae121b43659156',1,'xdgapp.c']]],
   ['xdg_5fapp_5fentry_5flookup',['xdg_app_entry_lookup',['../xdgapp_8h.html#a2ac9b110893c946dff99d1aada4a24a5',1,'xdgapp.c']]],
   ['xdg_5fapp_5fgroup_5flookup',['xdg_app_group_lookup',['../xdgapp_8h.html#a7cc9054f2e07a6251b2507689d72b750',1,'xdgapp.c']]],
@@ -9,16 +8,14 @@ var searchData=
   ['xdg_5fapp_5frebuild_5fcache_5ffile',['xdg_app_rebuild_cache_file',['../xdgapp_8h.html#a473a5bcd6162e7fc3424b99c422e916b',1,'xdgapp.c']]],
   ['xdg_5fapp_5frebuild_5fcache_5fin_5feach_5fdata_5fdir',['xdg_app_rebuild_cache_in_each_data_dir',['../xdgapp_8h.html#ab252f502378554d2f536ab98d2bae356',1,'xdgapp.c']]],
   ['xdg_5fapp_5frefresh',['xdg_app_refresh',['../xdgapp_8h.html#acf70d45bb83b91e72a93c5d07318857f',1,'xdgapp.c']]],
-  ['xdg_5fdefault_5fapps_5flookup',['xdg_default_apps_lookup',['../xdgapp_8h.html#aaad229dea73735dc7ec2ef7e693da92a',1,'xdgapp.c']]],
+  ['xdg_5fapps_5flookup',['xdg_apps_lookup',['../xdgapp_8h.html#a8182c617e6404c31a83828bb21515c1c',1,'xdgapp.c']]],
   ['xdg_5finit',['xdg_init',['../xdg_8h.html#a08a92c3de0625c618149597e4afa922a',1,'xdg.c']]],
   ['xdg_5fjoint_5flist_5fbegin',['xdg_joint_list_begin',['../xdglist_8h.html#a159dc783cd578e5192e7733373396e4d',1,'xdglist.c']]],
-  ['xdg_5fjoint_5flist_5fcontains_5fapp',['xdg_joint_list_contains_app',['../xdgapp_8h.html#a4a6f46b849672f40fd800e9ab7bdec15',1,'xdgapp.c']]],
   ['xdg_5fjoint_5flist_5fitem_5fapp',['xdg_joint_list_item_app',['../xdgapp_8h.html#a4d9870cc8cae751fd1a78756a98f81ec',1,'xdgapp.c']]],
   ['xdg_5fjoint_5flist_5fnext',['xdg_joint_list_next',['../xdglist_8h.html#a0ad242434e34280818a3bcfa8fe9b89d',1,'xdglist.c']]],
   ['xdg_5fknown_5fapps_5flookup',['xdg_known_apps_lookup',['../xdgapp_8h.html#af74b63e575298b2ce9a8e57fbacd4855',1,'xdgapp.c']]],
   ['xdg_5flist_5fbegin',['xdg_list_begin',['../xdglist_8h.html#a2364e7571e47efa4cb0f194a2aa3660e',1,'xdglist.c']]],
   ['xdg_5flist_5fitem_5fapp_5fgroup_5fentry_5fvalue',['xdg_list_item_app_group_entry_value',['../xdgapp_8h.html#a0b66de85862dc88e261453ec923dbf3c',1,'xdgapp.c']]],
   ['xdg_5flist_5fnext',['xdg_list_next',['../xdglist_8h.html#a01e7af27f9bde68cc2b400c5962774a2',1,'xdglist.c']]],
-  ['xdg_5fremoved_5fapps_5flookup',['xdg_removed_apps_lookup',['../xdgapp_8h.html#a83884641cb8729a6eb35c19b4414cb56',1,'xdgapp.c']]],
   ['xdg_5fshutdown',['xdg_shutdown',['../xdg_8h.html#a85a060bbe447516aee399fe7e3ef9511',1,'xdg.c']]]
 ];

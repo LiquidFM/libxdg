@@ -22,7 +22,7 @@
  <tr style="height: 56px;">
   <td style="padding-left: 0.5em;">
    <div id="projectname">xdg
-   &#160;<span id="projectnumber">0.2</span>
+   &#160;<span id="projectnumber">0.2.1</span>
    </div>
    <div id="projectbrief">This library is implementation of several freedesktop.org specifications.</div>
   </td>
@@ -95,54 +95,27 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 <div class="line"></div>
 <div class="line">    <span class="keywordflow">if</span> (values = xdg_list_begin(xdg_app_localized_entry_lookup(group, <span class="stringliteral">&quot;Name&quot;</span>, <span class="stringliteral">&quot;ru&quot;</span>, <span class="stringliteral">&quot;RU&quot;</span>, NULL)))</div>
 <div class="line">        <span class="keywordflow">do</span></div>
-<div class="line">        {</div>
 <div class="line">            printf(<span class="stringliteral">&quot;Name = %s&quot;</span>, xdg_list_item_app_group_entry_value(values));</div>
-<div class="line">        }</div>
 <div class="line">        <span class="keywordflow">while</span> (values = xdg_list_next(values));</div>
 <div class="line"></div>
 <div class="line">    <span class="keywordflow">if</span> (values = xdg_list_begin(xdg_app_localized_entry_lookup(group, <span class="stringliteral">&quot;GenericName&quot;</span>, <span class="stringliteral">&quot;ru&quot;</span>, <span class="stringliteral">&quot;RU&quot;</span>, NULL)))</div>
 <div class="line">        <span class="keywordflow">do</span></div>
-<div class="line">        {</div>
 <div class="line">            printf(<span class="stringliteral">&quot;GenericName = %s&quot;</span>, xdg_list_item_app_group_entry_value(values));</div>
-<div class="line">        }</div>
 <div class="line">        <span class="keywordflow">while</span> (values = xdg_list_next(values));</div>
 <div class="line">}</div>
 <div class="line"></div>
 <div class="line"><span class="keywordtype">void</span> print_applications(<span class="keyword">const</span> <span class="keywordtype">char</span> *mime)</div>
 <div class="line">{</div>
-<div class="line">    <span class="keyword">const</span> <a class="code" href="structXdgApp.html">XdgApp</a> *app;</div>
 <div class="line">    <span class="keyword">const</span> <a class="code" href="structXdgJointList.html">XdgJointList</a> *apps;</div>
-<div class="line">    <span class="keyword">const</span> <a class="code" href="structXdgJointList.html">XdgJointList</a> *removed_apps = xdg_removed_apps_lookup(mime);</div>
 <div class="line"></div>
-<div class="line">    <span class="keywordflow">if</span> (apps = xdg_joint_list_begin(xdg_added_apps_lookup(mime)))</div>
+<div class="line">    <span class="keywordflow">if</span> (apps = xdg_joint_list_begin(xdg_apps_lookup(mime)))</div>
 <div class="line">        <span class="keywordflow">do</span></div>
-<div class="line">        {</div>
-<div class="line">            app = xdg_joint_list_item_app(apps);</div>
-<div class="line"></div>
-<div class="line">            <span class="keywordflow">if</span> (xdg_joint_list_contains_app(removed_apps, app) == 0)</div>
-<div class="line">                print_app(app);</div>
-<div class="line">        }</div>
+<div class="line">            print_app(xdg_joint_list_item_app(apps));</div>
 <div class="line">        <span class="keywordflow">while</span> (apps = xdg_joint_list_next(apps));</div>
-<div class="line"></div>
-<div class="line">    <span class="keywordflow">if</span> (apps = xdg_joint_list_begin(xdg_default_apps_lookup(mime)))</div>
-<div class="line">        <span class="keywordflow">do</span></div>
-<div class="line">        {</div>
-<div class="line">            app = xdg_joint_list_item_app(apps);</div>
-<div class="line"></div>
-<div class="line">            <span class="keywordflow">if</span> (xdg_joint_list_contains_app(removed_apps, app) == 0)</div>
-<div class="line">                print_app(app);</div>
-<div class="line">        }</div>
-<div class="line">        <span class="keywordflow">while</span> (apps = xdg_joint_list_next(apps));</div>
-<div class="line"></div>
 <div class="line"></div>
 <div class="line">    <span class="keywordflow">if</span> (apps = xdg_joint_list_begin(xdg_known_apps_lookup(mime)))</div>
 <div class="line">        <span class="keywordflow">do</span></div>
-<div class="line">        {</div>
-<div class="line">            app = xdg_joint_list_item_app(apps);</div>
-<div class="line"></div>
-<div class="line">            <span class="keywordflow">if</span> (xdg_joint_list_contains_app(removed_apps, app) == 0)</div>
-<div class="line">                print_app(app);</div>
-<div class="line">        }</div>
+<div class="line">            print_app(xdg_joint_list_item_app(apps));</div>
 <div class="line">        <span class="keywordflow">while</span> (apps = xdg_joint_list_next(apps));</div>
 <div class="line">}</div>
 <div class="line"></div>
@@ -155,7 +128,7 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 </div><!-- fragment --> </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Jul 1 2012 23:52:51 for xdg by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun Jul 15 2012 21:29:45 for xdg by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.1
 </small></address>
