@@ -100,26 +100,25 @@ List of <a class="el" href="structXdgFileWatcher.html">XdgFileWatcher</a> struct
 <li>
 AVL tree of all <em>".desktop"</em> files located in the same directory (and subdirectories) as cache file. <br/>
  Each key of this tree is a name of <em>".desktop"</em> file (e.g. <em>kde4-kate.desktop</em>). <br/>
- Each value of this tree is an AVL tree of <a class="el" href="structXdgApp.html">XdgApp</a> items, which in turns is an AVL tree of <a class="el" href="structXdgAppGroup.html">XdgAppGroup</a> items, which is an AVL tree of <a class="el" href="structXdgAppGroupEntry.html">XdgAppGroupEntry</a> items. <dl class="section note"><dt>Note:</dt><dd>This tree serves as a container of <em>".desktop"</em> files for the two other trees in cache.</dd></dl>
+ Each value of this tree is AVL tree of <a class="el" href="structXdgApp.html">XdgApp</a> items, which in turns is AVL tree of <a class="el" href="structXdgAppGroup.html">XdgAppGroup</a> items, which is AVL tree of <a class="el" href="structXdgAppGroupEntry.html">XdgAppGroupEntry</a> items. <dl class="section note"><dt>Note:</dt><dd>This tree serves as a container of <em>".desktop"</em> files for the two other trees in cache.</dd></dl>
 </li>
 <li>
 AVL tree of associations of mime type with <em>".desktop"</em> files. <br/>
- Each key of this tree is a name of the first part of mime type (e.g. <em>text</em>). <br/>
- Each value of this tree is an AVL tree of a second part of mime type (e.g. <em>html</em>), which contains a list of pointers to <a class="el" href="structXdgApp.html">XdgApp</a> items. <dl class="section note"><dt>Note:</dt><dd>This tree stores connections between a certain <em>".desktop"</em> file and mime types. </dd></dl>
+ Each key of this tree is a name of the first part of the mime type (e.g. <em>text</em>). <br/>
+ Each value of this tree is AVL tree of the second part of the mime type (e.g. <em>html</em>), which contains a list of pointers to <a class="el" href="structXdgApp.html">XdgApp</a> items. <dl class="section note"><dt>Note:</dt><dd>This tree stores connections between a certain <em>".desktop"</em> file and mime types. </dd></dl>
 <dl class="section see"><dt>See also:</dt><dd><a class="el" href="xdgapp_8h.html#af74b63e575298b2ce9a8e57fbacd4855">xdg_known_apps_lookup()</a></dd></dl>
 </li>
 <li>
 AVL tree of merged contents of all <em>".list"</em> files located in the same directory (and subdirectories) as cache file. <br/>
- Each key of this tree is a name of a group from <em>".list"</em> file (e.g. <em>Default</em> <em>Applications</em>). <br/>
- Each value of this tree is an AVL tree of entries, which in it's turn is an AVL tree of {mime type, <em>".desktop"</em> files} pairs in the format: <br/>
-<em>"text/plain=kde4-kate.desktop;diffuse.desktop;"</em>. <dl class="section note"><dt>Note:</dt><dd>This tree stores connections (known from <em>".list"</em> files) between a certain <em>".desktop"</em> file and mime types. </dd></dl>
+ Each key of this tree is a name of the first part of the mime type (e.g. <em>text</em>). <br/>
+ Each value of this tree is AVL tree of the second part of the mime type (e.g. <em>html</em>), which contains a list of pointers to <a class="el" href="structXdgApp.html">XdgApp</a> items. <dl class="section note"><dt>Note:</dt><dd>This tree stores connections (known from <em>".list"</em> files) between a certain <em>".desktop"</em> file and mime types. </dd></dl>
 <dl class="section see"><dt>See also:</dt><dd><a class="el" href="xdgapp_8h.html#a8182c617e6404c31a83828bb21515c1c">xdg_apps_lookup()</a> </dd></dl>
 </li>
 </ul>
 </div></div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Sun Jul 15 2012 21:29:45 for xdg by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Sun Jul 15 2012 21:54:58 for xdg by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.1
 </small></address>
