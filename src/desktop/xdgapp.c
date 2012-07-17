@@ -625,8 +625,6 @@ static void _xdg_app_read_list_file(char *buffer, XdgAppData *data, FILE *file)
 						else
 							if (strcmp(buffer + 1, "Removed Associations") == 0)
 								handler = _xdg_lst_group_handle_removed;
-							else
-								break;
 				}
 			}
 			else
