@@ -234,7 +234,7 @@ const XdgApp *xdg_joint_list_item_app(const XdgJointList *list);
  * xdg_app_entry_lookup(), xdg_app_localized_entry_lookup() functions.
  *
  * @param list current list item.
- * @return a \c "const pointer" to XdgApp.
+ * @return s \c "const char *" to value of ".desktop" file group entry.
  */
 const char *xdg_list_item_app_group_entry_value(const XdgList *list);
 
