@@ -1239,6 +1239,11 @@ const XdgApp *xdg_joint_list_item_app(const XdgJointList *list)
 	return ((XdgMimeSubTypeValue *)list)->app;
 }
 
+const char *xdg_joint_list_item_app_id(const XdgJointList *list)
+{
+	return ((XdgMimeSubTypeValue *)list)->name;
+}
+
 const char *xdg_list_item_app_group_entry_value(const XdgList *list)
 {
 	return ((XdgValue *)list)->value;

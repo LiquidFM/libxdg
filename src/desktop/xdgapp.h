@@ -217,15 +217,25 @@ const XdgList *xdg_app_localized_entry_lookup(
  * Get XdgApp item from a given \p list item.
  *
  * @note This function works for XdgJointList returned by this functions:
- * @li xdg_default_apps_lookup()
- * @li xdg_added_apps_lookup()
- * @li xdg_removed_apps_lookup()
+ * @li xdg_apps_lookup()
  * @li xdg_known_apps_lookup()
  *
  * @param list current list item.
  * @return a \c "const pointer" to XdgApp.
  */
 const XdgApp *xdg_joint_list_item_app(const XdgJointList *list);
+
+/**
+ * Get XdgApp item id (".desktop" file name) from a given \p list item.
+ *
+ * @note This function works for XdgJointList returned by this functions:
+ * @li xdg_apps_lookup()
+ * @li xdg_known_apps_lookup()
+ *
+ * @param list current list item.
+ * @return a \c "const pointer" to XdgApp.
+ */
+const char *xdg_joint_list_item_app_id(const XdgJointList *list);
 
 /**
  * Get \c "const char *" value from current list item.
