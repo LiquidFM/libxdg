@@ -176,7 +176,7 @@ const XdgList *xdg_list_next(const XdgList *list)
 const XdgJointList *xdg_joint_list_begin(const XdgJointList *list)
 {
 	if (list)
-		return list->head;
+		return (const XdgJointList *)list->head->list.head;
 	else
 		return NULL;
 }
@@ -188,7 +188,10 @@ const XdgJointList *xdg_joint_list_next(const XdgJointList *list)
 	 * 	most of the cases list will be contain more than 1 element.
 	 */
 	if (__builtin_expect(list->list.next != NULL, 1))
-		return (XdgJointList *)list->list.next;
+		return (const XdgJointList *)list->list.next;
 	else
-		return list->next;
+		if (list->next)
+			return (const XdgJointList *)list->next->list.head;
+		else
+			return NULL;
 }
