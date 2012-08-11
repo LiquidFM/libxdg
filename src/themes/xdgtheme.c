@@ -409,9 +409,8 @@ static char *_xdg_search_icon_file(const char *directory, XdgIconSearchFuncArgs 
 			}
 
 			free(sub_dir);
-			subdir = (XdgStringList *)subdir->list.next;
 		}
-		while (subdir);
+		while (subdir = (XdgStringList *)subdir->list.next);
 	}
 
 	free(theme_dir);
@@ -586,10 +585,8 @@ static char *_xdg_mime_lookup_icon(const char *icon, int size, Context context, 
 				{
 					_xdg_list_string_item_copy(&directories, directory);
 				}
-
-				directory = (XdgStringList *)directory->list.next;
 			}
-			while (directory);
+			while (directory = (XdgStringList *)directory->list.next);
 
 			if (directories)
 			{
@@ -631,13 +628,9 @@ static char *_xdg_mime_find_icon_helper(const char *icon, int size, Context cont
 			XdgThemeParents *parent = (XdgThemeParents *)theme->parents->list.head;
 
 			do
-			{
 				if (res = _xdg_mime_find_icon_helper(icon, size, context, theme->parents->parent, hicolor))
 					return res;
-
-				parent = (XdgThemeParents *)parent->list.next;
-			}
-			while (parent);
+			while (parent = (XdgThemeParents *)parent->list.next);
 		}
 		else
 			if (theme != hicolor)
@@ -663,22 +656,25 @@ static char *_xdg_mime_find_icon(const char *icon, int size, Context context, Xd
 
 char *xdg_mime_type_icon_lookup(const char *mime, int size, const char *themeName)
 {
-	XdgTheme **hicolor = (XdgTheme **)search_node(&themes_list->themes_files_map, "hicolor");
-
-	if (hicolor)
+	if (mime)
 	{
-		XdgTheme **theme = (XdgTheme **)search_node(&themes_list->themes_files_map, themeName);
+		XdgTheme **hicolor = (XdgTheme **)search_node(&themes_list->themes_files_map, "hicolor");
 
-		if (theme)
+		if (hicolor)
 		{
-			char *sep;
-			char mimeTypeCopy[MIME_TYPE_NAME_BUFFER_SIZE];
-			strncpy(mimeTypeCopy, mime, MIME_TYPE_NAME_BUFFER_SIZE);
+			XdgTheme **theme = (XdgTheme **)search_node(&themes_list->themes_files_map, themeName);
 
-			if ((sep = strchr(mimeTypeCopy, '/')) != NULL)
-				(*sep) = '-';
+			if (theme)
+			{
+				char *sep;
+				char mimeTypeCopy[MIME_TYPE_NAME_BUFFER_SIZE];
+				strncpy(mimeTypeCopy, mime, MIME_TYPE_NAME_BUFFER_SIZE);
 
-			return _xdg_mime_find_icon(mimeTypeCopy, size, XdgThemeMimeTypes, *theme, *hicolor);
+				if ((sep = strchr(mimeTypeCopy, '/')) != NULL)
+					(*sep) = '-';
+
+				return _xdg_mime_find_icon(mimeTypeCopy, size, XdgThemeMimeTypes, *theme, *hicolor);
+			}
 		}
 	}
 
@@ -687,14 +683,17 @@ char *xdg_mime_type_icon_lookup(const char *mime, int size, const char *themeNam
 
 char *xdg_icon_lookup(const char *icon, int size, Context context, const char *themeName)
 {
-	XdgTheme **hicolor = (XdgTheme **)search_node(&themes_list->themes_files_map, "hicolor");
-
-	if (hicolor)
+	if (icon)
 	{
-		XdgTheme **theme = (XdgTheme **)search_node(&themes_list->themes_files_map, themeName);
+		XdgTheme **hicolor = (XdgTheme **)search_node(&themes_list->themes_files_map, "hicolor");
 
-		if (theme)
-			return _xdg_mime_find_icon(icon, size, context, *theme, *hicolor);
+		if (hicolor)
+		{
+			XdgTheme **theme = (XdgTheme **)search_node(&themes_list->themes_files_map, themeName);
+
+			if (theme)
+				return _xdg_mime_find_icon(icon, size, context, *theme, *hicolor);
+		}
 	}
 
 	return NULL;
