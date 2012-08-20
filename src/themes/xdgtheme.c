@@ -666,6 +666,7 @@ char *xdg_mime_type_icon_lookup(const char *mime, int size, const char *themeNam
 
 			if (theme)
 			{
+				char *res;
 				char *sep;
 				char mimeTypeCopy[MIME_TYPE_NAME_BUFFER_SIZE];
 				strncpy(mimeTypeCopy, mime, MIME_TYPE_NAME_BUFFER_SIZE);
@@ -673,7 +674,15 @@ char *xdg_mime_type_icon_lookup(const char *mime, int size, const char *themeNam
 				if ((sep = strchr(mimeTypeCopy, '/')) != NULL)
 					(*sep) = '-';
 
-				return _xdg_mime_find_icon(mimeTypeCopy, size, XdgThemeMimeTypes, *theme, *hicolor);
+				if (res = _xdg_mime_find_icon(mimeTypeCopy, size, XdgThemeMimeTypes, *theme, *hicolor))
+					return res;
+				else
+				{
+					(*sep) = 0;
+					strcat(mimeTypeCopy, "-x-generic");
+					mimeTypeCopy[sep + sizeof("-x-generic") - mimeTypeCopy] = 0;
+					return _xdg_mime_find_icon(mimeTypeCopy, size, XdgThemeMimeTypes, *theme, *hicolor);
+				}
 			}
 		}
 	}
