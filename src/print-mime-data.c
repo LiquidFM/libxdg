@@ -110,12 +110,27 @@ test_by_file (const char *filename)
   printf ("\tfile: %s\n", mt);
 }
 
+static int
+is_regular (const char *filename)
+{
+  struct stat s;
+
+  if (stat (filename, &s) == 0)
+    if (S_ISREG (s.st_mode))
+      return 1;
+
+  return 0;
+}
+
 static void
 process_file (const char *dir, const char *filename)
 {
   char path[1024];
 
   snprintf (path, 1024, "%s/%s", dir, filename);
+
+  if (!is_regular (path))
+    return;
 
   printf ("%s:\n", filename);
 
