@@ -1,12 +1,14 @@
 
 CFLAGS=-Wall -Wmissing-prototypes  -Wno-sign-compare -g -DXDG_PREFIX=xdg_test -DHAVE_MMAP
 
-all: test-mime test-mime-data
+all: test-mime test-mime-data print-mime-data
 
 test-mime: xdgmime.o xdgmimeglob.o xdgmimeint.o xdgmimemagic.o xdgmimealias.o xdgmimeparent.o xdgmimecache.o xdgmimeicon.o
 
 test-mime-data: xdgmime.o xdgmimeglob.o xdgmimeint.o xdgmimemagic.o xdgmimealias.o xdgmimeparent.o xdgmimecache.o xdgmimeicon.o
 
+print-mime-data: xdgmime.o xdgmimeglob.o xdgmimeint.o xdgmimemagic.o xdgmimealias.o xdgmimeparent.o xdgmimecache.o xdgmimeicon.o
+
 clean:
-	rm -f *~ *.o test-mime test-mime-data
+	rm -f *~ *.o test-mime test-mime-data print-mime-data
 
