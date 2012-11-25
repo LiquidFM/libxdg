@@ -667,6 +667,7 @@ static void __xdg_app_read_from_directory(char *buffer, XdgAppData *data, const 
 			}
 			else
 				if (entry->d_type == DT_REG)
+				{
 					if (fnmatch("*.desktop", entry->d_name, FNM_NOESCAPE) != FNM_NOMATCH)
 					{
 						file_name = malloc(strlen(directory_name) + strlen(entry->d_name) + 2);
@@ -702,6 +703,42 @@ static void __xdg_app_read_from_directory(char *buffer, XdgAppData *data, const 
 
 							free(file_name);
 						}
+				}
+				else
+                    if (entry->d_type == 0 && strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0)
+                    {
+                        file_name = malloc(strlen(directory_name) + strlen(entry->d_name) + 2);
+                        strcpy(file_name, directory_name); strcat(file_name, "/"); strcat(file_name, entry->d_name);
+
+                        if (lstat(file_name, &st) == 0)
+                            if (S_ISDIR(st.st_mode))
+                            {
+                                file_name_preffix = malloc(strlen(preffix) + strlen(entry->d_name) + 2);
+                                strcpy(file_name_preffix, preffix); strcat(file_name_preffix, entry->d_name); strcat(file_name_preffix, "-");
+
+                                __xdg_app_read_from_directory(buffer, data, file_name, file_name_preffix);
+
+                                free(file_name_preffix);
+                            }
+                            else
+                                if (S_ISREG(st.st_mode) && fnmatch("*.desktop", entry->d_name, FNM_NOESCAPE) != FNM_NOMATCH)
+                                {
+                                    if (file = fopen(file_name, "r"))
+                                    {
+                                        _xdg_file_watcher_list_add((XdgList **)&data->files, file_name, &st);
+
+                                        file_name_preffix = malloc(strlen(preffix) + strlen(entry->d_name) + 1);
+                                        strcpy(file_name_preffix, preffix); strcat(file_name_preffix, entry->d_name);
+
+                                        _xdg_app_read_desktop_file(buffer, data, file, file_name_preffix);
+
+                                        free(file_name_preffix);
+                                        fclose(file);
+                                    }
+                                }
+
+                        free(file_name);
+                    }
 
 		closedir(dir);
 	}

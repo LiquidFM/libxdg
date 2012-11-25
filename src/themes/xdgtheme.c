@@ -298,7 +298,7 @@ static void __xdg_mime_themes_read_from_directory(char *buffer, XdgThemes *theme
 		struct dirent *entry;
 
 		while ((entry = readdir(dir)) != NULL)
-			if (entry->d_type == DT_REG && strcmp(entry->d_name, "index.theme") == 0)
+			if (strcmp(entry->d_name, "index.theme") == 0)
 			{
 				file_name = malloc(strlen(directory_name) + strlen(entry->d_name) + 2);
 				strcpy(file_name, directory_name); strcat(file_name, "/"); strcat(file_name, entry->d_name);
@@ -323,19 +323,32 @@ static void _xdg_mime_themes_read_from_directory(const char *directory, char *bu
 
 	if (dir = opendir(directory))
 	{
+		struct stat st;
 		char *file_name;
 		struct dirent *entry;
 
 		while ((entry = readdir(dir)) != NULL)
-			if (entry->d_type == DT_DIR && strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0)
-			{
-				file_name = malloc(strlen(directory) + strlen(entry->d_name) + 2);
-				strcpy(file_name, directory); strcat(file_name, "/"); strcat(file_name, entry->d_name);
+		    if (strcmp(entry->d_name, ".") != 0 && strcmp(entry->d_name, "..") != 0)
+                if (entry->d_type == DT_DIR)
+                {
+                    file_name = malloc(strlen(directory) + strlen(entry->d_name) + 2);
+                    strcpy(file_name, directory); strcat(file_name, "/"); strcat(file_name, entry->d_name);
 
-				__xdg_mime_themes_read_from_directory(buffer, themes_list, file_name, entry->d_name);
+                    __xdg_mime_themes_read_from_directory(buffer, themes_list, file_name, entry->d_name);
 
-				free(file_name);
-			}
+                    free(file_name);
+                }
+                else
+                    if (entry->d_type == 0)
+                    {
+                        file_name = malloc(strlen(directory) + strlen(entry->d_name) + 2);
+                        strcpy(file_name, directory); strcat(file_name, "/"); strcat(file_name, entry->d_name);
+
+                        if (lstat(file_name, &st) == 0 && S_ISDIR(st.st_mode))
+                            __xdg_mime_themes_read_from_directory(buffer, themes_list, file_name, entry->d_name);
+
+                        free(file_name);
+                    }
 
 		closedir(dir);
 	}
