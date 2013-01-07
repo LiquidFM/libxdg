@@ -140,12 +140,12 @@ test_matches (void)
   test_one_match ("foo.bar.epub", "application/epub+zip");
   test_one_match ("core", "application/x-core");
   test_one_match ("README.in", "text/x-readme");
-  test_one_match ("README.gz", "application/x-gzip");
+  test_one_match ("README.gz", "application/gzip");
   test_one_match ("blabla.cs", "text/x-csharp");
   test_one_match ("blabla.f90", "text/x-fortran");
   test_one_match ("blabla.F95", "text/x-fortran");
   test_one_match ("tarball.tar.gz", "application/x-compressed-tar");
-  test_one_match ("file.gz", "application/x-gzip");
+  test_one_match ("file.gz", "application/gzip");
   test_one_match ("file.tar.lzo", "application/x-tzo");
   test_one_match ("file.lzo", "application/x-lzop");
 }
@@ -155,7 +155,7 @@ test_one_icon (const char *mimetype, const char *expected)
 {
   const char *actual;
 
-  actual = xdg_mime_get_icon (mimetype);
+  actual = xdg_mime_get_generic_icon (mimetype);
 
   if (actual != expected && (actual == NULL || strcmp (actual, expected) != 0)) 
     {
