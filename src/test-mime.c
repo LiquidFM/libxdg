@@ -41,6 +41,7 @@ test_individual_glob (const char  *glob,
 	       ((test_type == XDG_GLOB_SIMPLE)?"XDG_GLOB_SIMPLE":"XDG_GLOB_FULL")),
 	      ((expected_type == XDG_GLOB_LITERAL)?"XDG_GLOB_LITERAL":
 	       ((expected_type == XDG_GLOB_SIMPLE)?"XDG_GLOB_SIMPLE":"XDG_GLOB_COMPLEX")));
+      exit (1);
     }
 }
 
@@ -68,6 +69,7 @@ test_alias (const char *mime_a,
     {
       printf ("Test Failed: %s is %s to %s\n", 
 	      mime_a, actual ? "equal" : "not equal", mime_b);
+      exit (1);
     }
 }
 
@@ -96,6 +98,7 @@ test_subclass (const char *mime_a,
     {
       printf ("Test Failed: %s is %s of %s\n", 
 	      mime_a, actual ? "subclass" : "not subclass", mime_b);
+      exit (1);
     }
 }
 
@@ -127,7 +130,8 @@ test_one_match (const char *filename, const char *expected)
     {
       printf ("Test Failed: mime type of %s is %s, expected %s\n", 
 	      filename, actual, expected);
-    }  
+      exit (1);
+    }
 }
 
 static void
@@ -157,7 +161,8 @@ test_one_icon (const char *mimetype, const char *expected)
     {
       printf ("Test Failed: icon of %s is %s, expected %s\n", 
              mimetype, actual, expected);
-    }  
+      exit (1);
+    }
 }
 
 static void
