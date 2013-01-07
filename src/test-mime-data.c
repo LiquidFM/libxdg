@@ -48,7 +48,7 @@ check_mime_type (const char *mt,
 {
   total++;
 
-  if (strcmp (mt, mt_expected) != 0)
+  if (strcasecmp (mt, mt_expected) != 0)
     {
       failed++;
       

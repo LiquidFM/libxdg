@@ -123,7 +123,7 @@ test_one_match (const char *filename, const char *expected)
 
   actual = xdg_mime_get_mime_type_from_file_name (filename);
 
-  if (strcmp (actual, expected) != 0) 
+  if (strcasecmp (actual, expected) != 0)
     {
       printf ("Test Failed: mime type of %s is %s, expected %s\n", 
 	      filename, actual, expected);
