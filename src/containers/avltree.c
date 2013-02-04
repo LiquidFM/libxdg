@@ -513,6 +513,7 @@ void depth_first_search(const AvlTree *tree, DepthFirstSearch callback, void *us
 			if (this_node->visit & LEFT_IS_VISITED)
 				if (this_node->visit & RIGHT_IS_VISITED)
 				{
+                    callback(this_node->key, this_node->value, user_data);
 					this_node = this_node->links.parent;
 
 					if (this_node == 0)
@@ -524,7 +525,6 @@ void depth_first_search(const AvlTree *tree, DepthFirstSearch callback, void *us
 
 					if (this_node->links.right)
 					{
-						callback(this_node->links.right->key, this_node->links.right->value, user_data);
 						this_node = this_node->links.right;
 						this_node->visit = NONE_IS_VISITED;
 					}
@@ -535,7 +535,6 @@ void depth_first_search(const AvlTree *tree, DepthFirstSearch callback, void *us
 
 				if (this_node->links.left)
 				{
-					callback(this_node->links.left->key, this_node->links.left->value, user_data);
 					this_node = this_node->links.left;
 					this_node->visit = NONE_IS_VISITED;
 				}
