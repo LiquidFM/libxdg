@@ -70,7 +70,7 @@ void *read_app(void **memory);
 void write_mime_group_type(int fd, const XdgMimeType *value);
 void *read_mime_group_type(void **memory, const AvlTree *app_files_map);
 
-void write_file_watcher_list(int fd, const XdgFileWatcher *list);
-const XdgFileWatcher *read_file_watcher_list(void **memory);
+void write_file_watcher_list(int fd, const XdgList *list);
+const XdgList *read_file_watcher_list(void **memory);
 
 #endif /* XDGAPPCACHE_P_H_ */

@@ -103,6 +103,30 @@ void _xdg_for_each_data_dir(XdgDirectoryFunc func, void *user_data)
 	}
 }
 
+void _xdg_for_each_home_data_dir(XdgDirectoryFunc func, void *user_data)
+{
+    const char *xdg_data_dirs;
+
+    if ((xdg_data_dirs = getenv("XDG_DATA_HOME")))
+        func(xdg_data_dirs, user_data);
+    else
+    {
+        const char *home = getenv("HOME");
+
+        if (home != NULL)
+        {
+            char *guessed_xdg_home;
+
+            guessed_xdg_home = malloc(strlen(home) + strlen("/.local/share/") + 1);
+            strcpy(guessed_xdg_home, home); strcat(guessed_xdg_home, "/.local/share/");
+
+            func(guessed_xdg_home, user_data);
+
+            free(guessed_xdg_home);
+        }
+    }
+}
+
 void _xdg_for_each_theme_dir(XdgDirectoryFunc func, void *user_data)
 {
 	const char *xdg_data_dirs;

@@ -117,44 +117,30 @@ char *read_app_key(void **memory)
 	return res;
 }
 
-static void write_app_group_localized_entry(int fd, const XdgValue *value)
+static void write_app_group_localized_entry(int fd, const XdgList *value)
 {
-	XdgValue empty;
-	memset(&empty, 0, sizeof(XdgValue));
+    write(fd, value, sizeof(XdgList));
 
-	if (value)
-	{
-		XdgValue *item = (XdgValue *)value->list.head;
+    XdgValue *item = (XdgValue *)value->head;
 
-		while (item)
-		{
-			write(fd, item, sizeof(XdgValue) + strlen(item->value));
-			item = (XdgValue *)item->list.next;
-		}
-	}
-
-	write(fd, &empty, sizeof(XdgValue));
+    while (item)
+    {
+        write(fd, item, sizeof(XdgValue) + strlen(item->value));
+        item = (XdgValue *)item->item.next;
+    }
 }
 
 static void write_app_group_entry(int fd, const XdgAppGroupEntry *value)
 {
 	write(fd, value, sizeof(XdgAppGroupEntry));
 
-	if (value->values)
-	{
-		XdgValue *item = (XdgValue *)value->values->list.head;
+    XdgValue *item = (XdgValue *)value->values.head;
 
-		XdgValue empty;
-		memset(&empty, 0, sizeof(XdgValue));
-
-		while (item)
-		{
-			write(fd, item, sizeof(XdgValue) + strlen(item->value));
-			item = (XdgValue *)item->list.next;
-		}
-
-		write(fd, &empty, sizeof(XdgValue));
-	}
+    while (item)
+    {
+        write(fd, item, sizeof(XdgValue) + strlen(item->value));
+        item = (XdgValue *)item->item.next;
+    }
 
 	write_to_file(fd, &value->localized, write_app_key, (WriteValue)write_app_group_localized_entry, NULL);
 }
@@ -182,29 +168,32 @@ void write_app(int fd, const XdgApp *value)
 
 static void *read_app_group_localized_entry(void **memory)
 {
-	XdgValue *res = (*memory);
-	(*memory) += sizeof(XdgValue) + strlen(res->value);
+    XdgList *list = (*memory);
+    (*memory) += sizeof(XdgList);
 
-	if (res->list.head)
-	{
-		XdgValue *prev = res;
-		res->list.head = (XdgList *)res;
+    if (list->head)
+    {
+        XdgValue *tmp;
+        XdgValue *prev = (*memory);
 
-		while ((res = (*memory))->list.head)
-		{
-			prev->list.next = (XdgList *)res;
-			res->list.head = prev->list.head;
-			prev = res;
+        list->head = (XdgListItem *)prev;
+        prev->item.list = list;
+        (*memory) += sizeof(XdgValue) + strlen(prev->value);
 
-			(*memory) += sizeof(XdgValue) + strlen(res->value);
-		}
+        while (prev->item.next)
+        {
+            tmp = (*memory);
+            prev->item.next = (XdgListItem *)tmp;
+            tmp->item.prev = (XdgListItem *)prev;
+            tmp->item.list = list;
+            prev = tmp;
+            (*memory) += sizeof(XdgValue) + strlen(prev->value);
+        }
 
-		(*memory) += sizeof(XdgValue);
+        list->tail = (XdgListItem *)prev;
+    }
 
-		return prev;
-	}
-
-	return NULL;
+    return list;
 }
 
 static void *read_app_group_entry(void **memory)
@@ -212,25 +201,27 @@ static void *read_app_group_entry(void **memory)
 	XdgAppGroupEntry *res = (*memory);
 	(*memory) += sizeof(XdgAppGroupEntry);
 
-	if (res->values)
-	{
-		XdgValue *prev = res->values = (*memory);
-		res->values->list.head = (XdgList *)res->values;
-		(*memory) += sizeof(XdgValue) + strlen(res->values->value);
+    if (res->values.head)
+    {
+        XdgValue *tmp;
+        XdgValue *prev = (*memory);
 
-		while ((res->values = (*memory))->list.head)
-		{
-			prev->list.next = (XdgList *)res->values;
-			res->values->list.head = prev->list.head;
-			prev = res->values;
+        res->values.head = (XdgListItem *)prev;
+        prev->item.list = &res->values;
+        (*memory) += sizeof(XdgValue) + strlen(prev->value);
 
-			(*memory) += sizeof(XdgValue) + strlen(res->values->value);
-		}
+        while (prev->item.next)
+        {
+            tmp = (*memory);
+            prev->item.next = (XdgListItem *)tmp;
+            tmp->item.prev = (XdgListItem *)prev;
+            tmp->item.list = &res->values;
+            prev = tmp;
+            (*memory) += sizeof(XdgValue) + strlen(prev->value);
+        }
 
-		(*memory) += sizeof(XdgValue);
-
-		res->values = prev;
-	}
+        res->values.tail = (XdgListItem *)prev;
+    }
 
 	memcpy(&res->localized, map_from_memory(memory, (ReadKey)read_app_key, (ReadValue)read_app_group_localized_entry, strcmp, NULL), sizeof(AvlTree));
 
@@ -267,21 +258,13 @@ static void write_mime_group_sub_type(int fd, const XdgMimeSubType *value)
 {
 	write(fd, value, sizeof(XdgMimeSubType));
 
-	if (value->apps)
-	{
-		XdgMimeSubTypeValue *item = (XdgMimeSubTypeValue *)value->apps->list.list.head;
+    XdgMimeSubTypeValue *item = (XdgMimeSubTypeValue *)value->apps.list.head;
 
-		XdgMimeSubTypeValue empty;
-		memset(&empty, 0, sizeof(XdgMimeSubTypeValue));
-
-		while (item)
-		{
-			write(fd, item, sizeof(XdgMimeSubTypeValue) + strlen(item->name));
-			item = (XdgMimeSubTypeValue *)item->list.list.next;
-		}
-
-		write(fd, &empty, sizeof(XdgMimeSubTypeValue));
-	}
+    while (item)
+    {
+        write(fd, item, sizeof(XdgMimeSubTypeValue) + strlen(item->name));
+        item = (XdgMimeSubTypeValue *)item->item.item.next;
+    }
 }
 
 void write_mime_group_type(int fd, const XdgMimeType *value)
@@ -291,44 +274,42 @@ void write_mime_group_type(int fd, const XdgMimeType *value)
 
 static void *read_mime_group_sub_type(void **memory, const AvlTree *app_files_map)
 {
+    XdgApp **app;
 	XdgMimeSubType *res = (*memory);
 	(*memory) += sizeof(XdgMimeSubType);
 
-	if (res->apps)
-	{
-		XdgApp **app;
-		XdgMimeSubTypeValue *prev;
+    if (res->apps.list.head)
+    {
+        XdgMimeSubTypeValue *tmp;
+        XdgMimeSubTypeValue *prev = (*memory);
 
-		res->apps = (*memory);
+        res->apps.list.head = (XdgListItem *)prev;
+        prev->item.item.list = &res->apps.list;
+        (*memory) += sizeof(XdgMimeSubTypeValue) + strlen(prev->name);
 
-		if (app = (XdgApp **)search_node(app_files_map, res->apps->name))
-			res->apps->app = (*app);
-		else
-			res->apps->app = 0;
+        if (app = (XdgApp **)search_node(app_files_map, prev->name))
+            prev->app = (*app);
+        else
+            prev->app = NULL;
 
-		(*memory) += sizeof(XdgMimeSubTypeValue) + strlen(res->apps->name);
+        while (prev->item.item.next)
+        {
+            tmp = (*memory);
+            prev->item.item.next = (XdgListItem *)tmp;
+            tmp->item.item.prev = (XdgListItem *)prev;
+            tmp->item.item.list = &res->apps.list;
 
-		prev = (XdgMimeSubTypeValue *)res->apps;
-		res->apps->list.list.head = (XdgList *)res->apps;
+            if (app = (XdgApp **)search_node(app_files_map, tmp->name))
+                tmp->app = (*app);
+            else
+                tmp->app = NULL;
 
-		while ((res->apps = (*memory))->list.list.head)
-		{
-			prev->list.list.next = (XdgList *)res->apps;
-			res->apps->list.list.head = prev->list.list.head;
-			prev = res->apps;
+            prev = tmp;
+            (*memory) += sizeof(XdgMimeSubTypeValue) + strlen(prev->name);
+        }
 
-			if (app = (XdgApp **)search_node(app_files_map, res->apps->name))
-				res->apps->app = (*app);
-			else
-				res->apps->app = 0;
-
-			(*memory) += sizeof(XdgMimeSubTypeValue) + strlen(res->apps->name);
-		}
-
-		(*memory) += sizeof(XdgMimeSubTypeValue);
-
-		res->apps = prev;
-	}
+        res->apps.list.tail = (XdgListItem *)prev;
+    }
 
 	return res;
 }
@@ -342,48 +323,45 @@ void *read_mime_group_type(void **memory, const AvlTree *app_files_map)
 	return value;
 }
 
-void write_file_watcher_list(int fd, const XdgFileWatcher *list)
+void write_file_watcher_list(int fd, const XdgList *list)
 {
-	XdgFileWatcher empty;
-	memset(&empty, 0, sizeof(XdgFileWatcher));
+    write(fd, list, sizeof(XdgList));
 
-	if (list)
-	{
-		XdgFileWatcher *file = (XdgFileWatcher *)list->list.head;
+    XdgFileWatcher *file = (XdgFileWatcher *)list->head;
 
-		while (file)
-		{
-			write(fd, file, sizeof(XdgFileWatcher) + strlen(file->path));
-			file = (XdgFileWatcher *)file->list.next;
-		}
-	}
-
-	write(fd, &empty, sizeof(XdgFileWatcher));
+    while (file)
+    {
+        write(fd, file, sizeof(XdgFileWatcher) + strlen(file->path));
+        file = (XdgFileWatcher *)file->item.next;
+    }
 }
 
-const XdgFileWatcher *read_file_watcher_list(void **memory)
+const XdgList *read_file_watcher_list(void **memory)
 {
-	XdgFileWatcher *res = (*memory);
-	(*memory) += sizeof(XdgFileWatcher) + strlen(res->path);
+    XdgList *list = (*memory);
+	(*memory) += sizeof(XdgList);
 
-	if (res->list.head)
+	if (list->head)
 	{
-		XdgFileWatcher *prev = res;
-		res->list.head = (XdgList *)res;
+	    XdgFileWatcher *tmp;
+		XdgFileWatcher *prev = (*memory);
 
-		while ((res = (*memory))->list.head)
+		list->head = (XdgListItem *)prev;
+		prev->item.list = list;
+        (*memory) += sizeof(XdgFileWatcher) + strlen(prev->path);
+
+		while (prev->item.next)
 		{
-			prev->list.next = (XdgList *)res;
-			res->list.head = prev->list.head;
-			prev = res;
-
-			(*memory) += sizeof(XdgFileWatcher) + strlen(res->path);
+		    tmp = (*memory);
+		    prev->item.next = (XdgListItem *)tmp;
+		    tmp->item.prev = (XdgListItem *)prev;
+		    tmp->item.list = list;
+		    prev = tmp;
+		    (*memory) += sizeof(XdgFileWatcher) + strlen(prev->path);
 		}
 
-		(*memory) += sizeof(XdgFileWatcher);
-
-		return prev;
+		list->tail = (XdgListItem *)prev;
 	}
 
-	return NULL;
+	return list;
 }

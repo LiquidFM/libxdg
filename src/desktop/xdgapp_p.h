@@ -45,7 +45,7 @@
  */
 struct XdgFileWatcher
 {
-	XdgList list;
+	XdgListItem item;
 	time_t mtime;
 	char path[1];
 };
@@ -57,7 +57,7 @@ typedef struct XdgFileWatcher XdgFileWatcher;
  */
 struct XdgValue
 {
-	XdgList list;
+	XdgListItem item;
 	char value[1];
 };
 typedef struct XdgValue XdgValue;
@@ -70,7 +70,7 @@ struct XdgAppGroupEntry
 	/**
 	 * A list of \a default values.
 	 */
-	XdgValue *values;
+	XdgList values;
 	/**
 	 * A tree of \a localized values.
 	 */
@@ -84,6 +84,18 @@ typedef struct XdgAppGroupEntry XdgAppGroupEntry;
 struct XdgAppGroup
 {
 	AvlTree entries;
+};
+
+/**
+ * Represents User defined applications
+ * (from $XDG_DATA_HOME\.local\share\applications\mimeapps.list).
+ */
+struct XdgUserApps
+{
+    AvlTree addedApps;
+    AvlTree defaultApps;
+    AvlTree removedApps;
+    char fileName[1];
 };
 
 /**
@@ -110,7 +122,7 @@ struct XdgApp
  */
 struct XdgMimeSubTypeValue
 {
-	XdgJointList list;
+	XdgJointListItem item;
 	XdgApp *app;
 	char name[1];
 };
@@ -121,7 +133,7 @@ typedef struct XdgMimeSubTypeValue XdgMimeSubTypeValue;
  */
 struct XdgMimeSubType
 {
-	XdgMimeSubTypeValue *apps;
+	XdgJointList apps;
 };
 typedef struct XdgMimeSubType XdgMimeSubType;
 
@@ -150,6 +162,6 @@ void _xdg_app_shutdown();
  * Map of known associations of XdgApp with mime type.
  */
 XdgMimeSubType *_xdg_mime_sub_type_add(AvlTree *map, const char *mime);
-void _xdg_list_app_item_append(XdgList **list, const char *name, XdgApp *app);
+void _xdg_list_app_item_append(XdgList *list, const char *name, XdgApp *app);
 
 #endif /* __XDG_APP_P_H_ */

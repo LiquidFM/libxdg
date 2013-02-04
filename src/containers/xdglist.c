@@ -34,164 +34,154 @@
 #endif
 
 
-void _xdg_list_prepend(XdgList **list, XdgList *value)
+int _is_empty_list(const XdgList *list)
 {
-	if ((*list) == NULL)
+    return list->head == NULL;
+}
+
+int _is_empty_jointlist(const XdgJointList *list)
+{
+    return list->head == NULL;
+}
+
+void _xdg_list_prepend(XdgList *list, XdgListItem *value)
+{
+	if (list->head == NULL)
 	{
-		(*list) = value;
-		value->head = value;
-		value->next = NULL;
+		value->list = list;
+        value->prev = value->next = NULL;
+		list->head = list->tail = value;
 	}
 	else
 	{
-		XdgList *item = (*list)->head;
+		XdgListItem *item = list->head;
 
-		value->head = value;
+		value->list = list;
+        value->prev = NULL;
 		value->next = item;
-
-		do
-			item->head = value;
-		while (item = item->next);
+		item->prev = list->head = value;
 	}
 }
 
-void _xdg_list_apped(XdgList **list, XdgList *value)
+void _xdg_list_apped(XdgList *list, XdgListItem *value)
 {
-	if ((*list) == NULL)
+	if (list->head == NULL)
 	{
-		(*list) = value;
-		value->head = value;
-		value->next = NULL;
+        value->list = list;
+        value->prev = value->next = NULL;
+        list->head = list->tail = value;
 	}
 	else
 	{
-		value->head = (*list)->head;
+		value->list = list;
+		value->prev = list->tail;
 		value->next = NULL;
-		(*list)->next = value;
-		(*list) = value;
+		list->tail->next = value;
+		list->tail = value;
 	}
 }
 
-void _xdg_list_remove_if(XdgList **list, XdgListItemMatch match, void *user_data, XdgListItemFree list_item_free)
+XdgListItem *_xdg_list_remove(XdgListItem *item, XdgListItemFree list_item_free)
 {
-	if ((*list) != NULL)
+    XdgListItem *res;
+
+    if (item->prev)
+        if (item->prev->next = res = item->next)
+            res->prev = item->prev;
+        else
+            item->list->tail = item->prev;
+    else
+        if (item->list->head = res = item->next)
+            res->prev = NULL;
+        else
+            item->list->tail = NULL;
+
+    list_item_free(item);
+    return res;
+}
+
+void _xdg_list_remove_if(XdgList *list, XdgListItemMatch match, void *user_data, XdgListItemFree list_item_free)
+{
+	if (list->head)
 	{
-		XdgList *prev = NULL;
-		XdgList *item = (*list)->head;
+		XdgListItem *item = list->head;
 
 		do
 			if (match(item, user_data))
-				if (prev)
-				{
-					prev->next = item->next;
-					list_item_free(item);
-
-					if (prev->next)
-					{
-						item = prev->next;
-						continue;
-					}
-					else
-					{
-						(*list) = prev;
-						break;
-					}
-				}
-				else
-				{
-					prev = item->next;
-					list_item_free(item);
-
-					if (prev)
-					{
-						item = prev;
-
-						do
-							item->head = prev;
-						while (item = item->next);
-
-						item = prev;
-						prev = NULL;
-						continue;
-					}
-					else
-					{
-						(*list) = NULL;
-						break;
-					}
-				}
+			    item = _xdg_list_remove(item, list_item_free);
 			else
-				item = (prev = item)->next;
+				item = item->next;
 		while (item);
 	}
 }
 
 void _xdg_list_free(XdgList *list, XdgListItemFree list_item_free)
 {
-	if (list)
+	if (list->head)
 	{
-		XdgList *next;
-		XdgList *item = list->head;
+		XdgListItem *next;
+		XdgListItem *item = list->head;
 
 		do
 		{
 			next = item->next;
 			list_item_free(item);
-			item = next;
 		}
-		while (item);
+		while (item = next);
 	}
+
+	list->head = list->tail = NULL;
 }
 
-void _xdg_joint_list_apped(XdgJointList **list, XdgJointList *value)
+void _xdg_joint_list_apped(XdgJointList *list, XdgJointListItem *value)
 {
-	if ((*list) == NULL)
+	if (list->head == NULL)
 	{
-		(*list) = value;
-		value->head = value;
-		value->next = NULL;
+        value->list = list;
+        value->next = NULL;
+        list->head = list->tail = value;
 	}
 	else
 	{
-		value->head = (*list)->head;
-		value->next = NULL;
-		(*list)->next = value;
-		(*list) = value;
+        value->list = list;
+        value->next = NULL;
+        list->tail->next = value;
+        list->tail = value;
 	}
 }
 
-const XdgList *xdg_list_begin(const XdgList *list)
+const XdgListItem *xdg_list_head(const XdgListItem *item)
 {
-	if (list)
-		return list->head;
+	if (item)
+		return item->list->head;
 	else
 		return NULL;
 }
 
-const XdgList *xdg_list_next(const XdgList *list)
+const XdgListItem *xdg_list_next(const XdgListItem *list)
 {
 	return list->next;
 }
 
-const XdgJointList *xdg_joint_list_begin(const XdgJointList *list)
+const XdgJointListItem *xdg_joint_list_head(const XdgJointListItem *item)
 {
-	if (list)
-		return (const XdgJointList *)list->head->list.head;
+	if (item)
+		return (const XdgJointListItem *)item->list->head->item.list->head;
 	else
 		return NULL;
 }
 
-const XdgJointList *xdg_joint_list_next(const XdgJointList *list)
+const XdgJointListItem *xdg_joint_list_next(const XdgJointListItem *item)
 {
 	/**
 	 * Branch prediction:
 	 * 	most of the cases list will be contain more than 1 element.
 	 */
-	if (__builtin_expect(list->list.next != NULL, 1))
-		return (const XdgJointList *)list->list.next;
+	if (__builtin_expect(item->item.next != NULL, 1))
+		return (const XdgJointListItem *)item->item.next;
 	else
-		if (list->next)
-			return (const XdgJointList *)list->next->list.head;
+		if (item->next)
+			return (const XdgJointListItem *)item->next->item.list->head;
 		else
 			return NULL;
 }

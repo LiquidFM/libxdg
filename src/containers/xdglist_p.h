@@ -37,23 +37,44 @@ typedef int (*XdgListItemMatch)(void *item, void *user_data);
 
 struct XdgList
 {
-	XdgList *head;
-	XdgList *next;
+    XdgListItem *head;
+    XdgListItem *tail;
 };
+typedef struct XdgList XdgList;
+
+struct XdgListItem
+{
+    XdgList *list;
+    XdgListItem *prev;
+	XdgListItem *next;
+};
+typedef struct XdgListItem XdgListItem;
+
 
 struct XdgJointList
 {
-	XdgList list;
-	XdgJointList *head;
-	XdgJointList *next;
+    XdgList list;
+    XdgJointListItem *head;
+    XdgJointListItem *tail;
+};
+typedef struct XdgJointList XdgJointList;
+
+struct XdgJointListItem
+{
+    XdgListItem item;
+    XdgJointList *list;
+	XdgJointListItem *next;
 };
 
 
-void _xdg_list_prepend(XdgList **list, XdgList *value);
-void _xdg_list_apped(XdgList **list, XdgList *value);
-void _xdg_list_remove_if(XdgList **list, XdgListItemMatch match, void *user_data, XdgListItemFree list_item_free);
+int _is_empty_list(const XdgList *list);
+int _is_empty_jointlist(const XdgJointList *list);
+void _xdg_list_prepend(XdgList *list, XdgListItem *value);
+void _xdg_list_apped(XdgList *list, XdgListItem *value);
+XdgListItem *_xdg_list_remove(XdgListItem *item, XdgListItemFree list_item_free);
+void _xdg_list_remove_if(XdgList *list, XdgListItemMatch match, void *user_data, XdgListItemFree list_item_free);
 void _xdg_list_free(XdgList *list, XdgListItemFree list_item_free);
-void _xdg_joint_list_apped(XdgJointList **list, XdgJointList *value);
+void _xdg_joint_list_apped(XdgJointList *list, XdgJointListItem *value);
 
 
 #endif /* XDGLIST_P_H_ */

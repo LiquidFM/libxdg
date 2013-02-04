@@ -42,6 +42,20 @@ extern "C" {
 
 typedef struct XdgApp      XdgApp;
 typedef struct XdgAppGroup XdgAppGroup;
+typedef struct XdgUserApps XdgUserApps;
+
+
+/**
+ * This enum determines section in \a ".list" files.
+ */
+enum ListFileSections
+{
+    XdgAddedApplications,
+    XdgDefaultApplications,
+    XdgRemovedApplications
+};
+typedef enum ListFileSections ListFileSections;
+
 
 /**
  * Represents result
@@ -80,8 +94,7 @@ struct RebuildResult
 typedef struct RebuildResult RebuildResult;
 
 /**
- * Checks that cache file is valid (all data is up-to-date)
- * and exist.
+ * Checks that cache file is valid (all data is up-to-date).
  *
  * @param directory absolute path to directory which
  * contains the cache.
@@ -141,7 +154,7 @@ void xdg_app_refresh(RebuildResult *result);
  * @return a \c "const pointer" to XdgJointList of XdgApp elements
  * or \c NULL if there is no corresponding \a ".desktop" files.
  */
-const XdgJointList *xdg_apps_lookup(const char *mimeType);
+const XdgJointListItem *xdg_apps_lookup(const char *mimeType);
 
 /**
  * Looks in all \a ".desktop" files for association of
@@ -151,7 +164,13 @@ const XdgJointList *xdg_apps_lookup(const char *mimeType);
  * @return a \c "const pointer" to XdgJointList of XdgApp elements
  * or \c NULL if there is no corresponding \a ".desktop" files.
  */
-const XdgJointList *xdg_known_apps_lookup(const char *mimeType);
+const XdgJointListItem *xdg_known_apps_lookup(const char *mimeType);
+
+XdgUserApps *xdg_user_defined_apps_load();
+
+XdgJointListItem *xdg_user_defined_apps_lookup(XdgUserApps *apps, const char *mimeType, ListFileSections listFileSection);
+
+void xdg_user_defined_apps_free(XdgUserApps *apps, int save);
 
 /**
  * Takes an icon name from "Icon" entry of a given \p "app"
@@ -188,7 +207,7 @@ const XdgAppGroup *xdg_app_group_lookup(const XdgApp *app, const char *group);
  * @return a \c "const pointer" to XdgList of default \p entry
  * \c "const char *" values or \c NULL if there is no corresponding \p "entry".
  */
-const XdgList *xdg_app_entry_lookup(const XdgAppGroup *group, const char *entry);
+const XdgListItem *xdg_app_entry_lookup(const XdgAppGroup *group, const char *entry);
 
 /**
  * Searches for a localized \p "entry" (for example \a "Name[ru]") in a given \p "group"
@@ -206,7 +225,7 @@ const XdgList *xdg_app_entry_lookup(const XdgAppGroup *group, const char *entry)
  * If there is no corresponding localized value then it returns a
  * \c "const pointer" to XdgList of \a default \c "const char *" values (if any).
  */
-const XdgList *xdg_app_localized_entry_lookup(
+const XdgListItem *xdg_app_localized_entry_lookup(
 		const XdgAppGroup *group,
 		const char *entry,
 		const char *lang,
@@ -223,7 +242,7 @@ const XdgList *xdg_app_localized_entry_lookup(
  * @param list current list item.
  * @return a \c "const pointer" to XdgApp.
  */
-const XdgApp *xdg_joint_list_item_app(const XdgJointList *list);
+const XdgApp *xdg_joint_list_item_app(const XdgJointListItem *list);
 
 /**
  * Get XdgApp item id (".desktop" file name) from a given \p list item.
@@ -235,7 +254,7 @@ const XdgApp *xdg_joint_list_item_app(const XdgJointList *list);
  * @param list current list item.
  * @return a \c "const pointer" to XdgApp.
  */
-const char *xdg_joint_list_item_app_id(const XdgJointList *list);
+const char *xdg_joint_list_item_app_id(const XdgJointListItem *list);
 
 /**
  * Get \c "const char *" value from current list item.
@@ -246,7 +265,7 @@ const char *xdg_joint_list_item_app_id(const XdgJointList *list);
  * @param list current list item.
  * @return s \c "const char *" to value of ".desktop" file group entry.
  */
-const char *xdg_list_item_app_group_entry_value(const XdgList *list);
+const char *xdg_list_item_app_group_entry_value(const XdgListItem *list);
 
 #ifdef __cplusplus
 }

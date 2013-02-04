@@ -37,16 +37,28 @@ typedef int (*XdgDirectoryFunc)(const char *directory, void *user_data);
 typedef char *(*XdgIconSearchFunc)(const char *directory, void *user_data);
 
 
-/* Calls "func" for each "XDG_DATA_" directory */
+/**
+ * Calls "func" for each "XDG_DATA_" directory
+ */
 void _xdg_for_each_data_dir(XdgDirectoryFunc func, void *user_data);
 
 
-/* Calls "func" for each directory described in "Icon Theme Specification" */
+/**
+ * Calls "func" for each "XDG_DATA_HOME" directory
+ */
+void _xdg_for_each_home_data_dir(XdgDirectoryFunc func, void *user_data);
+
+
+/**
+ * Calls "func" for each directory described in "Icon Theme Specification"
+ */
 void _xdg_for_each_theme_dir(XdgDirectoryFunc func, void *user_data);
 
 
-/* Calls "func" for each directory described in "Icon Theme Specification".
- * Returns immediately if "func" returned not null. */
+/**
+ * Calls "func" for each directory described in "Icon Theme Specification".
+ * Returns immediately if "func" returned not null.
+ */
 char *_xdg_search_in_each_theme_dir(XdgIconSearchFunc func, void *user_data);
 
 #endif /* XDGBASEDIRECTORY_H_ */
