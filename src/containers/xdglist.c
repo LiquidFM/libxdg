@@ -27,6 +27,7 @@
 
 #include "xdglist_p.h"
 #include <stddef.h>
+#include <assert.h>
 
 
 #if __GNUC__ < 3
@@ -79,6 +80,47 @@ void _xdg_list_apped(XdgList *list, XdgListItem *value)
 		list->tail->next = value;
 		list->tail = value;
 	}
+}
+
+void _xdg_list_swap(XdgListItem *item1, XdgListItem *item2)
+{
+    assert(item1 != item2 && item1->list == item2->list);
+    XdgListItem *item1_prev = item1->prev;
+    XdgListItem *item1_next = item1->next;
+    XdgListItem *item2_prev = item2->prev;
+    XdgListItem *item2_next = item2->next;
+
+    if (item2->prev = item1_prev)
+        if (item2->prev == item2)
+            item2->prev = item1;
+        else
+            item2->prev->next = item2;
+    else
+        item2->list->head = item2;
+
+    if (item2->next = item1_next)
+        if (item2->next == item2)
+            item2->next = item1;
+        else
+            item2->next->prev = item2;
+    else
+        item2->list->tail = item2;
+
+    if (item1->prev = item2_prev)
+        if (item1->prev == item1)
+            item1->prev = item2;
+        else
+            item1->prev->next = item1;
+    else
+        item1->list->head = item1;
+
+    if (item1->next = item2_next)
+        if (item1->next == item1)
+            item1->next = item2;
+        else
+            item1->next->prev = item1;
+    else
+        item1->list->tail = item1;
 }
 
 XdgListItem *_xdg_list_remove(XdgListItem *item, XdgListItemFree list_item_free)
