@@ -166,9 +166,23 @@ const XdgJointListItem *xdg_apps_lookup(const char *mimeType);
  */
 const XdgJointListItem *xdg_known_apps_lookup(const char *mimeType);
 
+/**
+ * Loads contents of \a "mimeapps.list" file from XDG_DATA_HOME directory
+ * (according to Base Directory Layout specification).
+ */
 XdgUserApps *xdg_user_defined_apps_load();
 
-XdgJointListItem *xdg_user_defined_apps_lookup(XdgUserApps *apps, const char *mimeType, ListFileSections listFileSection);
+XdgList *xdg_user_defined_apps_lookup(
+        XdgUserApps *apps,
+        const char *mimeType,
+        ListFileSections listFileSection,
+        int create);
+
+XdgListItem *xdg_user_defined_apps_head(XdgList *list);
+
+XdgListItem *xdg_user_defined_apps_append(const XdgJointListItem *item, XdgList *list);
+
+XdgListItem *xdg_user_defined_apps_prepend(const XdgJointListItem *item, XdgList *list);
 
 void xdg_user_defined_apps_free(XdgUserApps *apps, int save);
 
@@ -235,37 +249,49 @@ const XdgListItem *xdg_app_localized_entry_lookup(
 /**
  * Get XdgApp item from a given \p list item.
  *
- * @note This function works for XdgJointList returned by this functions:
+ * @note This function works for XdgListItem returned by this functions:
+ * @li xdg_user_defined_apps_lookup()
+ *
+ * @param item current list item.
+ * @return a \c "const pointer" to XdgApp.
+ */
+const XdgApp *xdg_list_item_app(const XdgListItem *item);
+
+/**
+ * Get XdgApp item from a given \p list item.
+ *
+ * @note This function works for XdgJointListItem returned by this functions:
  * @li xdg_apps_lookup()
  * @li xdg_known_apps_lookup()
  *
- * @param list current list item.
+ * @param item current list item.
  * @return a \c "const pointer" to XdgApp.
  */
-const XdgApp *xdg_joint_list_item_app(const XdgJointListItem *list);
+const XdgApp *xdg_joint_list_item_app(const XdgJointListItem *item);
 
 /**
  * Get XdgApp item id (".desktop" file name) from a given \p list item.
  *
- * @note This function works for XdgJointList returned by this functions:
+ * @note This function works for XdgJointListItem returned by this functions:
  * @li xdg_apps_lookup()
  * @li xdg_known_apps_lookup()
  *
- * @param list current list item.
+ * @param item current list item.
  * @return a \c "const pointer" to XdgApp.
  */
-const char *xdg_joint_list_item_app_id(const XdgJointListItem *list);
+const char *xdg_joint_list_item_app_id(const XdgJointListItem *item);
 
 /**
  * Get \c "const char *" value from current list item.
  *
- * @note This function works for XdgList returned by
- * xdg_app_entry_lookup(), xdg_app_localized_entry_lookup() functions.
+ * @note This function works for XdgList returned by this functions:
+ * @li xdg_app_entry_lookup()
+ * @li xdg_app_localized_entry_lookup()
  *
- * @param list current list item.
+ * @param item current list item.
  * @return s \c "const char *" to value of ".desktop" file group entry.
  */
-const char *xdg_list_item_app_group_entry_value(const XdgListItem *list);
+const char *xdg_list_item_app_group_entry_value(const XdgListItem *item);
 
 #ifdef __cplusplus
 }

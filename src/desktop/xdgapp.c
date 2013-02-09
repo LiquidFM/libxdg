@@ -220,24 +220,48 @@ static void _xdg_file_watcher_list_free(XdgList *list)
 	_xdg_list_free(list, free);
 }
 
-void _xdg_list_app_item_prepend(XdgList *list, const char *name, XdgApp *app)
-{
-	XdgMimeSubTypeValue *val = malloc(sizeof(XdgMimeSubTypeValue) + strlen(name));
-
-	_xdg_list_prepend(list, (XdgListItem *)val);
-
-	val->app = app;
-	strcpy(val->name, name);
-}
-
 void _xdg_list_app_item_append(XdgList *list, const char *name, XdgApp *app)
 {
-	XdgMimeSubTypeValue *val = malloc(sizeof(XdgMimeSubTypeValue) + strlen(name));
+	XdgMimeSubTypeValue *value = malloc(sizeof(XdgMimeSubTypeValue) + strlen(name));
 
-	_xdg_list_apped(list, (XdgListItem *)val);
+	_xdg_list_apped(list, (XdgListItem *)value);
 
-	val->app = app;
-	strcpy(val->name, name);
+	value->app = app;
+	strcpy(value->name, name);
+}
+
+static XdgMimeSubTypeValue *_xdg_list_app_item_append_copy(XdgList *list, XdgMimeSubTypeValue *value)
+{
+    XdgMimeSubTypeValue *res = malloc(sizeof(XdgMimeSubTypeValue) + strlen(value->name));
+
+    _xdg_list_apped(list, (XdgListItem *)res);
+
+    res->app = value->app;
+    strcpy(res->name, value->name);
+
+    return res;
+}
+
+void _xdg_list_app_item_prepend(XdgList *list, const char *name, XdgApp *app)
+{
+    XdgMimeSubTypeValue *value = malloc(sizeof(XdgMimeSubTypeValue) + strlen(name));
+
+    _xdg_list_prepend(list, (XdgListItem *)value);
+
+    value->app = app;
+    strcpy(value->name, name);
+}
+
+static XdgMimeSubTypeValue *_xdg_list_app_item_prepend_copy(XdgList *list, XdgMimeSubTypeValue *value)
+{
+    XdgMimeSubTypeValue *res = malloc(sizeof(XdgMimeSubTypeValue) + strlen(value->name));
+
+    _xdg_list_prepend(list, (XdgListItem *)res);
+
+    res->app = value->app;
+    strcpy(res->name, value->name);
+
+    return res;
 }
 
 static void _xdg_mime_sub_type_map_item_free(XdgMimeSubType *sub_type)
@@ -468,6 +492,12 @@ static XdgMimeSubType *_xdg_mime_sub_type_item_search(const AvlTree *map, const 
 	}
 
 	return NULL;
+}
+
+static XdgMimeSubType *_xdg_mime_sub_type_item_search_or_create(AvlTree *map, const char *type, const char *sub_type)
+{
+    XdgMimeType *mime_type = _xdg_mime_type_map_item_add(map, type);
+    return _xdg_mime_sub_type_map_item_add(&mime_type->sub_types, sub_type);
 }
 
 static void _xdg_app_group_read_entry_value(XdgList *list, char *line)
@@ -1211,7 +1241,10 @@ const XdgJointListItem *xdg_apps_lookup(const char *mimeType)
 		while (item);
 	}
 
-	return res.head;
+    if (res.head)
+        return (const XdgJointListItem *)res.head->item.list->head;
+    else
+        return NULL;
 }
 
 const XdgJointListItem *xdg_known_apps_lookup(const char *mimeType)
@@ -1242,7 +1275,10 @@ const XdgJointListItem *xdg_known_apps_lookup(const char *mimeType)
 		while (item);
 	}
 
-	return res.head;
+	if (res.head)
+	    return (const XdgJointListItem *)res.head->item.list->head;
+	else
+	    return NULL;
 }
 
 static void _xdg_load_user_defined_apps(const char *directory, InitFromHomeDirectoryArgs *args)
@@ -1251,8 +1287,8 @@ static void _xdg_load_user_defined_apps(const char *directory, InitFromHomeDirec
     char *file_name;
     assert(directory != NULL);
 
-    *args->apps = malloc(sizeof(XdgUserApps) + strlen(directory) + strlen("/applications/mimeapps.item"));
-    strcpy((*args->apps)->fileName, directory); strcat((*args->apps)->fileName, "/applications/mimeapps.item");
+    *args->apps = malloc(sizeof(XdgUserApps) + strlen(directory) + strlen("/applications/mimeapps.list"));
+    strcpy((*args->apps)->fileName, directory); strcat((*args->apps)->fileName, "/applications/mimeapps.list");
 
     init_avl_tree(&(*args->apps)->addedApps, strdup, (DestroyKey)free, strcmp);
     init_avl_tree(&(*args->apps)->defaultApps, strdup, (DestroyKey)free, strcmp);
@@ -1287,7 +1323,7 @@ XdgUserApps *xdg_user_defined_apps_load()
     return res;
 }
 
-XdgJointListItem *xdg_user_defined_apps_lookup(XdgUserApps *apps, const char *mimeType, ListFileSections listFileSection)
+XdgList *xdg_user_defined_apps_lookup(XdgUserApps *apps, const char *mimeType, ListFileSections listFileSection, int create)
 {
     assert(!_is_empty_list(&folders_list) && "Library was not initialized!");
     char buffer[MIME_TYPE_NAME_BUFFER_SIZE];
@@ -1320,8 +1356,11 @@ XdgJointListItem *xdg_user_defined_apps_lookup(XdgUserApps *apps, const char *mi
                 return NULL;
         }
 
-        if (sub_type = _xdg_mime_sub_type_item_search(tree, buffer, sep))
-            return sub_type->apps.head;
+        if (create)
+            return &_xdg_mime_sub_type_item_search_or_create(tree, buffer, sep)->apps.list;
+        else
+            if (sub_type = _xdg_mime_sub_type_item_search(tree, buffer, sep))
+                return &sub_type->apps.list;
     }
 
     return NULL;
@@ -1329,25 +1368,42 @@ XdgJointListItem *xdg_user_defined_apps_lookup(XdgUserApps *apps, const char *mi
 
 static void __xdg_user_defined_apps_save(const char *key, const XdgMimeSubType *mime_subtype, UserDefinedAppsArgs *args)
 {
-//    XdgMimeSubTypeValue *item = mime_subtype->apps;
-//
-//    if (item)
-//    {
-//        fprintf(args->file, "%s/%s=", args->type, key);
-//        item = (XdgMimeSubTypeValue *)item->item.list.head;
-//
-//        do
-//            fprintf(args->file, "%s;", item->name);
-//        while (item = (XdgMimeSubTypeValue *)item->item.list.next);
-//
-//        fwrite("\n", 1, 1, args->file);
-//    }
+    XdgMimeSubTypeValue *item = (XdgMimeSubTypeValue *)mime_subtype->apps.list.head;
+
+    if (item)
+    {
+        fprintf(args->file, "%s/%s=", args->type, key);
+
+        do
+            fprintf(args->file, "%s;", item->name);
+        while (item = (XdgMimeSubTypeValue *)item->item.item.next);
+
+        fwrite("\n", 1, 1, args->file);
+    }
 }
 
 static void _xdg_user_defined_apps_save(const char *key, const XdgMimeType *mime_type, UserDefinedAppsArgs *args)
 {
     args->type = key;
     depth_first_search(&mime_type->sub_types, (DepthFirstSearch)__xdg_user_defined_apps_save, args);
+}
+
+XdgListItem *xdg_user_defined_apps_head(XdgList *list)
+{
+    assert(list);
+    return list->head;
+}
+
+XdgListItem *xdg_user_defined_apps_append(const XdgJointListItem *item, XdgList *list)
+{
+    assert(item && list);
+    return (XdgListItem *)_xdg_list_app_item_append_copy(list, (XdgMimeSubTypeValue *)item);
+}
+
+XdgListItem *xdg_user_defined_apps_prepend(const XdgJointListItem *item, XdgList *list)
+{
+    assert(item && list);
+    return (XdgListItem *)_xdg_list_app_item_prepend_copy(list, (XdgMimeSubTypeValue *)item);
 }
 
 void xdg_user_defined_apps_free(XdgUserApps *apps, int save)
@@ -1358,7 +1414,7 @@ void xdg_user_defined_apps_free(XdgUserApps *apps, int save)
         {
             FILE *file;
 
-            if (file = fopen(apps->fileName, "rw"))
+            if (file = fopen(apps->fileName, "w"))
             {
                 UserDefinedAppsArgs args = { NULL, file };
 
@@ -1383,7 +1439,6 @@ void xdg_user_defined_apps_free(XdgUserApps *apps, int save)
                     fwrite("\n", 1, 1, file);
                 }
 
-                fflush(file);
                 fclose(file);
             }
         }
@@ -1430,7 +1485,7 @@ const XdgListItem *xdg_app_entry_lookup(const XdgAppGroup *group, const char *en
 	XdgAppGroupEntry **res = (XdgAppGroupEntry **)search_node(&group->entries, entry);
 
 	if (res)
-		return (XdgListItem *)&(*res)->values;
+		return (*res)->values.head;
 	else
 		return NULL;
 }
@@ -1545,17 +1600,22 @@ const XdgListItem *xdg_app_localized_entry_lookup(const XdgAppGroup *group, cons
 	return NULL;
 }
 
-const XdgApp *xdg_joint_list_item_app(const XdgJointListItem *list)
+const XdgApp *xdg_list_item_app(const XdgListItem *item)
 {
-	return ((XdgMimeSubTypeValue *)list)->app;
+    return ((XdgMimeSubTypeValue *)item)->app;
 }
 
-const char *xdg_joint_list_item_app_id(const XdgJointListItem *list)
+const XdgApp *xdg_joint_list_item_app(const XdgJointListItem *item)
 {
-	return ((XdgMimeSubTypeValue *)list)->name;
+	return ((XdgMimeSubTypeValue *)item)->app;
 }
 
-const char *xdg_list_item_app_group_entry_value(const XdgListItem *list)
+const char *xdg_joint_list_item_app_id(const XdgJointListItem *item)
 {
-	return ((XdgValue *)list)->value;
+	return ((XdgMimeSubTypeValue *)item)->name;
+}
+
+const char *xdg_list_item_app_group_entry_value(const XdgListItem *item)
+{
+	return ((XdgValue *)item)->value;
 }
