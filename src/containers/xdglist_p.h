@@ -40,7 +40,6 @@ struct XdgList
     XdgListItem *head;
     XdgListItem *tail;
 };
-typedef struct XdgList XdgList;
 
 struct XdgListItem
 {
@@ -71,7 +70,6 @@ int _is_empty_list(const XdgList *list);
 int _is_empty_jointlist(const XdgJointList *list);
 void _xdg_list_prepend(XdgList *list, XdgListItem *value);
 void _xdg_list_apped(XdgList *list, XdgListItem *value);
-void _xdg_list_swap(XdgListItem *item1, XdgListItem *item2);
 XdgListItem *_xdg_list_remove(XdgListItem *item, XdgListItemFree list_item_free);
 void _xdg_list_remove_if(XdgList *list, XdgListItemMatch match, void *user_data, XdgListItemFree list_item_free);
 void _xdg_list_free(XdgList *list, XdgListItemFree list_item_free);

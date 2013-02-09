@@ -36,32 +36,24 @@ extern "C" {
 /**
  * Represents a linked list.
  */
+typedef struct XdgList XdgList;
+
+/**
+ * Represents an item of a linked list.
+ */
 typedef struct XdgListItem XdgListItem;
 
 /**
- * Represents a linked list which can be join
+ * Represents an item of a linked list which can be join
  * with other similar lists without memory allocation.
  */
 typedef struct XdgJointListItem XdgJointListItem;
 
-
-/**
- * Returns head of a given list.
- *
- * @param list a \c "const pointer" to XdgList.
- * @return a \c "const pointer" to head of XdgList.
- *
- * @note
- * This function checks if a given \p "list"
- * is equal to \c NULL and returns \c NULL if it is.
- */
-const XdgListItem *xdg_list_head(const XdgListItem *item);
-
 /**
  * Returns next element of a given list.
  *
- * @param list a \c "const pointer" to XdgList.
- * @return a \c "const pointer" to next element of XdgList.
+ * @param item a \c "const pointer" to XdgListItem.
+ * @return a \c "const pointer" to the next element of XdgList if any, or \c NULL.
  *
  * @note
  * This function does \a NOT check if a given \p "list"
@@ -70,25 +62,29 @@ const XdgListItem *xdg_list_head(const XdgListItem *item);
 const XdgListItem *xdg_list_next(const XdgListItem *item);
 
 /**
- * Returns head of a given list.
+ * Swaps elements in a linked list.
  *
- * @param list a \c "const pointer" to XdgJointList.
- * @return a \c "const pointer" to head of XdgJointList.
- *
- * @note
- * This function checks if a given \p "list"
- * is equal to \c NULL and returns \c NULL if it is.
+ * @param item1 a \c "pointer" to XdgListItem.
+ * @param item2 a \c "pointer" to XdgListItem.
  */
-const XdgJointListItem *xdg_joint_list_head(const XdgJointListItem *item);
+void xdg_list_swap(XdgListItem *item1, XdgListItem *item2);
+
+/**
+ * Removes given element of a linked list.
+ *
+ * @param item a \c "pointer" to XdgListItem which should be removed.
+ * @return a \c "pointer" to the next element of XdgList if any, or \c NULL.
+ */
+XdgListItem *xdg_list_remove(XdgListItem *item);
 
 /**
  * Returns next element of a given list.
  *
- * @param list a \c "const pointer" to XdgJointList.
- * @return a \c "const pointer" to next element of XdgJointList.
+ * @param item a \c "const pointer" to XdgJointListItem.
+ * @return a \c "const pointer" to the next element of XdgJointList if any, or \c NULL.
  *
  * @note
- * This function does \a NOT check if a given \p "list"
+ * This function does \a NOT check if a given \p "item"
  * is equal to \c NULL.
  */
 const XdgJointListItem *xdg_joint_list_next(const XdgJointListItem *item);

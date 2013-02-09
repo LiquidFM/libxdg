@@ -27,6 +27,7 @@
 
 #include "xdglist_p.h"
 #include <stddef.h>
+#include <stdlib.h>
 #include <assert.h>
 
 
@@ -82,9 +83,9 @@ void _xdg_list_apped(XdgList *list, XdgListItem *value)
 	}
 }
 
-void _xdg_list_swap(XdgListItem *item1, XdgListItem *item2)
+void xdg_list_swap(XdgListItem *item1, XdgListItem *item2)
 {
-    assert(item1 != item2 && item1->list == item2->list);
+    assert(item1 && item2 && item1 != item2 && item1->list == item2->list);
     XdgListItem *item1_prev = item1->prev;
     XdgListItem *item1_next = item1->next;
     XdgListItem *item2_prev = item2->prev;
@@ -121,6 +122,12 @@ void _xdg_list_swap(XdgListItem *item1, XdgListItem *item2)
             item1->next->prev = item1;
     else
         item1->list->tail = item1;
+}
+
+XdgListItem *xdg_list_remove(XdgListItem *item)
+{
+    assert(item);
+    return _xdg_list_remove(item, free);
 }
 
 XdgListItem *_xdg_list_remove(XdgListItem *item, XdgListItemFree list_item_free)
@@ -192,25 +199,9 @@ void _xdg_joint_list_apped(XdgJointList *list, XdgJointListItem *value)
 	}
 }
 
-const XdgListItem *xdg_list_head(const XdgListItem *item)
-{
-	if (item)
-		return item->list->head;
-	else
-		return NULL;
-}
-
 const XdgListItem *xdg_list_next(const XdgListItem *list)
 {
 	return list->next;
-}
-
-const XdgJointListItem *xdg_joint_list_head(const XdgJointListItem *item)
-{
-	if (item)
-		return (const XdgJointListItem *)item->list->head->item.list->head;
-	else
-		return NULL;
 }
 
 const XdgJointListItem *xdg_joint_list_next(const XdgJointListItem *item)
