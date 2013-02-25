@@ -49,6 +49,7 @@ set (UNIT_TESTING                     NO CACHE BOOL "Compile binary executable f
 set (BUILD_MIME_SPEC                 YES CACHE BOOL "Build library with \"Shared MIME-info Database\"")
 set (BUILD_DESKTOP_SPEC              YES CACHE BOOL "Build library with \"Desktop Entry Specification\"")
 set (BUILD_THEMES_SPEC               YES CACHE BOOL "Build library with \"Icon Theme Specification\"")
+set (BUILD_MENU_SPEC                 YES CACHE BOOL "Build library with \"Desktop Menu Specification\"")
 set (BUILD_UPDATE_APPLICATIONS_CACHE YES CACHE BOOL "Build executable for rebuilding the cache")
 
 
@@ -65,6 +66,38 @@ endif ()
 
 # Set up compiler flags
 set (CMAKE_CXX_FLAGS "${PROJECT_COMP_FLAGS}")
+
+
+# Create config file
+if (BUILD_MIME_SPEC)
+    set (CONFIG_MIME_SPEC "#define MIME_SPEC")
+else ()
+    set (CONFIG_MIME_SPEC "// #define MIME_SPEC")
+endif ()
+
+if (BUILD_DESKTOP_SPEC OR BUILD_UPDATE_APPLICATIONS_CACHE)
+    set (CONFIG_DESKTOP_SPEC "#define DESKTOP_SPEC")
+else ()
+    set (CONFIG_DESKTOP_SPEC "// #define DESKTOP_SPEC")
+endif ()
+
+if (BUILD_THEMES_SPEC)
+    set (CONFIG_THEMES_SPEC "#define THEMES_SPEC")
+else ()
+    set (CONFIG_THEMES_SPEC "// #define THEMES_SPEC")
+endif ()
+
+if (BUILD_MENU_SPEC)
+    if (NOT BUILD_DESKTOP_SPEC)
+        message (FATAL_ERROR "Implementation of \"Desktop Menu Specification\" depends on implementation of \"Desktop Entry Specification\"! You have to set BUILD_DESKTOP_SPEC to ON if you need \"Desktop Menu Specification\".")
+    endif ()
+    set (CONFIG_MENU_SPEC "#define MENU_SPEC")
+else ()
+    set (CONFIG_MENU_SPEC "// #define MENU_SPEC")
+endif ()
+
+configure_file (${CMAKE_SOURCE_DIR}/src/config/config.h.in ${CMAKE_BINARY_DIR}/include/xdg/config.h @ONLY)
+install (FILES ${CMAKE_BINARY_DIR}/include/xdg/config.h DESTINATION include/xdg)
 
 
 # 3rdparty
@@ -93,28 +126,12 @@ if (DOXYGEN_FOUND)
     install (DIRECTORY ${CMAKE_BINARY_DIR}/doc/ DESTINATION doc)
 endif ()
 
-
-# Create config file
-if (BUILD_MIME_SPEC)
-    set (CONFIG_MIME_SPEC "#define MIME_SPEC")
-else ()
-    set (CONFIG_MIME_SPEC "// #define MIME_SPEC")
+if (BUILD_MENU_SPEC)
+    find_package (LibXml2 REQUIRED 2.8.0)
+    include_directories (${LIBXML2_INCLUDE_DIR})
+    list (APPEND ${PROJECT_NAME}_LIBS ${LIBXML2_LIBRARIES})
+    add_definitions (${LIBXML2_DEFINITIONS})
 endif ()
-
-if (BUILD_DESKTOP_SPEC OR BUILD_UPDATE_APPLICATIONS_CACHE)
-    set (CONFIG_DESKTOP_SPEC "#define DESKTOP_SPEC")
-else ()
-    set (CONFIG_DESKTOP_SPEC "// #define DESKTOP_SPEC")
-endif ()
-
-if (BUILD_THEMES_SPEC)
-    set (CONFIG_THEMES_SPEC "#define THEMES_SPEC")
-else ()
-    set (CONFIG_THEMES_SPEC "// #define THEMES_SPEC")
-endif ()
-
-configure_file (${CMAKE_SOURCE_DIR}/src/config/config.h.in ${CMAKE_BINARY_DIR}/include/xdg/config.h @ONLY)
-install (FILES ${CMAKE_BINARY_DIR}/include/xdg/config.h DESTINATION include/xdg)
 
 
 # Includes
@@ -126,7 +143,7 @@ include_directories (${CMAKE_BINARY_DIR}/include)
 
 # Libs
 if (USE_GPROF)
-	set (xdg_LIBS ${xdg_LIBS} gmon)
+    list (APPEND ${PROJECT_NAME}_LIBS gmon)
 endif (USE_GPROF)
 
 
@@ -144,4 +161,4 @@ endif (USE_GPROF)
 
 
 # Targets
-add_subdirectory ("src")
+add_subdirectory (src)

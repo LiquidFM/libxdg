@@ -18,4 +18,9 @@
  */
 @CONFIG_THEMES_SPEC@
 
+/**
+ * Define for "Desktop Menu Specification".
+ */
+@CONFIG_MENU_SPEC@
+
 #endif /* XDG_CONFIG_H */

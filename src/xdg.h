@@ -42,6 +42,10 @@
 #	include "themes/xdgtheme.h"
 #endif
 
+#ifdef MENU_SPEC
+#   include "menu/xdgmenu.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -68,4 +72,5 @@ void xdg_shutdown();
 #ifdef __cplusplus
 }
 #endif
+
 #endif /* XDG_H_ */

@@ -39,6 +39,10 @@
 #	include "themes/xdgtheme_p.h"
 #endif
 
+#ifdef MENU_SPEC
+#   include "menu/xdgmenu_p.h"
+#endif
+
 
 void xdg_init()
 {
@@ -53,10 +57,18 @@ void xdg_init()
 #ifdef THEMES_SPEC
 	_xdg_themes_init();
 #endif
+
+#ifdef MENU_SPEC
+	_xdg_menu_init();
+#endif
 }
 
 void xdg_shutdown()
 {
+#ifdef MENU_SPEC
+    _xdg_menu_shutdown();
+#endif
+
 #ifdef THEMES_SPEC
 	_xdg_themes_shutdown();
 #endif
