@@ -1,9 +1,3 @@
-[submodule "xml.c"]
-	path = xml.c
-	url = git://github.com/ooxi/xml.c.git
-[submodule "libroxml"]
-	path = libroxml
-	url = https://code.google.com/p/libroxml
 [submodule "txmlparser"]
 	path = txmlparser
 	url = git@github.com:vilkov/txmlparser.git
