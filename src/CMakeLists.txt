@@ -3,6 +3,7 @@ include (collect_sources)
 
 
 # Sources
+set (${PROJECT_NAME}_SOURCES ${CMAKE_SOURCE_DIR}/txmlparser/txml_parser.c)
 set (SOURCES_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 
 if (BUILD_THEMES_SPEC OR (BUILD_DESKTOP_SPEC OR BUILD_UPDATE_APPLICATIONS_CACHE))

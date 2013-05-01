@@ -4,3 +4,6 @@
 [submodule "libroxml"]
 	path = libroxml
 	url = https://code.google.com/p/libroxml
+[submodule "txmlparser"]
+	path = txmlparser
+	url = git@github.com:vilkov/txmlparser.git

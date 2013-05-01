@@ -101,12 +101,6 @@ install (FILES ${CMAKE_BINARY_DIR}/include/xdg/config.h DESTINATION include/xdg)
 
 
 # 3rdparty
-if (BUILD_MENU_SPEC)
-    add_subdirectory(libroxml)
-    include_directories(libroxml/inc)
-    list (APPEND ${PROJECT_NAME}_LIBS roxml-static)
-endif ()
-
 find_package (Doxygen 1.7.5)
 if (DOXYGEN_FOUND)
     # Config file variables
@@ -135,6 +129,7 @@ endif ()
 
 # Includes
 include_directories (${CMAKE_BINARY_DIR}/include)
+include_directories (${CMAKE_SOURCE_DIR}/txmlparser)
 
 
 # Link directories
