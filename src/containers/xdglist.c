@@ -164,7 +164,7 @@ void _xdg_list_remove_if(XdgList *list, XdgListItemMatch match, void *user_data,
 	}
 }
 
-void _xdg_list_free(XdgList *list, XdgListItemFree list_item_free)
+void _xdg_list_clear(XdgList *list, XdgListItemFree list_item_free)
 {
 	if (list->head)
 	{

@@ -72,7 +72,7 @@ void _xdg_list_prepend(XdgList *list, XdgListItem *value);
 void _xdg_list_apped(XdgList *list, XdgListItem *value);
 XdgListItem *_xdg_list_remove(XdgListItem *item, XdgListItemFree list_item_free);
 void _xdg_list_remove_if(XdgList *list, XdgListItemMatch match, void *user_data, XdgListItemFree list_item_free);
-void _xdg_list_free(XdgList *list, XdgListItemFree list_item_free);
+void _xdg_list_clear(XdgList *list, XdgListItemFree list_item_free);
 void _xdg_joint_list_apped(XdgJointList *list, XdgJointListItem *value);
 
 

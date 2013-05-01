@@ -157,7 +157,7 @@ static XdgThemeGroupEntry *_xdg_theme_group_entry_map_item_add(AvlTree *map, con
 
 static void _xdg_theme_group_entry_map_item_free(XdgThemeGroupEntry *item)
 {
-	_xdg_list_free(&item->values, free);
+	_xdg_list_clear(&item->values, free);
 	free(item);
 }
 
@@ -202,7 +202,7 @@ static XdgTheme *_xdg_theme_map_item_add(AvlTree *map, const char *name)
 static void _xdg_theme_map_item_free(XdgTheme *item)
 {
 	clear_avl_tree_and_values(&item->groups, (DestroyValue)_xdg_theme_group_map_item_free);
-	_xdg_list_free(&item->parents, free);
+	_xdg_list_clear(&item->parents, free);
 	free(item);
 }
 
@@ -618,11 +618,11 @@ static char *_xdg_mime_lookup_icon(const char *icon, int size, Context context, 
 						if (dir = _xdg_search_in_each_theme_dir((XdgIconSearchFunc)_xdg_search_icon_file, &data))
 							res = dir;
 
-						_xdg_list_free(&tmp_directories, free);
+						_xdg_list_clear(&tmp_directories, free);
 					}
 			}
 
-			_xdg_list_free(&directories, free);
+			_xdg_list_clear(&directories, free);
 		}
 	}
 

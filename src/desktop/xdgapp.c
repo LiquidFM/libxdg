@@ -192,7 +192,7 @@ static void _xdg_list_value_item_add(XdgList *list, const char *line)
 
 static void _xdg_list_value_item_free(XdgList *list)
 {
-	_xdg_list_free(list, free);
+	_xdg_list_clear(list, free);
 }
 
 static void _xdg_list_value_item_and_list_free(XdgList *list)
@@ -217,7 +217,7 @@ static void _xdg_file_watcher_list_add(XdgList *list, const char *path, struct s
 
 static void _xdg_file_watcher_list_free(XdgList *list)
 {
-	_xdg_list_free(list, free);
+	_xdg_list_clear(list, free);
 }
 
 void _xdg_list_app_item_append(XdgList *list, const char *name, XdgApp *app)
@@ -266,7 +266,7 @@ static XdgMimeSubTypeValue *_xdg_list_app_item_prepend_copy(XdgList *list, XdgMi
 
 static void _xdg_mime_sub_type_map_item_free(XdgMimeSubType *sub_type)
 {
-	_xdg_list_free((XdgList *)&sub_type->apps, free);
+	_xdg_list_clear((XdgList *)&sub_type->apps, free);
 	free(sub_type);
 }
 
@@ -1042,7 +1042,7 @@ void _xdg_app_init()
 
 void _xdg_app_shutdown()
 {
-	_xdg_list_free(&folders_list, (XdgListItemFree)_xdg_app_folder_item_free);
+	_xdg_list_clear(&folders_list, (XdgListItemFree)_xdg_app_folder_item_free);
 }
 
 static BOOL _xdg_check_time_stamp(const XdgList *files)
