@@ -899,8 +899,18 @@ static void __xdg_app_read_from_directory(char *buffer, XdgAppData *data, const 
 
 static void _xdg_app_read_from_directory(InitFromDirectoryArgs *args, const char *directory_name, const char *preffix)
 {
+    XdgAppFolderItem *folder = (XdgAppFolderItem *)args->folders->head;
+
+    while (folder)
+    {
+        if (strcmp(folder->directory, directory_name) == 0)
+            return;
+
+        folder = (XdgAppFolderItem *)folder->item.next;
+    }
+
 	char *file_name;
-	XdgAppFolderItem *folder = _xdg_app_folder_item_new(args->folders, directory_name);
+	folder = _xdg_app_folder_item_new(args->folders, directory_name);
 
 	file_name = malloc(strlen(directory_name) + strlen(cache_file_name) + 2);
 	strcpy(file_name, directory_name); strcat(file_name, "/"); strcat(file_name, cache_file_name);
