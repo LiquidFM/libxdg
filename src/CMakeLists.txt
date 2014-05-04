@@ -1,5 +1,5 @@
 # CMake tools
-include (collect_sources)
+include (platform/collect_sources)
 
 
 # Sources
@@ -50,61 +50,37 @@ target_link_libraries (xdg ${${PROJECT_NAME}_LIBS})
 
 
 # Include files
-if (BUILD_THEMES_SPEC OR (BUILD_DESKTOP_SPEC OR BUILD_UPDATE_APPLICATIONS_CACHE))
-    generate_include_file (xdg "xdg/containers/avltree.h" "src/containers/avltree.h")
-    generate_include_file (xdg "xdg/containers/xdglist.h" "src/containers/xdglist.h")
+set (HEADERS_TO_BE_INSTALLED)
 
-    # Install include files
-    install (
-        FILES 
-            ${CMAKE_CURRENT_SOURCE_DIR}/containers/avltree.h
-            ${CMAKE_CURRENT_SOURCE_DIR}/containers/xdglist.h
-            
-        DESTINATION
-            include/xdg/containers
-    )
+if (BUILD_THEMES_SPEC OR (BUILD_DESKTOP_SPEC OR BUILD_UPDATE_APPLICATIONS_CACHE))
+    list (APPEND HEADERS_TO_BE_INSTALLED "containers/avltree.h:containers/")
+    list (APPEND HEADERS_TO_BE_INSTALLED "containers/xdglist.h:containers/")
 endif ()
 
 if (BUILD_MIME_SPEC)
-    generate_include_file (xdg "xdg/mime/xdgmime.h" "src/mime/xdgmime.h")
-
-    # Install include files
-    install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/mime/xdgmime.h DESTINATION include/xdg/mime)
+    list (APPEND HEADERS_TO_BE_INSTALLED "mime/xdgmime.h:mime/")
 endif ()
 
 if (BUILD_DESKTOP_SPEC OR BUILD_UPDATE_APPLICATIONS_CACHE)
-    generate_include_file (xdg "xdg/desktop/xdgapp.h" "src/desktop/xdgapp.h")
-
-    # Install include files
-    install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/desktop/xdgapp.h DESTINATION include/xdg/desktop)
+    list (APPEND HEADERS_TO_BE_INSTALLED "desktop/xdgapp.h:desktop/")
 endif ()
 
 if (BUILD_THEMES_SPEC)
-    generate_include_file (xdg "xdg/themes/xdgtheme.h" "src/themes/xdgtheme.h")
-
-    # Install include files
-    install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/themes/xdgtheme.h DESTINATION include/xdg/themes)
+    list (APPEND HEADERS_TO_BE_INSTALLED "themes/xdgtheme.h:themes/")
 endif ()
 
 if (BUILD_MENU_SPEC)
-    generate_include_file (xdg "xdg/menu/xdgmenu.h" "src/menu/xdgmenu.h")
-
-    # Install include files
-    install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/menu/xdgmenu.h DESTINATION include/xdg/menu)
+    list (APPEND HEADERS_TO_BE_INSTALLED "menu/xdgmenu.h:menu/")
 endif ()
 
-generate_include_file  (xdg "xdg/xdg.h"    "src/xdg.h")
-configure_include_file (xdg "xdg/config.h" "src/config/config.h.in")
+list (APPEND HEADERS_TO_BE_INSTALLED "xdg.h")
+
+configure_file ("config/config.h.in" "${CMAKE_CURRENT_BINARY_DIR}/config.h" @ONLY)
+list (APPEND HEADERS_TO_BE_INSTALLED "${CMAKE_CURRENT_BINARY_DIR}/config.h")
 
 
 # Install
-install (
-    TARGETS xdg
-    RUNTIME DESTINATION bin
-    LIBRARY DESTINATION lib
-    ARCHIVE DESTINATION lib
-)
-install (FILES ${CMAKE_CURRENT_SOURCE_DIR}/xdg.h DESTINATION include/xdg)
+install_header_files (xdg ${HEADERS_TO_BE_INSTALLED})
 
 
 # Target - update-applications-cache
