@@ -221,7 +221,7 @@ static void rebalance_grew(AvlNode *this_node, AvlNode **root)
 
 static void rebalance_shrunk(AvlNode *this_node, AvlNode **root)
 {
-	Links previous_node_links = {};
+	Links previous_node_links = { NULL, NULL, NULL };
 	AvlNode *previous_node = 0;
 	AvlNode *node_to_remove = this_node;
 	this_node = this_node->links.left;

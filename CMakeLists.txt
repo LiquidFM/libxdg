@@ -1,7 +1,7 @@
 project (xdg)
 
 # Project header
-project_cxx_library_header_default ()
+project_static_library_header_default ()
 
 # Includes
 include_directories (${CMAKE_SOURCE_DIR}/txmlparser)
