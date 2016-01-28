@@ -1,9 +1,16 @@
+project (xdg)
+
+# Project header
+project_static_library_header_default ()
+
 # CMake tools
 include (platform/collect_sources)
 
+# Includes
+include_directories (${CMAKE_SOURCE_DIR}/txmlparser)
 
 # Sources
-set (${PROJECT_NAME}_SOURCES ${PROJECT_SOURCE_DIR}/txmlparser/txml_parser.c)
+set (${PROJECT_NAME}_SOURCES ${CMAKE_SOURCE_DIR}/txmlparser/txml_parser.c)
 set (SOURCES_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 
 if (BUILD_THEMES_SPEC OR (BUILD_DESKTOP_SPEC OR BUILD_UPDATE_APPLICATIONS_CACHE))
@@ -43,11 +50,12 @@ else ()
     set (CONFIG_MENU_SPEC "// #define MENU_SPEC")
 endif ()
 
-
 # Target - xdg
 add_library(xdg STATIC xdg.c ${${PROJECT_NAME}_SOURCES})
 target_link_libraries (xdg ${${PROJECT_NAME}_LIBS})
 
+# Documentation
+add_documentation ("XDG" 0.2.1 "This library is implementation of several freedesktop.org specifications.")
 
 # Include files
 set (HEADERS_TO_BE_INSTALLED)

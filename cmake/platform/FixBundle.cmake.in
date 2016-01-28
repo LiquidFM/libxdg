@@ -1,0 +1,6 @@
+include ("@MY_BUNDLE_UTILITIES_PATH@")
+
+set (bundle "@EXECUTABLE_PATH@")
+set (disr "@LIBRARY_OUTPUT_PATH@")
+set (other_libs "")
+fixup_bundle ("${bundle}" "${other_libs}" "${dirs}")
