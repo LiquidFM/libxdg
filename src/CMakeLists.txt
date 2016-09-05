@@ -7,10 +7,10 @@ project_static_library_header_default ()
 include (platform/collect_sources)
 
 # Includes
-include_directories (${CMAKE_SOURCE_DIR}/txmlparser)
+include_directories (${CMAKE_CURRENT_SOURCE_DIR}/../txmlparser)
 
 # Sources
-set (${PROJECT_NAME}_SOURCES ${CMAKE_SOURCE_DIR}/txmlparser/txml_parser.c)
+set (${PROJECT_NAME}_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/../txmlparser/txml_parser.c)
 set (SOURCES_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 
 if (BUILD_THEMES_SPEC OR (BUILD_DESKTOP_SPEC OR BUILD_UPDATE_APPLICATIONS_CACHE))
